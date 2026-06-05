@@ -61,6 +61,63 @@ class AddNoteBody(BaseModel):
     note: str
     category: str = "general"
 
+class AddNoteBody(BaseModel):
+    note: str
+    category: str = "general"
+
+# ════════════════════════════════════════════════
+# BACKGROUND: AUTO-LEARN FACTS FROM CONVERSATION
+# ════════════════════════════════════════════════
+
+async def extract_facts(user_msg: str, ai_response: str):
+    """Silently extract personal facts from what the user said and save to memory."""
+    if not ANTHROPIC_API_KEY or len(user_msg) < 25:
+        return
+    try:
+        client = anthropic.AsyncAnthropic(api_key=ANTHROPIC_API_KEY)
+        resp = await client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=300,
+            messages=[{
+                "role": "user",
+                "content": (
+                    f"Extract concrete personal facts about Sebastian from what he said.\n"
+                    f"Sebastian said: \"{user_msg}\"\n\n"
+                    "Return a JSON array only: "
+                    "[{\"category\": \"personal|health|business|tech|general\", \"note\": \"specific fact\"}]\n"
+                    "Rules: only concrete specific facts the user revealed about themselves. "
+                    "Ignore questions or generic chat. Max 3 items. Return [] if nothing to extract.\n"
+                    "Return ONLY the JSON array, no other text."
+                )
+            }]
+        )
+        text = resp.content[0].text.strip()
+        if not text.startswith('['):
+            return
+        facts = json.loads(text)
+        if not facts:
+            return
+        db = get_db()
+        cursor = db.cursor()
+        for f in facts[:3]:
+            note = (f.get('note') or '').strip()
+            if len(note) < 10:
+                continue
+            # Simple dedup: skip if very similar note already exists
+            cursor.execute(
+                "SELECT COUNT(*) FROM memory_notes WHERE user_id=1 AND note LIKE ?",
+                ('%' + note[:40] + '%',)
+            )
+            if cursor.fetchone()[0] == 0:
+                cursor.execute(
+                    "INSERT INTO memory_notes (user_id, category, note, source) VALUES (1, ?, ?, 'auto')",
+                    (f.get('category', 'general'), note)
+                )
+        db.commit()
+        db.close()
+    except Exception:
+        pass  # Silent failure — learning is best-effort
+
 # ════════════════════════════════════════════════
 # AUTO-LEARN: extract personal facts from conversation
 # ════════════════════════════════════════════════
@@ -209,6 +266,50 @@ async def delete_note(note_id: int):
     db.close()
     return {"status": "deleted"}
 
+@app.get("/api/history")
+async def get_history(limit: int = 30):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        "SELECT role, content FROM chat_history WHERE user_id = 1 ORDER BY timestamp DESC LIMIT ?",
+        (limit,)
+    )
+    rows = cursor.fetchall()
+    db.close()
+    return {"messages": [{"role": r[0], "content": r[1]} for r in reversed(rows)]}
+
+@app.get("/api/notes")
+async def get_notes():
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        "SELECT id, category, note, created_at FROM memory_notes WHERE user_id = 1 ORDER BY created_at DESC LIMIT 50"
+    )
+    notes = [{"id": n[0], "category": n[1], "note": n[2], "at": n[3]} for n in cursor.fetchall()]
+    db.close()
+    return {"notes": notes}
+
+@app.post("/api/notes/add")
+async def add_note(body: AddNoteBody):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        "INSERT INTO memory_notes (user_id, category, note) VALUES (1, ?, ?)",
+        (body.category, body.note)
+    )
+    db.commit()
+    db.close()
+    return {"status": "saved"}
+
+@app.delete("/api/notes/{note_id}")
+async def delete_note(note_id: int):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM memory_notes WHERE id = ? AND user_id = 1", (note_id,))
+    db.commit()
+    db.close()
+    return {"status": "deleted"}
+
 @app.post("/api/chat")
 async def chat(body: ChatBody):
     if not ANTHROPIC_API_KEY:
@@ -234,6 +335,15 @@ async def chat(body: ChatBody):
     saved_notes = cursor.fetchall()
 
     # Full conversation history from DB — this is how MONIR remembers
+    cursor.execute(
+        "SELECT role, content FROM chat_history WHERE user_id = 1 ORDER BY timestamp DESC LIMIT 30"
+    )
+    db_history = [{"role": r[0], "content": r[1]} for r in reversed(cursor.fetchall())]
+
+    cursor.execute("SELECT category, note FROM memory_notes WHERE user_id = 1 ORDER BY created_at DESC LIMIT 20")
+    saved_notes = cursor.fetchall()
+
+    # Load full conversation history from DB — this is how MONIR remembers
     cursor.execute(
         "SELECT role, content FROM chat_history WHERE user_id = 1 ORDER BY timestamp DESC LIMIT 30"
     )
