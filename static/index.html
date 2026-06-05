@@ -139,9 +139,9 @@ input:focus{border-color:var(--acc)}
 <!-- BOOT SEQUENCE -->
 <div id="boot">
   <div style="text-align:center">
-    <div class="tech-text">⚛ MONIR 2027 INITIALIZING</div>
-    <div class="tech-text">⚛ CONSCIOUSNESS LOADING</div>
-    <div class="tech-text">⚛ READY TO LIVE WITH YOU</div>
+    <div class="tech-text">⚛ MONIR INITIALIZING</div>
+    <div class="tech-text">⚛ LASTER MINNE OG KONTEKST</div>
+    <div class="tech-text">⚛ KLAR — 6. JUNI 2026</div>
   </div>
 </div>
 
@@ -173,15 +173,15 @@ input:focus{border-color:var(--acc)}
     </div>
 
     <nav>
-      <button class="nav-btn active" onclick="showPage('dashboard')">📊 DASHBOARD</button>
+      <button class="nav-btn active" onclick="showPage('chat')">💬 MONIR</button>
+      <button class="nav-btn" onclick="showPage('dashboard')">📊 DASHBOARD</button>
       <button class="nav-btn" onclick="showPage('profile')">👤 PROFIL</button>
-      <button class="nav-btn" onclick="showPage('calendar')">📅 KALENDER</button>
       <button class="nav-btn" onclick="showPage('lifestyle')">💪 LIVSSTIL</button>
-      <button class="nav-btn" onclick="showPage('chat')">💬 MONIR</button>
+      <button class="nav-btn" onclick="showPage('notes')" id="notes-nav">💾 <span id="notes-count">MINNE</span></button>
     </nav>
 
     <div style="font-size:.7rem;color:rgba(0,255,136,.4);text-align:center;margin-top:auto">
-      MONIR v2027 • Levende AI
+      MONIR • 6. juni 2026 • 01:01
     </div>
   </div>
 
@@ -221,23 +221,34 @@ input:focus{border-color:var(--acc)}
 
   <!-- CONTENT -->
   <div id="content">
+    <!-- CHAT (default) -->
+    <div id="page-chat" class="page active">
+      <div class="header" style="display:flex;justify-content:space-between;align-items:center">
+        <div class="title">💬 MONIR</div>
+        <div style="display:flex;gap:6px">
+          <button id="tts-btn" onclick="toggleTTS()" title="MONIR snakker (tekst til tale)" style="padding:6px 10px;border:1px solid rgba(0,255,136,.3);background:rgba(0,255,136,.05);color:rgba(0,255,136,.6);cursor:pointer;border-radius:2px;font-size:.8rem;transition:all .2s">🔇</button>
+          <button id="onb-btn" onclick="startOnboarding()" title="Kartlegg meg — MONIR stiller dype spørsmål" style="padding:6px 10px;border:1px solid rgba(0,255,136,.3);background:rgba(0,255,136,.05);color:rgba(0,255,136,.6);cursor:pointer;border-radius:2px;font-size:.8rem;transition:all .2s">🧬 KARTLEGG</button>
+        </div>
+      </div>
+      <div id="onb-banner" style="display:none;background:rgba(255,136,0,.06);border:1px solid rgba(255,136,0,.2);padding:6px 10px;font-size:.75rem;color:rgba(255,136,0,.7);margin-bottom:8px;display:none;justify-content:space-between;align-items:center">
+        <span>🧬 Kartleggingsmodus — MONIR stiller spørsmål</span>
+        <span onclick="stopOnboarding()" style="cursor:pointer;color:rgba(255,0,102,.6);padding:2px 8px;border:1px solid rgba(255,0,102,.3);font-size:.7rem">AVSLUTT ✕</span>
+      </div>
+      <div id="messages"></div>
+      <div class="input-area">
+        <button id="mic-btn" onclick="toggleVoice()" title="Tal til MONIR" style="padding:9px 12px;border:1px solid rgba(0,255,136,.3);background:rgba(0,255,136,.05);color:rgba(0,255,136,.7);cursor:pointer;border-radius:2px;font-size:.9rem;transition:all .2s;white-space:nowrap">🎤</button>
+        <input type="text" id="chat-input" placeholder="Skriv eller tal til MONIR..." onkeydown="handleKey(event)"/>
+        <button class="btn-send" onclick="sendMessage()">▶</button>
+      </div>
+    </div>
+
     <!-- DASHBOARD -->
-    <div id="page-dashboard" class="page active">
+    <div id="page-dashboard" class="page">
       <div class="header">
         <div class="title">📊 DASHBOARD</div>
       </div>
-      <div>
-        <p style="color:rgba(0,255,136,.7);margin-bottom:16px">
-          Velkommen! Dag 47 av ditt nye livet. Du gjør det bra. 💚
-        </p>
-        <div class="event" style="border-left:3px solid var(--acc)">
-          <div class="event-title">🎯 I dag: Trening + 8 timer søvn</div>
-          <div class="event-time">Målsetting for optimal helse</div>
-        </div>
-        <div class="event">
-          <div class="event-title">💬 MONIR Tip</div>
-          <div class="event-time">"Du ser ut til å ha høy energi i dag. Perfekt dag for å teste noe nytt!"</div>
-        </div>
+      <div id="dashboard-today" style="color:rgba(0,255,136,.7);font-size:.85rem;line-height:1.8">
+        Laster data...
       </div>
     </div>
 
@@ -260,15 +271,19 @@ input:focus{border-color:var(--acc)}
       </div>
     </div>
 
-    <!-- CALENDAR -->
-    <div id="page-calendar" class="page">
+    <!-- NOTES / MEMORY -->
+    <div id="page-notes" class="page">
       <div class="header">
-        <div class="title">📅 KALENDER</div>
+        <div class="title">💾 MONIRS MINNE</div>
       </div>
-      <div class="calendar" id="calendar-grid"></div>
-      <div style="margin-top:20px">
-        <div class="profile-label">Kommende hendelser</div>
-        <div id="upcoming-events"></div>
+      <p style="font-size:.8rem;color:rgba(0,255,136,.5);margin-bottom:12px">MONIR lærer automatisk fra samtalene. Her er hva den har lært om deg.</p>
+      <div id="notes-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div style="margin-top:16px">
+        <div class="profile-label">Legg til manuelt</div>
+        <div class="input-row">
+          <input type="text" id="manual-note" placeholder="Skriv et faktum om deg selv..."/>
+          <button class="btn-send" onclick="addManualNote()">+</button>
+        </div>
       </div>
     </div>
 
@@ -295,17 +310,6 @@ input:focus{border-color:var(--acc)}
       </div>
     </div>
 
-    <!-- CHAT -->
-    <div id="page-chat" class="page">
-      <div class="header">
-        <div class="title">💬 MONIR — DIN AI</div>
-      </div>
-      <div id="messages"></div>
-      <div class="input-area">
-        <input type="text" id="chat-input" placeholder="Snakk med MONIR..." onkeydown="handleKey(event)"/>
-        <button class="btn-send" onclick="sendMessage()">▶</button>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -315,14 +319,20 @@ input:focus{border-color:var(--acc)}
 // ════════════════════════════════════════════════
 
 window.addEventListener('load', () => {
-  setTimeout(() => {
-    document.getElementById('boot').classList.add('hidden');
-  }, 5000);
-
+  setTimeout(() => document.getElementById('boot').classList.add('hidden'), 4000);
   loadUser();
-  loadCalendar();
+  loadHistory();
+  loadNotes();
+  loadTodayDashboard();
   animateStickFigure();
   setInterval(animateStickFigure, 3000);
+  // Update sidebar clock
+  setInterval(() => {
+    const n = new Date();
+    const t = [n.getHours(), n.getMinutes()].map(v=>String(v).padStart(2,'0')).join(':');
+    const footer = document.querySelector('#sidebar > div:last-child');
+    if (footer) footer.textContent = `MONIR • ${n.getDate()}. juni 2026 • ${t}`;
+  }, 30000);
 });
 
 // ════════════════════════════════════════════════
@@ -363,23 +373,87 @@ async function logLifestyle() {
   alert('Logget! ✅');
 }
 
-async function loadCalendar() {
-  const res = await fetch('/api/calendar?days=30');
-  const data = await res.json();
-  const grid = document.getElementById('calendar-grid');
-  const today = new Date().getDate();
+async function loadTodayDashboard() {
+  try {
+    const r = await fetch('/api/today');
+    const d = await r.json();
+    const el = document.getElementById('dashboard-today');
+    if (!el) return;
+    const rows = [
+      d.sleep != null ? `💤 Søvn: <b>${d.sleep} timer</b>` : '💤 Søvn: <span style="opacity:.4">ikke logget</span>',
+      d.exercise != null ? `💪 Trening: <b>${d.exercise} min</b>` : '💪 Trening: <span style="opacity:.4">ikke logget</span>',
+      d.mood != null ? `😊 Humør: <b>${d.mood}/10</b>` : '😊 Humør: <span style="opacity:.4">ikke logget</span>',
+      d.water != null ? `💧 Vann: <b>${d.water} glass</b>` : '💧 Vann: <span style="opacity:.4">ikke logget</span>',
+    ];
+    el.innerHTML = rows.map(r => `<div style="padding:6px 0;border-bottom:1px solid rgba(0,255,136,.08)">${r}</div>`).join('');
+  } catch(e) {}
+}
 
-  for (let i = 1; i <= 31; i++) {
-    const d = document.createElement('div');
-    d.className = 'cal-day' + (i === today ? ' today' : '');
-    d.textContent = i;
-    grid.appendChild(d);
-  }
+async function loadNotes() {
+  try {
+    const r = await fetch('/api/notes');
+    const d = await r.json();
+    const count = d.notes.length;
+    const el = document.getElementById('notes-count');
+    if (el) el.textContent = count > 0 ? `MINNE (${count})` : 'MINNE';
+    // Render notes list
+    const list = document.getElementById('notes-list');
+    if (!list) return;
+    if (!d.notes.length) {
+      list.innerHTML = '<div style="color:rgba(0,255,136,.3);font-size:.8rem;text-align:center;padding:20px">MONIR har ikke lært noe ennå — start en samtale!</div>';
+      return;
+    }
+    const cols = {personal:'#aa00ff',health:'#ff0066',business:'#ff4466',tech:'#00d4ff',general:'rgba(0,255,136,.7)',chat:'rgba(0,255,136,.5)',auto:'rgba(0,212,255,.6)'};
+    list.innerHTML = d.notes.map(n => `
+      <div style="display:flex;gap:8px;align-items:flex-start;padding:8px;border:1px solid rgba(0,255,136,.1);border-radius:2px;background:rgba(0,255,136,.02)">
+        <div style="width:3px;background:${cols[n.category]||'#00ff88'};flex-shrink:0;align-self:stretch;border-radius:1px;min-height:24px"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.65rem;color:rgba(0,212,255,.4);letter-spacing:.08em;margin-bottom:2px">${(n.category||'general').toUpperCase()} // ${(n.at||'').split('T')[0]}</div>
+          <div style="font-size:.82rem;color:rgba(0,255,136,.85);line-height:1.5">${n.note}</div>
+        </div>
+        <span onclick="deleteNote(${n.id})" style="cursor:pointer;color:rgba(255,0,102,.3);font-size:.8rem;padding:2px 4px;flex-shrink:0" onmouseover="this.style.color='#ff0066'" onmouseout="this.style.color='rgba(255,0,102,.3)'">✕</span>
+      </div>`).join('');
+  } catch(e) {}
+}
 
-  const events = document.getElementById('upcoming-events');
-  events.innerHTML = data.events.slice(0, 3).map(e =>
-    `<div class="event"><div class="event-title">${e.title}</div><div class="event-time">${e.start}</div></div>`
-  ).join('');
+async function deleteNote(id) {
+  await fetch('/api/notes/' + id, {method: 'DELETE'});
+  loadNotes();
+}
+
+async function addManualNote() {
+  const inp = document.getElementById('manual-note');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  await fetch('/api/notes/add', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({note: txt, category: 'personal'})
+  });
+  inp.value = '';
+  loadNotes();
+}
+
+async function loadHistory() {
+  try {
+    const r = await fetch('/api/history');
+    const d = await r.json();
+    if (!d.messages || !d.messages.length) return;
+    const m = document.getElementById('messages');
+    if (!m) return;
+    m.innerHTML = '';
+    const sep = document.createElement('div');
+    sep.style.cssText = 'font-size:.65rem;color:rgba(0,255,136,.2);text-align:center;padding:6px;border-bottom:1px solid rgba(0,255,136,.08);margin-bottom:8px;letter-spacing:.1em';
+    sep.textContent = '── forrige sesjon ──';
+    m.appendChild(sep);
+    d.messages.slice(-10).forEach(msg => {
+      const el = document.createElement('div');
+      el.className = 'msg msg-' + (msg.role === 'user' ? 'user' : 'ai');
+      el.textContent = msg.content;
+      m.appendChild(el);
+    });
+    m.scrollTop = m.scrollHeight;
+  } catch(e) {}
 }
 
 // ════════════════════════════════════════════════
@@ -425,31 +499,137 @@ function animateStickFigure() {
 }
 
 // ════════════════════════════════════════════════
+// TTS — MONIR SNAKKER
+// ════════════════════════════════════════════════
+
+let ttsEnabled = false;
+const synth = window.speechSynthesis;
+
+// Voices load async — cache when ready
+let norVoice = null;
+if (synth) {
+  function pickVoice() {
+    const voices = synth.getVoices();
+    norVoice = voices.find(v => v.lang.startsWith('nb') || v.lang.startsWith('no'))
+               || voices.find(v => v.lang.startsWith('sv'))
+               || null;
+  }
+  pickVoice();
+  synth.onvoiceschanged = pickVoice;
+}
+
+function toggleTTS() {
+  ttsEnabled = !ttsEnabled;
+  const btn = document.getElementById('tts-btn');
+  btn.textContent = ttsEnabled ? '🔊' : '🔇';
+  btn.style.borderColor = ttsEnabled ? 'var(--c)' : 'rgba(0,255,136,.3)';
+  btn.style.background = ttsEnabled ? 'rgba(0,255,136,.15)' : 'rgba(0,255,136,.05)';
+  btn.style.color = ttsEnabled ? 'var(--c)' : 'rgba(0,255,136,.6)';
+  if (!ttsEnabled && synth) synth.cancel();
+}
+
+function speakText(text) {
+  if (!ttsEnabled || !synth) return;
+  synth.cancel();
+  const clean = text.replace(/[*_#`]/g, '').replace(/\n+/g, '. ').slice(0, 800);
+  const utt = new SpeechSynthesisUtterance(clean);
+  utt.lang = 'nb-NO';
+  utt.rate = 1.05;
+  utt.pitch = 0.92;
+  if (norVoice) utt.voice = norVoice;
+  utt.onstart = () => { document.getElementById('figure-emoji').textContent = '🔊'; };
+  utt.onend = () => animateStickFigure();
+  synth.speak(utt);
+}
+
+// ════════════════════════════════════════════════
+// VOICE INPUT
+// ════════════════════════════════════════════════
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recog = null, voiceActive = false;
+
+if (SR) {
+  recog = new SR();
+  recog.lang = 'nb-NO';
+  recog.continuous = false;
+  recog.interimResults = false;
+  recog.onresult = (e) => {
+    const txt = Array.from(e.results).map(r=>r[0].transcript).join(' ');
+    document.getElementById('chat-input').value = txt;
+    stopVoice();
+    sendMessage();
+  };
+  recog.onerror = () => stopVoice();
+  recog.onend = () => stopVoice();
+}
+
+function toggleVoice() {
+  if (!SR) { alert('Bruk Chrome eller Safari for tale-input'); return; }
+  if (voiceActive) { stopVoice(); return; }
+  voiceActive = true;
+  recog.start();
+  const btn = document.getElementById('mic-btn');
+  btn.textContent = '⏹';
+  btn.style.borderColor = '#ff0066';
+  btn.style.color = '#ff0066';
+  btn.style.background = 'rgba(255,0,102,.1)';
+}
+
+function stopVoice() {
+  voiceActive = false;
+  if (recog) try { recog.stop(); } catch(e) {}
+  const btn = document.getElementById('mic-btn');
+  if (btn) { btn.textContent = '🎤'; btn.style.borderColor = 'rgba(0,255,136,.3)'; btn.style.color = 'rgba(0,255,136,.7)'; btn.style.background = 'rgba(0,255,136,.05)'; }
+}
+
+// ════════════════════════════════════════════════
+// ONBOARDING
+// ════════════════════════════════════════════════
+
+let chatMode = 'normal';
+
+function startOnboarding() {
+  chatMode = 'onboarding';
+  const banner = document.getElementById('onb-banner');
+  if (banner) banner.style.display = 'flex';
+  document.getElementById('chat-input').value = 'Start kartleggingen nå.';
+  sendMessage();
+}
+
+function stopOnboarding() {
+  chatMode = 'normal';
+  const banner = document.getElementById('onb-banner');
+  if (banner) banner.style.display = 'none';
+}
+
+// ════════════════════════════════════════════════
 // CHAT
 // ════════════════════════════════════════════════
 
-let chatHistory = [];
-
 function handleKey(e) {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    sendMessage();
-  }
+  if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
 }
 
 async function sendMessage() {
   const input = document.getElementById('chat-input');
   const msg = input.value.trim();
   if (!msg) return;
-
   input.value = '';
+
   appendMsg(msg, 'user');
 
   const res = await fetch('/api/chat', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({message: msg, history: chatHistory})
+    body: JSON.stringify({message: msg, mode: chatMode})
   });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({error: 'Feil'}));
+    appendMsg('FEIL: ' + (err.error || 'Tilkobling feilet'), 'ai');
+    return;
+  }
 
   const reader = res.body.getReader();
   const dec = new TextDecoder();
@@ -475,8 +655,9 @@ async function sendMessage() {
   }
 
   if (aiText) {
-    chatHistory.push({role: 'user', content: msg});
-    chatHistory.push({role: 'assistant', content: aiText});
+    speakText(aiText);
+    // Refresh memory count after 4s (background fact extraction may complete)
+    setTimeout(loadNotes, 4000);
   }
 }
 
@@ -486,14 +667,19 @@ function appendMsg(text, who) {
   d.className = `msg msg-${who}`;
   d.textContent = text;
   m.appendChild(d);
+  m.scrollTop = m.scrollHeight;
   return d;
 }
 
-function showPage(id) {
+function showPage(id, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(`page-${id}`).classList.add('active');
+  const page = document.getElementById('page-' + id);
+  if (page) page.classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
+  const target = btn || event.target;
+  if (target) target.classList.add('active');
+  if (id === 'dashboard') loadTodayDashboard();
+  if (id === 'notes') loadNotes();
 }
 </script>
 </body>

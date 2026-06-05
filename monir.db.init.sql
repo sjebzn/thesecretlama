@@ -1,4 +1,4 @@
--- MONIR 2027 — Levende AI Livsassistent Database
+-- MONIR — Levende AI Livsassistent Database
 -- Futuristisk, menneskelig, intelligent
 
 CREATE TABLE IF NOT EXISTS users (
@@ -69,6 +69,16 @@ CREATE TABLE IF NOT EXISTS goals (
   target_date DATE,
   progress INTEGER DEFAULT 0,
   status TEXT DEFAULT 'active',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS memory_notes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  category TEXT DEFAULT 'general',
+  note TEXT NOT NULL,
+  source TEXT DEFAULT 'manual',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
