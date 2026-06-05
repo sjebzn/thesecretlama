@@ -2,498 +2,550 @@
 <html lang="no">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MONIR 2027 — Din Levende Livsassistent</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<title>MONIR // 2027</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-:root{--c:#00ff88;--navy:#0a0e27;--dark:#050817;--acc:#ff00ff;--g:0 0 30px rgba(0,255,136,.5)}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:var(--navy);color:var(--c);font-family:'Courier Prime',monospace;overflow:hidden}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#020a14;color:#00ff88;font-family:'Share Tech Mono',monospace}
+#bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
+.hexgrid{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg width='56' height='48' viewBox='0 0 56 48' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M28 2l26 15v14L28 46 2 31V17L28 2z' fill='none' stroke='rgba(0,255,136,0.04)' stroke-width='1'/%3E%3C/svg%3E")}
+.scanlines{position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.05) 2px,rgba(0,0,0,0.05) 4px);pointer-events:none;z-index:998}
+.vignette{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,0.65) 100%);pointer-events:none;z-index:0}
 
-body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;
-background:repeating-linear-gradient(0deg,transparent 0,rgba(0,0,0,.1) 2px,transparent 4px);
-pointer-events:none;z-index:9999;animation:scan 8s linear infinite}
-@keyframes scan{0%{transform:translateY(0)}100%{transform:translateY(4px)}}
+#app{position:fixed;top:0;left:0;width:100%;height:100%;z-index:2;display:grid;grid-template-rows:44px 1fr 210px;grid-template-columns:255px 1fr 270px;gap:7px;padding:9px}
 
-#boot{position:fixed;inset:0;background:var(--dark);z-index:10000;
-display:flex;flex-direction:column;align-items:center;justify-content:center;
-opacity:1;animation:boot-out 5s ease forwards}
-#boot.hidden{opacity:0;pointer-events:none}
-@keyframes boot-out{0%{opacity:1}80%{opacity:1}100%{opacity:0}}
+/* HEADER */
+header{grid-column:1/-1;grid-row:1;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid rgba(0,255,136,0.15);background:rgba(0,10,20,0.4)}
+.htitle{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;letter-spacing:5px;animation:glitch 10s infinite}
+.htitle b{color:#00d4ff}
+@keyframes glitch{0%,87%,100%{clip-path:none;transform:none;color:#00ff88}88%{clip-path:inset(20% 0 50% 0);transform:translateX(-4px);color:#ff0066}89%{clip-path:none;transform:none}90%{clip-path:inset(60% 0 10% 0);transform:translateX(4px);color:#00d4ff}91%{clip-path:none;transform:none;color:#00ff88}}
+.hmid{display:flex;align-items:center;gap:12px;font-size:9px;letter-spacing:2px;color:rgba(0,255,136,0.35)}
+.hclk{font-family:'Orbitron',sans-serif;font-size:14px;color:#00d4ff;letter-spacing:3px}
+.odot{width:5px;height:5px;border-radius:50%;background:#00ff88;box-shadow:0 0 6px #00ff88;animation:od 2s ease-in-out infinite;flex-shrink:0}
+@keyframes od{0%,100%{opacity:1}50%{opacity:0.15}}
+.pill{padding:2px 8px;border:1px solid currentColor;font-size:8px;letter-spacing:1px}
+.pill.on{color:#00ff88}
+.pill.warn{color:#ff4466}
 
-.tech-text{font-size:1rem;letter-spacing:.1em;opacity:0;animation:appear .5s ease forwards;margin:6px}
-.tech-text:nth-child(1){animation-delay:.2s}
-.tech-text:nth-child(2){animation-delay:1s}
-.tech-text:nth-child(3){animation-delay:1.8s}
-@keyframes appear{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+/* PANELS */
+.panel{background:rgba(0,12,24,0.85);border:1px solid rgba(0,255,136,0.15);position:relative;overflow:hidden;padding:11px 12px;backdrop-filter:blur(20px)}
+.panel::before,.panel::after{content:'';position:absolute;width:10px;height:10px;border-color:rgba(0,255,136,0.4);border-style:solid}
+.panel::before{top:-1px;left:-1px;border-width:1px 0 0 1px}
+.panel::after{bottom:-1px;right:-1px;border-width:0 1px 1px 0}
+.ptop{position:absolute;top:0;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,136,0.4),transparent)}
+.ptitle{font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:3px;color:rgba(0,255,136,0.3);margin-bottom:9px;margin-top:2px}
 
-body{display:flex;flex-direction:column}
-#app{flex:1;display:flex;overflow:hidden}
+@keyframes fa{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes fb{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes fc{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes fd{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes fe{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.fa{animation:fa 5s ease-in-out infinite}.fb{animation:fb 6.5s ease-in-out infinite;animation-delay:-2s}.fc{animation:fc 4.5s ease-in-out infinite;animation-delay:-1s}.fd{animation:fd 7s ease-in-out infinite;animation-delay:-3s}.fe{animation:fe 5.5s ease-in-out infinite;animation-delay:-1.5s}
 
-/* SIDEBAR */
-#sidebar{width:320px;background:linear-gradient(180deg,rgba(10,14,39,.98),rgba(5,8,17,.98));
-border-right:2px solid var(--c);overflow-y:auto;padding:20px;display:flex;flex-direction:column}
-.avatar{width:100px;height:100px;border-radius:50%;border:3px solid var(--c);
-background:radial-gradient(circle,rgba(0,255,136,.2),rgba(0,255,136,.05));
-display:flex;align-items:center;justify-content:center;font-size:3rem;
-margin:0 auto 20px;box-shadow:inset 0 0 20px rgba(0,255,136,.3),0 0 30px rgba(0,255,136,.5)}
+/* LEFT */
+#col-l{grid-column:1;grid-row:2;display:flex;flex-direction:column;gap:7px}
+.uavt{width:50px;height:50px;border-radius:50%;border:2px solid #00ff88;background:radial-gradient(circle,rgba(0,255,136,0.2),rgba(0,10,30,0.9));display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:20px;font-weight:700;margin:0 auto 7px;animation:pav 3.5s ease-in-out infinite}
+@keyframes pav{0%,100%{box-shadow:0 0 0 2px rgba(0,255,136,0.1),0 0 18px rgba(0,255,136,0.3)}50%{box-shadow:0 0 0 4px rgba(0,255,136,0.2),0 0 36px rgba(0,255,136,0.5),0 0 60px rgba(0,212,255,0.15)}}
+.uname{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;text-align:center;letter-spacing:2px;margin-bottom:2px}
+.utags{font-size:7px;color:rgba(0,212,255,0.5);text-align:center;letter-spacing:1px;margin-bottom:10px;line-height:1.6}
+.gauges{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px}
+.gauge-wrap{text-align:center}
+.gl{font-size:7px;letter-spacing:1px;color:rgba(255,255,255,0.3);margin-top:2px}
 
-.name{font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:900;
-color:var(--c);text-shadow:var(--g);text-align:center;margin-bottom:4px}
-.status{font-size:.7rem;color:rgba(0,255,136,.5);text-align:center;margin-bottom:20px}
+/* habits */
+.hi{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:background 0.2s;border-radius:2px;padding-left:2px}
+.hi:last-child{border-bottom:none}
+.hi:hover{background:rgba(0,255,136,0.04)}
+.hcat{width:3px;height:26px;border-radius:1px;flex-shrink:0}
+.hinfo{flex:1;min-width:0}
+.hn{font-size:9px;color:rgba(255,255,255,0.7);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hf{font-size:7px;color:rgba(255,255,255,0.25);letter-spacing:1px;margin-top:1px}
+.hck{width:16px;height:16px;border:1px solid rgba(255,255,255,0.2);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;transition:all 0.2s}
+.hck.done{border-color:#00ff88;background:rgba(0,255,136,0.15);color:#00ff88}
+.hs{font-size:8px;color:#ffaa00;white-space:nowrap;margin-right:4px}
 
-.stats{display:flex;flex-direction:column;gap:12px;margin-bottom:20px;
-padding-bottom:20px;border-bottom:1px solid rgba(0,255,136,.2)}
-.stat{display:flex;justify-content:space-between;align-items:center;font-size:.8rem}
-.stat-label{color:rgba(0,255,136,.6)}
-.stat-bar{flex:1;height:4px;background:rgba(0,255,136,.1);border-radius:2px;margin:0 8px;overflow:hidden}
-.stat-fill{height:100%;background:linear-gradient(90deg,var(--c),var(--acc));
-transition:width .5s ease;box-shadow:0 0 10px var(--c)}
+/* CENTER */
+#col-c{grid-column:2;grid-row:2;display:flex;flex-direction:column;align-items:center;justify-content:space-between;position:relative;padding:8px 0}
+.ring{position:absolute;border-radius:50%;border:1px solid rgba(0,255,136,0.06);animation:spin linear infinite}
+.ring.dot::after{content:'';position:absolute;border-radius:50%;box-shadow:0 0 10px currentColor;top:-3px;left:50%;transform:translateX(-50%)}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+#fig-area{position:relative;display:flex;flex-direction:column;align-items:center;flex:1;justify-content:center}
+#fig-wrap{animation:breathe 4s ease-in-out infinite;position:relative;z-index:5}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.015)}}
+.fig-anno{position:absolute;font-size:8px;letter-spacing:1px;white-space:nowrap;z-index:6;pointer-events:none;animation:fa 4s ease-in-out infinite;color:rgba(0,212,255,0.7)}
+.fig-anno.r{right:-95px;text-align:left}
+.fig-anno.r::before{content:'── ';opacity:0.4}
+.fig-anno.l{left:-95px;text-align:right}
+.fig-anno.l::after{content:' ──';opacity:0.4}
+.flbl{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:5px;color:rgba(0,255,136,0.2);margin-top:6px}
 
-nav{flex:1;display:flex;flex-direction:column;gap:4px}
-.nav-btn{padding:11px;border:1px solid transparent;background:transparent;
-color:rgba(0,255,136,.5);cursor:pointer;font-size:.8rem;font-weight:700;
-font-family:'Orbitron',sans-serif;transition:all .2s;border-radius:2px;
-text-transform:uppercase;letter-spacing:.05em}
-.nav-btn:hover,.nav-btn.active{background:rgba(0,255,136,.15);border-color:var(--c);
-color:var(--c);box-shadow:0 0 15px rgba(0,255,136,.3)}
+/* QUICK ACTIONS */
+#qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%;padding:0 10px 4px}
+.qa{background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.2);padding:10px 6px;text-align:center;cursor:pointer;transition:all 0.2s;font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:1px;color:rgba(0,255,136,0.7);position:relative;overflow:hidden}
+.qa::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,255,136,0.06),transparent);transition:left 0.4s}
+.qa:hover{background:rgba(0,255,136,0.12);border-color:rgba(0,255,136,0.5);color:#00ff88;box-shadow:0 0 12px rgba(0,255,136,0.15)}
+.qa:hover::before{left:100%}
+.qa:active{transform:scale(0.97)}
+.qa-icon{display:block;font-size:18px;margin-bottom:4px}
+.qa.primary{border-color:rgba(0,212,255,0.4);color:rgba(0,212,255,0.8);background:rgba(0,212,255,0.05)}
+.qa.primary:hover{background:rgba(0,212,255,0.12);border-color:#00d4ff;color:#00d4ff;box-shadow:0 0 12px rgba(0,212,255,0.2)}
 
-/* MAIN */
-#main{flex:1;display:flex;overflow:hidden}
+/* RIGHT */
+#col-r{grid-column:3;grid-row:2;display:flex;flex-direction:column;gap:7px}
+.gi{margin-bottom:8px;cursor:pointer;padding:3px;border-radius:2px;transition:background 0.2s}
+.gi:hover{background:rgba(0,255,136,0.04)}
+.gi-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.gn{font-size:9px;color:rgba(255,255,255,0.65);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:6px}
+.gp{font-size:9px;color:#00d4ff;font-family:'Orbitron',sans-serif}
+.gbar{height:2px;background:rgba(255,255,255,0.06);position:relative;overflow:hidden}
+.gfill{height:100%;background:linear-gradient(90deg,#0055ff,#00d4ff,#00ff88);box-shadow:0 0 6px rgba(0,212,255,0.5);transition:width 1.5s ease}
+.gbar::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent);animation:shimmer 3s linear infinite}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.gi-hint{font-size:7px;color:rgba(0,212,255,0.3);letter-spacing:1px;text-align:right;margin-top:1px}
 
-/* STICK FIGURE */
-#canvas-container{width:280px;padding:20px;border-right:2px solid var(--c);
-display:flex;flex-direction:column;align-items:center;justify-content:center;
-background:linear-gradient(135deg,rgba(0,100,80,.1),transparent)}
-svg{width:220px;height:400px}
+/* TODAY - clickable */
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.dc{background:rgba(0,255,136,0.03);border:1px solid rgba(0,255,136,0.1);padding:8px 6px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative}
+.dc:hover{background:rgba(0,255,136,0.08);border-color:rgba(0,255,136,0.35);box-shadow:0 0 10px rgba(0,255,136,0.1)}
+.dc:hover .dc-edit{opacity:1}
+.dc-edit{position:absolute;top:3px;right:4px;font-size:7px;color:rgba(0,255,136,0.3);opacity:0;transition:opacity 0.2s}
+.dv{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:700;line-height:1}
+.dl{font-size:7px;letter-spacing:1px;color:rgba(255,255,255,0.22);margin-top:3px}
 
-/* CONTENT */
-#content{flex:1;padding:20px;overflow-y:auto;display:flex;flex-direction:column}
-.page{display:none}
-.page.active{display:block;animation:fade-in .3s}
-@keyframes fade-in{from{opacity:0}to{opacity:1}}
-
-.header{margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid var(--c);
-position:relative}
-.header::after{content:'';position:absolute;bottom:-2px;left:0;width:200px;height:1px;
-background:linear-gradient(90deg,var(--c),transparent);box-shadow:var(--g)}
-.title{font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:900;
-color:var(--c);text-shadow:var(--g);text-transform:uppercase;letter-spacing:.05em}
-
-/* CALENDAR */
-.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
-.cal-day{padding:10px;border:1px solid rgba(0,255,136,.2);border-radius:2px;
-text-align:center;font-size:.75rem;cursor:pointer;transition:all .2s;background:rgba(0,255,136,.02)}
-.cal-day:hover{background:rgba(0,255,136,.1);border-color:var(--c);box-shadow:0 0 10px rgba(0,255,136,.3)}
-.cal-day.today{background:rgba(0,255,136,.2);border-color:var(--c);font-weight:700}
-
-.event{padding:10px;border-left:3px solid var(--c);background:rgba(0,255,136,.08);
-border-radius:2px;margin:8px 0;font-size:.8rem}
-.event-title{font-weight:700;margin-bottom:2px}
-.event-time{color:rgba(0,255,136,.5);font-size:.7rem}
-
-/* PROFILE */
-.profile-card{background:rgba(0,255,136,.05);border:1px solid rgba(0,255,136,.2);
-padding:16px;border-radius:4px;margin-bottom:16px}
-.profile-label{color:rgba(0,255,136,.6);font-size:.75rem;font-weight:700;
-text-transform:uppercase;margin-bottom:4px;letter-spacing:.05em}
-.profile-value{color:var(--c);font-size:.9rem;margin-bottom:12px}
-textarea{width:100%;background:rgba(0,255,136,.05);border:1px solid rgba(0,255,136,.2);
-color:var(--c);padding:10px;border-radius:2px;font-family:'Courier Prime',monospace;
-font-size:.8rem;resize:none;outline:none}
-textarea:focus{border-color:var(--c);box-shadow:0 0 10px rgba(0,255,136,.2)}
+/* EVENTS */
+.evi{display:flex;gap:6px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);align-items:flex-start}
+.evi:last-child{border-bottom:none}
+.eline{width:1px;flex-shrink:0;background:rgba(255,0,102,0.4);align-self:stretch;margin-top:2px}
+.etit{flex:1;font-size:9px;color:rgba(255,255,255,0.65);line-height:1.4}
+.edt{font-size:7px;color:rgba(255,0,102,0.5);white-space:nowrap}
+.add-event-btn{width:100%;margin-top:6px;padding:5px;background:rgba(255,0,102,0.06);border:1px dashed rgba(255,0,102,0.25);color:rgba(255,0,102,0.5);font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:2px;cursor:pointer;transition:all 0.2s}
+.add-event-btn:hover{background:rgba(255,0,102,0.12);border-color:rgba(255,0,102,0.5);color:#ff0066}
 
 /* CHAT */
-#messages{height:400px;overflow-y:auto;margin-bottom:12px;display:flex;flex-direction:column;gap:10px}
-.msg{max-width:85%;animation:msg-in .25s ease;font-size:.85rem;line-height:1.6}
-@keyframes msg-in{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
-.msg-user{align-self:flex-end;background:rgba(0,255,136,.12);border:1px solid var(--c);
-border-radius:2px;padding:10px;color:var(--c)}
-.msg-ai{align-self:flex-start;background:rgba(0,100,80,.1);border:1px solid rgba(0,255,136,.3);
-border-radius:2px;padding:10px;color:rgba(0,255,136,.9)}
+#chat{grid-column:1/-1;grid-row:3;display:flex;gap:7px}
+#chat-main{flex:1;display:flex;flex-direction:column;background:rgba(0,5,12,0.8);border:1px solid rgba(0,255,136,0.12);border-top:2px solid rgba(0,255,136,0.25)}
+#chat-header{padding:4px 12px;border-bottom:1px solid rgba(0,255,136,0.08);display:flex;justify-content:space-between;align-items:center}
+#cmsgs{flex:1;overflow-y:auto;padding:6px 14px;font-size:11px;line-height:1.8}
+#cmsgs::-webkit-scrollbar{width:2px}
+#cmsgs::-webkit-scrollbar-thumb{background:rgba(0,255,136,0.2)}
+.mu{color:rgba(0,212,255,0.9);margin-bottom:3px}
+.mu::before{content:'YOU \203A  ';font-size:8px;color:rgba(0,212,255,0.4);letter-spacing:2px}
+.ma{color:rgba(0,255,136,0.95);margin-bottom:3px}
+.ma::before{content:'MONIR \203A  ';font-size:8px;color:rgba(0,255,136,0.4);letter-spacing:2px}
+.merr{color:#ff4466;margin-bottom:3px}
+.merr::before{content:'ERR \203A  ';font-size:8px;color:rgba(255,68,102,0.4);letter-spacing:2px}
+.typing::after{content:'▋';animation:blink 0.7s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 
-.input-area{display:flex;gap:8px}
-#chat-input{flex:1;background:rgba(0,0,0,.6);border:1px solid var(--c);
-color:var(--c);padding:9px;border-radius:2px;outline:none;font-family:'Courier Prime',monospace;font-size:.85rem}
-#chat-input:focus{border-color:var(--acc);box-shadow:0 0 10px rgba(0,255,136,.2)}
-.btn-send{padding:9px 18px;border:1px solid var(--c);background:rgba(0,255,136,.1);
-color:var(--c);cursor:pointer;border-radius:2px;font-weight:700;transition:all .2s}
-.btn-send:hover{background:rgba(0,255,136,.2);box-shadow:0 0 15px rgba(0,255,136,.3)}
+/* prompts */
+#prompts{display:flex;gap:5px;flex-wrap:wrap;padding:5px 12px;border-top:1px solid rgba(0,255,136,0.06)}
+.prompt-chip{padding:4px 10px;border:1px solid rgba(0,255,136,0.2);font-size:8px;letter-spacing:1px;color:rgba(0,255,136,0.55);cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.prompt-chip:hover{border-color:rgba(0,255,136,0.5);color:#00ff88;background:rgba(0,255,136,0.07)}
 
-/* LIFESTYLE */
-.habit{padding:12px;border:1px solid rgba(0,255,136,.2);border-radius:2px;
-margin:8px 0;display:flex;justify-content:space-between;align-items:center}
-.habit-name{font-weight:700}
-.habit-streak{color:var(--acc);font-weight:700}
+#cside{display:flex;flex-direction:column;gap:6px;width:280px}
+.cinp-wrap{flex:1;position:relative;background:rgba(0,12,26,0.9);border:1px solid rgba(0,255,136,0.2)}
+.cinp-wrap::before{content:'INPUT:\00a0';position:absolute;top:8px;left:10px;font-size:8px;color:rgba(0,255,136,0.2);letter-spacing:1px;pointer-events:none}
+#cin{width:100%;height:100%;background:transparent;border:none;padding:24px 10px 10px;color:#00ff88;font-family:'Share Tech Mono',monospace;font-size:11px;outline:none;resize:none}
+#cin::placeholder{color:rgba(0,255,136,0.12)}
+.cinp-wrap:focus-within{border-color:rgba(0,255,136,0.45);box-shadow:0 0 14px rgba(0,255,136,0.05)}
+#cbtn{background:rgba(0,255,136,0.07);border:1px solid rgba(0,255,136,0.25);color:#00ff88;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:3px;padding:12px;cursor:pointer;transition:all 0.2s}
+#cbtn:hover{background:rgba(0,255,136,0.15);box-shadow:0 0 16px rgba(0,255,136,0.15)}
+#cbtn:disabled{opacity:0.35;cursor:not-allowed}
 
-.input-row{display:flex;gap:8px;margin:8px 0}
-input{flex:1;background:rgba(0,0,0,.6);border:1px solid var(--c);color:var(--c);
-padding:8px;border-radius:2px;outline:none;font-family:'Courier Prime',monospace;font-size:.8rem}
-input:focus{border-color:var(--acc)}
+/* MODAL */
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,5,15,0.85);backdrop-filter:blur(8px);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{background:rgba(0,15,30,0.97);border:1px solid rgba(0,255,136,0.3);padding:24px;min-width:320px;max-width:480px;position:relative;animation:modal-in 0.2s ease-out}
+@keyframes modal-in{from{transform:scale(0.95) translateY(-10px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.modal-box::before,.modal-box::after{content:'';position:absolute;width:12px;height:12px;border-color:#00ff88;border-style:solid}
+.modal-box::before{top:-1px;left:-1px;border-width:1px 0 0 1px}
+.modal-box::after{bottom:-1px;right:-1px;border-width:0 1px 1px 0}
+.modal-title{font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:3px;color:#00ff88;margin-bottom:16px;border-bottom:1px solid rgba(0,255,136,0.15);padding-bottom:10px}
+.modal-label{font-size:9px;letter-spacing:2px;color:rgba(0,255,136,0.4);margin-bottom:6px;display:block}
+.modal-big-val{font-family:'Orbitron',sans-serif;font-size:48px;font-weight:700;text-align:center;color:#00ff88;margin:12px 0}
+.modal-big-val span{font-size:16px;color:rgba(0,255,136,0.5)}
+
+/* custom range */
+input[type=range]{-webkit-appearance:none;width:100%;height:3px;background:rgba(255,255,255,0.1);outline:none;margin:8px 0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00ff88;box-shadow:0 0 10px rgba(0,255,136,0.6);cursor:pointer;transition:transform 0.1s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.3)}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gradient(90deg,#00ff88 var(--pct,50%),rgba(255,255,255,0.1) var(--pct,50%))}
+.range-labels{display:flex;justify-content:space-between;font-size:8px;color:rgba(255,255,255,0.25);margin-bottom:12px}
+
+/* number counter */
+.counter{display:flex;align-items:center;justify-content:center;gap:16px;margin:12px 0}
+.counter-btn{width:40px;height:40px;border:1px solid rgba(0,255,136,0.3);background:rgba(0,255,136,0.07);color:#00ff88;font-size:20px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center}
+.counter-btn:hover{background:rgba(0,255,136,0.15);border-color:#00ff88}
+.counter-val{font-family:'Orbitron',sans-serif;font-size:36px;font-weight:700;color:#00ff88;min-width:80px;text-align:center}
+
+/* text input */
+.modal-input{width:100%;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.25);padding:10px 12px;color:#00ff88;font-family:'Share Tech Mono',monospace;font-size:12px;outline:none;margin-bottom:12px}
+.modal-input:focus{border-color:rgba(0,255,136,0.5)}
+.modal-input::placeholder{color:rgba(0,255,136,0.15)}
+
+.modal-btns{display:flex;gap:8px;margin-top:16px}
+.btn-cancel{flex:1;padding:10px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.3);font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all 0.2s}
+.btn-cancel:hover{border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.6)}
+.btn-save{flex:2;padding:10px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.35);color:#00ff88;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all 0.2s}
+.btn-save:hover{background:rgba(0,255,136,0.2);box-shadow:0 0 14px rgba(0,255,136,0.2)}
+
+/* TOAST */
+#toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
+.toast-item{background:rgba(0,20,40,0.95);border:1px solid rgba(0,255,136,0.4);padding:8px 18px;font-size:10px;letter-spacing:2px;color:#00ff88;box-shadow:0 0 20px rgba(0,255,136,0.2);animation:toast-in 0.3s ease,toast-out 0.3s ease 2.5s forwards;white-space:nowrap}
+@keyframes toast-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toast-out{from{opacity:1}to{opacity:0;transform:translateY(-8px)}}
+
+/* FLOATING STRINGS */
+.fstr{position:fixed;white-space:nowrap;font-size:8px;letter-spacing:2px;pointer-events:none;z-index:1;text-shadow:0 0 8px currentColor}
 </style>
 </head>
 <body>
+<canvas id="bg"></canvas>
+<div class="hexgrid"></div>
+<div class="vignette"></div>
+<div class="scanlines"></div>
 
-<!-- BOOT SEQUENCE -->
-<div id="boot">
-  <div style="text-align:center">
-    <div class="tech-text">⚛ MONIR 2027 INITIALIZING</div>
-    <div class="tech-text">⚛ CONSCIOUSNESS LOADING</div>
-    <div class="tech-text">⚛ READY TO LIVE WITH YOU</div>
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">MODAL</div>
+    <div id="modal-body"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">AVBRYT</button>
+      <button class="btn-save" id="modal-save" onclick="saveModal()">LAGRE</button>
+    </div>
   </div>
 </div>
 
-<!-- APP -->
+<div id="toast"></div>
+
 <div id="app">
-  <!-- SIDEBAR -->
-  <div id="sidebar">
-    <div class="avatar" id="avatar">👋</div>
-    <div class="name" id="user-name">Sebastian</div>
-    <div class="status" id="user-status">Enerji: 78% • Mood: Optimist</div>
-
-    <div class="stats">
-      <div class="stat">
-        <span class="stat-label">💪 Aktivitet</span>
-        <div class="stat-bar"><div class="stat-fill" style="width:65%"></div></div>
-      </div>
-      <div class="stat">
-        <span class="stat-label">😴 Søvn</span>
-        <div class="stat-bar"><div class="stat-fill" style="width:72%"></div></div>
-      </div>
-      <div class="stat">
-        <span class="stat-label">🧠 Fokus</span>
-        <div class="stat-bar"><div class="stat-fill" style="width:81%"></div></div>
-      </div>
-      <div class="stat">
-        <span class="stat-label">❤️ Helse</span>
-        <div class="stat-bar"><div class="stat-fill" style="width:88%"></div></div>
-      </div>
-    </div>
-
-    <nav>
-      <button class="nav-btn active" onclick="showPage('dashboard')">📊 DASHBOARD</button>
-      <button class="nav-btn" onclick="showPage('profile')">👤 PROFIL</button>
-      <button class="nav-btn" onclick="showPage('calendar')">📅 KALENDER</button>
-      <button class="nav-btn" onclick="showPage('lifestyle')">💪 LIVSSTIL</button>
-      <button class="nav-btn" onclick="showPage('chat')">💬 MONIR</button>
-    </nav>
-
-    <div style="font-size:.7rem;color:rgba(0,255,136,.4);text-align:center;margin-top:auto">
-      MONIR v2027 • Levende AI
-    </div>
+<header>
+  <div class="htitle">MONIR <b>2027</b></div>
+  <div class="hmid">
+    <div class="odot"></div>
+    <span class="pill on">ONLINE</span>
+    <span style="color:rgba(0,255,136,0.4)">SEBASTIAN.SALIH</span>
+    <span id="hdate" style="color:rgba(0,212,255,0.3)"></span>
   </div>
+  <div class="hclk" id="clk">--:--:--</div>
+</header>
 
-  <!-- STICK FIGURE CANVAS -->
-  <div id="canvas-container">
-    <svg id="stick-figure" viewBox="0 0 200 400">
-      <!-- Head -->
-      <circle cx="100" cy="60" r="20" stroke="url(#glow)" stroke-width="2" fill="none"/>
-      <circle cx="95" cy="55" r="2" fill="var(--c)"/>
-      <circle cx="105" cy="55" r="2" fill="var(--c)"/>
-
-      <!-- Body -->
-      <line x1="100" y1="80" x2="100" y2="140" stroke="var(--c)" stroke-width="3" id="body"/>
-
-      <!-- Arms -->
-      <line x1="100" y1="100" x2="70" y2="120" stroke="var(--c)" stroke-width="2" id="left-arm"/>
-      <line x1="100" y1="100" x2="130" y2="120" stroke="var(--c)" stroke-width="2" id="right-arm"/>
-
-      <!-- Legs -->
-      <line x1="100" y1="140" x2="85" y2="180" stroke="var(--c)" stroke-width="2" id="left-leg"/>
-      <line x1="100" y1="140" x2="115" y2="180" stroke="var(--c)" stroke-width="2" id="right-leg"/>
-
-      <!-- Glow effect -->
-      <defs>
-        <radialGradient id="glow">
-          <stop offset="0%" stop-color="var(--c)" stop-opacity="1"/>
-          <stop offset="100%" stop-color="var(--c)" stop-opacity="0.3"/>
-        </radialGradient>
-      </defs>
-    </svg>
-
-    <div style="text-align:center;margin-top:20px;font-size:.8rem;color:rgba(0,255,136,.6)">
-      <div id="figure-status">Morgen rutine</div>
-      <div style="font-size:.7rem;margin-top:4px" id="figure-emoji">🌅</div>
-    </div>
-  </div>
-
-  <!-- CONTENT -->
-  <div id="content">
-    <!-- DASHBOARD -->
-    <div id="page-dashboard" class="page active">
-      <div class="header">
-        <div class="title">📊 DASHBOARD</div>
+<!-- LEFT -->
+<div id="col-l">
+  <div class="panel fa">
+    <div class="ptop"></div>
+    <div class="ptitle">// profil</div>
+    <div class="uavt">S</div>
+    <div class="uname">SEBASTIAN SALIH</div>
+    <div class="utags">BMW · OBDAI · AUTOVERS<br>GRÜNDER · AI-UTVIKLER · 2027</div>
+    <div class="gauges">
+      <div class="gauge-wrap">
+        <svg width="52" height="52" viewBox="0 0 52 52">
+          <circle cx="26" cy="26" r="21" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3" transform="rotate(-90 26 26)" stroke-dasharray="100 132"/>
+          <circle cx="26" cy="26" r="21" fill="none" stroke="#00ff88" stroke-width="3" stroke-linecap="round" transform="rotate(-90 26 26)" stroke-dasharray="72 132"/>
+          <text x="26" y="30" text-anchor="middle" fill="#00ff88" font-size="11" font-family="Orbitron,sans-serif" font-weight="700">72%</text>
+        </svg>
+        <div class="gl">AKTIVITET</div>
       </div>
-      <div>
-        <p style="color:rgba(0,255,136,.7);margin-bottom:16px">
-          Velkommen! Dag 47 av ditt nye livet. Du gjør det bra. 💚
-        </p>
-        <div class="event" style="border-left:3px solid var(--acc)">
-          <div class="event-title">🎯 I dag: Trening + 8 timer søvn</div>
-          <div class="event-time">Målsetting for optimal helse</div>
-        </div>
-        <div class="event">
-          <div class="event-title">💬 MONIR Tip</div>
-          <div class="event-time">"Du ser ut til å ha høy energi i dag. Perfekt dag for å teste noe nytt!"</div>
-        </div>
+      <div class="gauge-wrap">
+        <svg width="52" height="52" viewBox="0 0 52 52">
+          <circle cx="26" cy="26" r="21" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3" transform="rotate(-90 26 26)" stroke-dasharray="100 132"/>
+          <circle cx="26" cy="26" r="21" fill="none" id="g-sleep" stroke="#aa00ff" stroke-width="3" stroke-linecap="round" transform="rotate(-90 26 26)" stroke-dasharray="65 132"/>
+          <text x="26" y="30" text-anchor="middle" id="g-sleep-t" fill="#aa00ff" font-size="11" font-family="Orbitron,sans-serif" font-weight="700">6h</text>
+        </svg>
+        <div class="gl">SØVN</div>
       </div>
-    </div>
-
-    <!-- PROFILE -->
-    <div id="page-profile" class="page">
-      <div class="header">
-        <div class="title">👤 DIN PROFIL</div>
+      <div class="gauge-wrap">
+        <svg width="52" height="52" viewBox="0 0 52 52">
+          <circle cx="26" cy="26" r="21" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3" transform="rotate(-90 26 26)" stroke-dasharray="100 132"/>
+          <circle cx="26" cy="26" r="21" fill="none" stroke="#00d4ff" stroke-width="3" stroke-linecap="round" transform="rotate(-90 26 26)" stroke-dasharray="85 132"/>
+          <text x="26" y="30" text-anchor="middle" fill="#00d4ff" font-size="11" font-family="Orbitron,sans-serif" font-weight="700">85%</text>
+        </svg>
+        <div class="gl">FOKUS</div>
       </div>
-      <div class="profile-card">
-        <div class="profile-label">Navn</div>
-        <div class="profile-value" id="profile-name">Sebastian</div>
-        <div class="profile-label">Bio</div>
-        <textarea id="profile-bio" placeholder="Skriv om deg...">En praktisk, ambisiøs person</textarea>
-        <button class="btn-send" style="width:100%;margin-top:8px" onclick="updateProfile()">Lagre</button>
-      </div>
-      <div class="profile-card">
-        <div class="profile-label">Mål for året</div>
-        <textarea id="profile-goals" placeholder="Hva vil du oppnå?">Bedre helse, mer produktivitet, meningsfulle relasjoner</textarea>
-        <button class="btn-send" style="width:100%;margin-top:8px" onclick="updateProfile()">Lagre</button>
-      </div>
-    </div>
-
-    <!-- CALENDAR -->
-    <div id="page-calendar" class="page">
-      <div class="header">
-        <div class="title">📅 KALENDER</div>
-      </div>
-      <div class="calendar" id="calendar-grid"></div>
-      <div style="margin-top:20px">
-        <div class="profile-label">Kommende hendelser</div>
-        <div id="upcoming-events"></div>
-      </div>
-    </div>
-
-    <!-- LIFESTYLE -->
-    <div id="page-lifestyle" class="page">
-      <div class="header">
-        <div class="title">💪 LIVSSTIL & VANER</div>
-      </div>
-      <div class="profile-card">
-        <div class="profile-label">Log i dag</div>
-        <div class="input-row">
-          <input type="number" id="sleep" placeholder="Timer søvn" step="0.5" min="0" max="12"/>
-          <input type="number" id="exercise" placeholder="Trening (min)" min="0"/>
-        </div>
-        <div class="input-row">
-          <input type="number" id="water" placeholder="Vann (glas)" min="0"/>
-          <input type="number" id="mood" placeholder="Humør (1-10)" min="1" max="10"/>
-        </div>
-        <button class="btn-send" style="width:100%;margin-top:8px" onclick="logLifestyle()">Logg</button>
-      </div>
-      <div class="profile-card">
-        <div class="profile-label">Dine vaner</div>
-        <div id="habits-list"></div>
-      </div>
-    </div>
-
-    <!-- CHAT -->
-    <div id="page-chat" class="page">
-      <div class="header">
-        <div class="title">💬 MONIR — DIN AI</div>
-      </div>
-      <div id="messages"></div>
-      <div class="input-area">
-        <input type="text" id="chat-input" placeholder="Snakk med MONIR..." onkeydown="handleKey(event)"/>
-        <button class="btn-send" onclick="sendMessage()">▶</button>
+      <div class="gauge-wrap">
+        <svg width="52" height="52" viewBox="0 0 52 52">
+          <circle cx="26" cy="26" r="21" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3" transform="rotate(-90 26 26)" stroke-dasharray="100 132"/>
+          <circle cx="26" cy="26" r="21" fill="none" id="g-health" stroke="#ff0066" stroke-width="3" stroke-linecap="round" transform="rotate(-90 26 26)" stroke-dasharray="70 132"/>
+          <text x="26" y="30" text-anchor="middle" id="g-health-t" fill="#ff0066" font-size="11" font-family="Orbitron,sans-serif" font-weight="700">70%</text>
+        </svg>
+        <div class="gl">HELSE</div>
       </div>
     </div>
   </div>
+  <div class="panel fb" style="flex:1;overflow-y:auto">
+    <div class="ptop"></div>
+    <div class="ptitle">// vaner — klikk for å markere</div>
+    <div id="habits"></div>
+  </div>
+</div>
+
+<!-- CENTER -->
+<div id="col-c">
+  <div class="ring dot" style="width:190px;height:190px;animation-duration:16s;color:#00ff88"></div>
+  <div class="ring dot" style="width:260px;height:260px;animation-duration:27s;animation-direction:reverse;color:#00d4ff"></div>
+  <div class="ring" style="width:340px;height:340px;animation-duration:45s;opacity:0.3"></div>
+
+  <div id="fig-area">
+    <div id="fig-wrap">
+      <div class="fig-anno r" style="top:4px;animation-delay:-1s">HUMØR: <b id="an-mood" style="color:#fff">9/10</b></div>
+      <div class="fig-anno l" style="top:44px;animation-delay:-0.5s">HRV: <b style="color:#fff">68ms</b></div>
+      <div class="fig-anno r" style="top:84px;animation-delay:-2s">FOKUS: <b style="color:#fff">HIGH</b></div>
+      <div class="fig-anno l" style="top:128px;animation-delay:-1.5s">TRENING: <b id="an-ex" style="color:#fff">45min</b></div>
+      <svg width="140" height="255" viewBox="0 0 140 255" filter="drop-shadow(0 0 10px rgba(0,255,136,0.6))">
+        <circle cx="70" cy="40" r="30" fill="none" stroke="rgba(0,255,136,0.08)" stroke-width="7"/>
+        <circle cx="70" cy="40" r="22" fill="rgba(0,255,136,0.04)" stroke="#00ff88" stroke-width="2.5"/>
+        <circle cx="62" cy="37" r="2.5" fill="rgba(0,255,136,0.2)" stroke="#00ff88" stroke-width="1.5"><animate attributeName="r" values="2.5;2.5;2.5;0.8;2.5" dur="5s" repeatCount="indefinite"/></circle>
+        <circle cx="78" cy="37" r="2.5" fill="rgba(0,255,136,0.2)" stroke="#00ff88" stroke-width="1.5"><animate attributeName="r" values="2.5;2.5;2.5;0.8;2.5" dur="5s" repeatCount="indefinite"/></circle>
+        <circle cx="62" cy="37" r="1" fill="#00ff88"/><circle cx="78" cy="37" r="1" fill="#00ff88"/>
+        <path d="M64 46 Q70 51 76 46" fill="none" stroke="rgba(0,255,136,0.4)" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="70" y1="62" x2="70" y2="68" stroke="#00ff88" stroke-width="2.5"/>
+        <line x1="70" y1="68" x2="70" y2="150" stroke="#00ff88" stroke-width="2.5"/>
+        <line x1="55" y1="100" x2="85" y2="100" stroke="rgba(0,255,136,0.15)" stroke-width="1" stroke-dasharray="2 3"/>
+        <line x1="70" y1="86" x2="32" y2="115" stroke="#00ff88" stroke-width="2.5" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" values="0 70 86;-16 70 86;0 70 86" dur="2.8s" repeatCount="indefinite" calcMode="spline" keySplines="0.5 0 0.5 1;0.5 0 0.5 1"/></line>
+        <line x1="70" y1="86" x2="108" y2="115" stroke="#00ff88" stroke-width="2.5" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" values="0 70 86;16 70 86;0 70 86" dur="2.8s" repeatCount="indefinite" calcMode="spline" keySplines="0.5 0 0.5 1;0.5 0 0.5 1"/></line>
+        <line x1="70" y1="150" x2="44" y2="218" stroke="#00ff88" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="70" y1="150" x2="96" y2="218" stroke="#00ff88" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="44" y1="218" x2="31" y2="227" stroke="#00ff88" stroke-width="2" stroke-linecap="round"/>
+        <line x1="96" y1="218" x2="109" y2="227" stroke="#00ff88" stroke-width="2" stroke-linecap="round"/>
+        <line x1="35" y1="0" x2="105" y2="0" stroke="rgba(0,255,136,0.5)" stroke-width="1"><animate attributeName="y1" values="0;255;0" dur="3.5s" repeatCount="indefinite"/><animate attributeName="y2" values="0;255;0" dur="3.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0.5;0" dur="3.5s" repeatCount="indefinite"/></line>
+      </svg>
+      <div class="flbl">SEB.SALIH // ONLINE</div>
+    </div>
+  </div>
+
+  <div id="qa-grid">
+    <button class="qa" onclick="openLog('sleep')"><span class="qa-icon">💤</span>LOG SØVN</button>
+    <button class="qa" onclick="openLog('exercise')"><span class="qa-icon">💪</span>TRENING</button>
+    <button class="qa" onclick="openLog('mood')"><span class="qa-icon">🧠</span>HUMØR</button>
+    <button class="qa primary" onclick="openAddEvent()"><span class="qa-icon">📅</span>NY EVENT</button>
+  </div>
+</div>
+
+<!-- RIGHT -->
+<div id="col-r">
+  <div class="panel fc" style="flex:1;overflow-y:auto">
+    <div class="ptop"></div>
+    <div class="ptitle">// mål 2026 — klikk for å oppdatere</div>
+    <div id="goals"></div>
+  </div>
+  <div class="panel fd">
+    <div class="ptop"></div>
+    <div class="ptitle">// i dag — klikk for å logge</div>
+    <div class="dgrid">
+      <div class="dc" onclick="openLog('sleep')"><div class="dc-edit">✎</div><div class="dv" id="dv-sl">–</div><div class="dl">TIMER SØVN</div></div>
+      <div class="dc" onclick="openLog('exercise')"><div class="dc-edit">✎</div><div class="dv" id="dv-ex" style="color:#00d4ff">–</div><div class="dl">MIN TRENING</div></div>
+      <div class="dc" onclick="openLog('mood')"><div class="dc-edit">✎</div><div class="dv" id="dv-mo" style="color:#aa00ff">–</div><div class="dl">HUMØR /10</div></div>
+      <div class="dc" onclick="openLog('water')"><div class="dc-edit">✎</div><div class="dv" id="dv-wa" style="color:#ffaa00">–</div><div class="dl">GLASS VANN</div></div>
+    </div>
+  </div>
+  <div class="panel fe">
+    <div class="ptop"></div>
+    <div class="ptitle">// kommende events</div>
+    <div id="events"></div>
+    <button class="add-event-btn" onclick="openAddEvent()">+ LEGG TIL EVENT</button>
+  </div>
+</div>
+
+<!-- CHAT -->
+<div id="chat">
+  <div id="chat-main">
+    <div id="chat-header">
+      <span style="font-size:7px;letter-spacing:3px;color:rgba(0,255,136,0.3)">MONIR.TERMINAL</span>
+      <span id="chat-status" style="font-size:7px;letter-spacing:2px;color:rgba(0,255,136,0.3)">READY</span>
+    </div>
+    <div id="cmsgs">
+      <div class="ma">Hei Sebastian. Jeg er MONIR — online og klar. Klikk på datasellene for å logge, knappene for hurtighandlinger, eller spør meg om hva som helst.</div>
+    </div>
+    <div id="prompts">
+      <div class="prompt-chip" onclick="quickSend('Hva bør jeg fokusere på i dag?')">FOKUS I DAG</div>
+      <div class="prompt-chip" onclick="quickSend('Analyser mine vaner og gi konkrete råd')">ANALYSER VANER</div>
+      <div class="prompt-chip" onclick="quickSend('Hjelp meg med BMW-diagnose')">BMW HJELP</div>
+      <div class="prompt-chip" onclick="quickSend('Oppsummer uken min og gi motivasjon')">UKE RAPPORT</div>
+      <div class="prompt-chip" onclick="quickSend('Hva er status på OBDAI og Autovers?')">PROSJEKT STATUS</div>
+    </div>
+  </div>
+  <div id="cside">
+    <div class="cinp-wrap">
+      <textarea id="cin" placeholder="Skriv til MONIR... (Enter for å sende)" rows="5"></textarea>
+    </div>
+    <button id="cbtn" onclick="send()">SEND ›› MONIR</button>
+  </div>
+</div>
 </div>
 
 <script>
-// ════════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════════
+// ══ CANVAS ══
+const cv=document.getElementById('bg'),cx=cv.getContext('2d');
+function resize(){cv.width=innerWidth;cv.height=innerHeight}
+resize();window.addEventListener('resize',resize);
+const stars=Array.from({length:200},()=>({x:Math.random(),y:Math.random(),r:Math.random()*1.3+0.2,a:Math.random()*0.4+0.1,t:Math.random()*Math.PI*2}));
+const CH='01░▒▓■●◆⊕≡∞∑Δλπβαγ//::──';
+const ptcls=Array.from({length:60},()=>({x:Math.random(),y:Math.random(),ch:CH[Math.floor(Math.random()*CH.length)],sp:0.06+Math.random()*0.18,al:Math.random()*0.1+0.02,col:['#00ff88','#00d4ff','#aa00ff','#ff0066','#ffaa00'][Math.floor(Math.random()*5)],sz:8+Math.floor(Math.random()*7)}));
+let fr=0;
+(function loop(){fr++;const W=cv.width,H=cv.height,now=fr/60;cx.fillStyle='rgba(2,10,20,0.15)';cx.fillRect(0,0,W,H);stars.forEach(s=>{const a=s.a*(0.5+0.5*Math.sin(now*0.3+s.t));cx.fillStyle=`rgba(180,210,255,${a})`;cx.beginPath();cx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);cx.fill()});ptcls.forEach(p=>{cx.globalAlpha=p.al;cx.fillStyle=p.col;cx.font=p.sz+'px monospace';cx.fillText(p.ch,p.x*W,p.y*H);p.y-=p.sp/H;if(p.y<-0.02){p.y=1.02;p.x=Math.random();p.ch=CH[Math.floor(Math.random()*CH.length)]}});cx.globalAlpha=1;requestAnimationFrame(loop)})();
 
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    document.getElementById('boot').classList.add('hidden');
-  }, 5000);
+// ══ FLOATING STRINGS ══
+const STRS=[['OBDAI v2.3.1 // ACTIVE','#00d4ff'],['ECU_READ: 0x7E8 OK','#00d4ff'],['RPM: 4200 | TPS: 78%','#00d4ff'],['LAMBDA: 1.002 OPTIMAL','#00d4ff'],['DTC: P0000 CLEAR','#00d4ff'],['CAN BUS: 500KBPS','#00d4ff'],['BMW N54 @ 342HP TUNE','#ffaa00'],['BOOST: 1.2 BAR OK','#ffaa00'],['OIL_TEMP: 91°C NOMINAL','#ffaa00'],['MS45.1 ROM UNLOCKED','#ffaa00'],['E60 TORQUE: 420Nm','#ffaa00'],['VANOS ADJ: +4° INTAKE','#ffaa00'],['HRV: 68ms OPTIMAL','#aa00ff'],['SLEEP SCORE: 84/100','#aa00ff'],['CORTISOL: LOW AM','#aa00ff'],['VO2MAX: 48 ml/kg','#aa00ff'],['STEPS: 7.842 TODAY','#aa00ff'],['git push origin main','#00ff88'],['BUILD: SUCCESS 2.1s','#00ff88'],['claude-sonnet-4-6','#00ff88'],['API_LATENCY: 230ms','#00ff88'],['DEPLOY: v1.8.2 LIVE','#00ff88'],['Autovers MRR +12%','#ff0066'],['LEADS: 24 THIS WEEK','#ff0066'],['B2B PIPELINE: €44k','#ff0066'],['INSTACALL: 8 ACTIVE','#ff0066'],['OSLO UTC+2 // 2027','#00d4ff'],['NEURAL SYNC: ACTIVE','#aa00ff'],['TASK QUEUE: 7 ITEMS','#00ff88'],['FOCUS MODE: ON','#00ff88'],['ENERGY LEVEL: HIGH','#ffaa00']];
+function spawnStr(){const[txt,col]=STRS[Math.floor(Math.random()*STRS.length)];const el=document.createElement('div');el.className='fstr';el.textContent=txt;const dur=6+Math.random()*6;el.style.cssText='color:'+col+';left:'+(3+Math.random()*70)+'vw;bottom:'+(5+Math.random()*60)+'vh;opacity:0;transition:transform '+dur+'s linear,opacity 1.2s ease';document.body.appendChild(el);requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.opacity=(0.3+Math.random()*0.35).toFixed(2);el.style.transform='translateY(-'+(70+Math.random()*100)+'px) translateX('+((Math.random()-.5)*40)+'px)';setTimeout(()=>{el.style.opacity='0';setTimeout(()=>el.remove(),2000)},(dur-2)*1000)}));setTimeout(spawnStr,800+Math.random()*1500)}
+setTimeout(spawnStr,500);
 
-  loadUser();
-  loadCalendar();
-  animateStickFigure();
-  setInterval(animateStickFigure, 3000);
-});
+// ══ CLOCK ══
+(function tick(){const n=new Date();const t=[n.getHours(),n.getMinutes(),n.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':');document.getElementById('clk').textContent=t;document.getElementById('hdate').textContent=n.toLocaleDateString('no-NO',{weekday:'short',day:'numeric',month:'short'}).toUpperCase();setTimeout(tick,1000)})();
 
-// ════════════════════════════════════════════════
-// API CALLS
-// ════════════════════════════════════════════════
+// ══ TOAST ══
+function toast(msg,col='#00ff88'){const el=document.createElement('div');el.className='toast-item';el.style.borderColor=col;el.style.color=col;el.textContent=msg;document.getElementById('toast').appendChild(el);setTimeout(()=>el.remove(),3000)}
 
-async function loadUser() {
-  const res = await fetch('/api/user');
-  const user = await res.json();
-  document.getElementById('user-name').textContent = user.name;
-  document.getElementById('profile-name').textContent = user.name;
-  document.getElementById('avatar').textContent = user.name[0];
+// ══ STATIC DATA ══
+const GOALS=[{id:1,t:'OBDAI Production Release',p:45,c:'#00d4ff'},{id:2,t:'Autovers 50k Revenue',p:30,c:'#ff0066'},{id:3,t:'BMW MS45.1 Tuning Suite',p:60,c:'#ffaa00'},{id:4,t:'Health Baseline',p:20,c:'#aa00ff'},{id:5,t:'AutoSvar AI Launch',p:25,c:'#00d4ff'},{id:6,t:'Event Portfolio Build',p:10,c:'#ff0066'}];
+const HABITS=[{n:'Morning Code Review',f:'DAGLIG',s:12,c:'#00d4ff'},{n:'BMW Diagnostics',f:'4x/UKE',s:8,c:'#ffaa00'},{n:'Workout',f:'4x/UKE',s:5,c:'#00ff88'},{n:'Event Planning',f:'3x/UKE',s:4,c:'#ff0066'},{n:'Learn AI/ML',f:'3x/UKE',s:6,c:'#aa00ff'}];
+
+let goalData=[...GOALS];
+let todayData={sleep:null,exercise:null,mood:null,water:null};
+
+function renderGoals(){
+  document.getElementById('goals').innerHTML=goalData.map(g=>`
+    <div class="gi" onclick="openGoalEdit(${g.id})">
+      <div class="gi-h"><span class="gn">${g.t}</span><span class="gp" style="color:${g.c}">${g.p}%</span></div>
+      <div class="gbar"><div class="gfill" style="width:${g.p}%;background:linear-gradient(90deg,${g.c}66,${g.c})"></div></div>
+      <div class="gi-hint">↑ klikk for å oppdatere</div>
+    </div>`).join('');
+}
+renderGoals();
+
+document.getElementById('habits').innerHTML=HABITS.map((h,i)=>`
+  <div class="hi" onclick="toggleHabit(this,${i})" id="habit-${i}">
+    <div class="hcat" style="background:${h.c}"></div>
+    <div class="hinfo"><span class="hn">${h.n}</span><span class="hf">${h.f}</span></div>
+    <span class="hs">${h.s}d 🔥</span>
+    <div class="hck" id="hck-${i}">✓</div>
+  </div>`).join('');
+
+function toggleHabit(el,i){const ck=document.getElementById('hck-'+i);const done=ck.classList.toggle('done');toast(done?'✓ '+HABITS[i].n+' fullført!':'✗ Markering fjernet','#00ff88')}
+
+function renderToday(){
+  const sl=document.getElementById('dv-sl');const ex=document.getElementById('dv-ex');const mo=document.getElementById('dv-mo');const wa=document.getElementById('dv-wa');
+  sl.textContent=todayData.sleep!=null?todayData.sleep:'–';
+  ex.textContent=todayData.exercise!=null?todayData.exercise:'–';
+  mo.textContent=todayData.mood!=null?todayData.mood:'–';
+  wa.textContent=todayData.water!=null?todayData.water:'–';
+  if(todayData.mood){const hp=todayData.mood*10;document.getElementById('g-health').setAttribute('stroke-dasharray',Math.round(hp*1.32)+' 132');document.getElementById('g-health-t').textContent=hp+'%';}
+  if(todayData.sleep){const sp=Math.round(Math.min(100,(todayData.sleep/8)*100));document.getElementById('g-sleep').setAttribute('stroke-dasharray',Math.round(sp*1.32)+' 132');document.getElementById('g-sleep-t').textContent=todayData.sleep+'h';}
+  if(todayData.exercise)document.getElementById('an-ex').textContent=todayData.exercise+'min';
+  if(todayData.mood)document.getElementById('an-mood').textContent=todayData.mood+'/10';
 }
 
-async function updateProfile() {
-  const name = document.getElementById('profile-name').textContent;
-  const bio = document.getElementById('profile-bio').value;
-  const goals = document.getElementById('profile-goals').value;
-  await fetch('/api/user/update', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({name, bio, goals})
+// ══ API DATA ══
+async function loadData(){
+  try{const r=await fetch('/api/today');if(!r.ok)return;const d=await r.json();if(d.sleep!=null)todayData.sleep=d.sleep;if(d.exercise!=null)todayData.exercise=d.exercise;if(d.mood!=null)todayData.mood=d.mood;if(d.water!=null)todayData.water=d.water;renderToday()}catch(e){}
+  try{const r=await fetch('/api/calendar?days=30');if(!r.ok)return;const d=await r.json();if(d.events&&d.events.length){const col={tech:'#00d4ff',automotive:'#ffaa00',business:'#ff0066',health:'#aa00ff'};document.getElementById('events').innerHTML=d.events.slice(0,4).map(e=>{const dt=new Date(e.start);const ds=dt.toLocaleDateString('no-NO',{month:'short',day:'numeric'});return`<div class="evi"><div class="eline" style="background:${col[e.category]||'#ff0066'}"></div><div><div class="etit">${e.title}</div><div class="edt">${ds}</div></div></div>`}).join('')}}catch(e){}
+}
+loadData();
+
+// ══ MODAL SYSTEM ══
+let modalCurrent={};
+function openModal(title,body,onSave){document.getElementById('modal-title').textContent=title;document.getElementById('modal-body').innerHTML=body;modalCurrent.onSave=onSave;document.getElementById('modal').classList.add('open')}
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal()})
+function saveModal(){if(modalCurrent.onSave)modalCurrent.onSave();closeModal()}
+
+function openLog(type){
+  const configs={
+    sleep:{title:'LOG SØVN',min:0,max:12,step:0.5,unit:'TIMER',val:todayData.sleep||6,key:'sleep_hours',display:'dv-sl',toastKey:'sleep'},
+    exercise:{title:'LOG TRENING',min:0,max:180,step:5,unit:'MINUTTER',val:todayData.exercise||45,key:'exercise_minutes',display:'dv-ex',toastKey:'exercise'},
+    mood:{title:'HUMØR / STEMNING',min:1,max:10,step:1,unit:'/10',val:todayData.mood||7,key:'mood_rating',display:'dv-mo',toastKey:'mood'},
+    water:{title:'VANNINNTAK',min:0,max:15,step:1,unit:'GLASS',val:todayData.water||6,key:'water_intake',display:'dv-wa',toastKey:'water'},
+  };
+  const c=configs[type];if(!c)return;
+  let cur=c.val;
+  const body=`
+    <div class="modal-big-val" id="log-display">${cur} <span>${c.unit}</span></div>
+    <input type="range" min="${c.min}" max="${c.max}" step="${c.step}" value="${cur}" id="log-slider" oninput="updateSlider(this,${c.step},'${c.unit}')">
+    <div class="range-labels"><span>${c.min}</span><span>${c.max} ${c.unit}</span></div>`;
+  openModal('// '+c.title,body,async()=>{
+    const v=parseFloat(document.getElementById('log-slider').value);
+    const today=new Date().toISOString().split('T')[0];
+    const body2={date:today,[c.key]:v};
+    try{await fetch('/api/lifestyle/log',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body2)})}catch(e){}
+    if(type==='sleep')todayData.sleep=v;
+    else if(type==='exercise')todayData.exercise=v;
+    else if(type==='mood')todayData.mood=v;
+    else if(type==='water')todayData.water=v;
+    renderToday();
+    toast('✓ '+c.title+': '+v+' '+c.unit);
+  });
+  setTimeout(()=>{const sl=document.getElementById('log-slider');if(sl)sl.oninput({target:sl})},50);
+}
+
+function updateSlider(el,step,unit){const v=parseFloat(el.value);const disp=document.getElementById('log-display');if(disp)disp.innerHTML=v+' <span>'+unit+'</span>';const pct=((v-parseFloat(el.min))/(parseFloat(el.max)-parseFloat(el.min)))*100;el.style.setProperty('--pct',pct+'%')}
+
+function openGoalEdit(id){
+  const g=goalData.find(x=>x.id===id);if(!g)return;
+  const body=`
+    <div class="modal-big-val" id="goal-display">${g.p}<span>%</span></div>
+    <input type="range" min="0" max="100" step="5" value="${g.p}" id="goal-slider" oninput="updateSlider(this,5,'%')">
+    <div class="range-labels"><span>0%</span><span>100%</span></div>
+    <div style="font-size:9px;color:rgba(0,255,136,0.4);letter-spacing:1px;margin-top:8px">${g.t}</div>`;
+  openModal('// OPPDATER MÅL',body,()=>{
+    const v=parseInt(document.getElementById('goal-slider').value);
+    g.p=v;renderGoals();
+    toast('✓ MÅL OPPDATERT: '+v+'%','#00d4ff');
+  });
+  setTimeout(()=>{const sl=document.getElementById('goal-slider');if(sl)sl.oninput({target:sl})},50);
+}
+
+function openAddEvent(){
+  const body=`
+    <label class="modal-label">TITTEL</label>
+    <input class="modal-input" id="ev-title" placeholder="Event navn...">
+    <label class="modal-label">DATO</label>
+    <input class="modal-input" id="ev-date" type="datetime-local" style="color-scheme:dark">
+    <label class="modal-label">KATEGORI</label>
+    <select class="modal-input" id="ev-cat" style="background:rgba(0,255,136,0.05)">
+      <option value="tech" style="background:#020a14">TECH</option>
+      <option value="automotive" style="background:#020a14">AUTOMOTIVE</option>
+      <option value="business" style="background:#020a14">BUSINESS</option>
+      <option value="health" style="background:#020a14">HEALTH</option>
+    </select>`;
+  openModal('// NY KALENDER EVENT',body,async()=>{
+    const title=document.getElementById('ev-title').value.trim();
+    const start=document.getElementById('ev-date').value;
+    const cat=document.getElementById('ev-cat').value;
+    if(!title||!start){toast('Fyll inn tittel og dato','#ff4466');return}
+    try{await fetch('/api/calendar/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,start_time:start,category:cat})})}catch(e){}
+    toast('✓ EVENT LAGT TIL: '+title,'#ff0066');
+    setTimeout(loadData,500);
   });
 }
 
-async function logLifestyle() {
-  const date = new Date().toISOString().split('T')[0];
-  const sleep = parseFloat(document.getElementById('sleep').value) || null;
-  const exercise = parseInt(document.getElementById('exercise').value) || null;
-  const water = parseInt(document.getElementById('water').value) || null;
-  const mood = parseInt(document.getElementById('mood').value) || null;
+// ══ CHAT ══
+let hist=[];let sending=false;
+document.getElementById('cin').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
 
-  await fetch('/api/lifestyle/log', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({date, sleep_hours: sleep, exercise_minutes: exercise, water_intake: water, mood_rating: mood})
-  });
-  alert('Logget! ✅');
-}
+function addMsg(role,text){const el=document.createElement('div');el.className=role==='user'?'mu':role==='err'?'merr':'ma';el.textContent=text;const m=document.getElementById('cmsgs');m.appendChild(el);m.scrollTop=m.scrollHeight;return el}
 
-async function loadCalendar() {
-  const res = await fetch('/api/calendar?days=30');
-  const data = await res.json();
-  const grid = document.getElementById('calendar-grid');
-  const today = new Date().getDate();
+function quickSend(msg){document.getElementById('cin').value=msg;send()}
 
-  for (let i = 1; i <= 31; i++) {
-    const d = document.createElement('div');
-    d.className = 'cal-day' + (i === today ? ' today' : '');
-    d.textContent = i;
-    grid.appendChild(d);
-  }
-
-  const events = document.getElementById('upcoming-events');
-  events.innerHTML = data.events.slice(0, 3).map(e =>
-    `<div class="event"><div class="event-title">${e.title}</div><div class="event-time">${e.start}</div></div>`
-  ).join('');
-}
-
-// ════════════════════════════════════════════════
-// STICK FIGURE ANIMATION
-// ════════════════════════════════════════════════
-
-function animateStickFigure() {
-  const hour = new Date().getHours();
-  const body = document.getElementById('body');
-  const leftArm = document.getElementById('left-arm');
-  const rightArm = document.getElementById('right-arm');
-  const leftLeg = document.getElementById('left-leg');
-  const rightLeg = document.getElementById('right-leg');
-  const status = document.getElementById('figure-status');
-  const emoji = document.getElementById('figure-emoji');
-
-  let state, st, em;
-
-  if (hour < 9) {
-    state = 'sleeping'; st = '😴 Sovner'; em = '🌙';
-    body.style.transform = 'rotate(-15deg)';
-    leftArm.style.transform = 'rotate(-30deg)';
-    rightArm.style.transform = 'rotate(30deg)';
-  } else if (hour < 12) {
-    state = 'morning'; st = '🌅 Morgenrutine'; em = '☀️';
-    leftArm.style.transform = `rotate(${Math.sin(Date.now()/500)*20}deg)`;
-    rightArm.style.transform = `rotate(${-Math.sin(Date.now()/500)*20}deg)`;
-  } else if (hour < 17) {
-    state = 'working'; st = '💼 I gang'; em = '🎯';
-    leftLeg.style.transform = `rotate(${Math.sin(Date.now()/400)*5}deg)`;
-    rightLeg.style.transform = `rotate(${-Math.sin(Date.now()/400)*5}deg)`;
-  } else if (hour < 20) {
-    state = 'exercise'; st = '💪 Trening'; em = '🔥';
-    leftArm.style.transform = `rotate(${Math.sin(Date.now()/300)*40}deg)`;
-    rightArm.style.transform = `rotate(${Math.sin(Date.now()/300)*40}deg)`;
-  } else {
-    state = 'relaxing'; st = '🌙 Kveld'; em = '✨';
-    body.style.transform = 'rotate(-5deg)';
-  }
-
-  status.textContent = st;
-  emoji.textContent = em;
-}
-
-// ════════════════════════════════════════════════
-// CHAT
-// ════════════════════════════════════════════════
-
-let chatHistory = [];
-
-function handleKey(e) {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    sendMessage();
-  }
-}
-
-async function sendMessage() {
-  const input = document.getElementById('chat-input');
-  const msg = input.value.trim();
-  if (!msg) return;
-
-  input.value = '';
-  appendMsg(msg, 'user');
-
-  const res = await fetch('/api/chat', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({message: msg, history: chatHistory})
-  });
-
-  const reader = res.body.getReader();
-  const dec = new TextDecoder();
-  let aiText = '';
-  let aiEl = null;
-
-  while (true) {
-    const {done, value} = await reader.read();
-    if (done) break;
-    const lines = dec.decode(value).split('\n');
-    for (const line of lines) {
-      if (!line.startsWith('data:')) continue;
-      try {
-        const ev = JSON.parse(line.slice(5));
-        if (ev.t === 'text') {
-          if (!aiEl) aiEl = appendMsg('', 'ai');
-          aiText += ev.v;
-          aiEl.textContent = aiText;
-          document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
-        }
-      } catch (_) {}
-    }
-  }
-
-  if (aiText) {
-    chatHistory.push({role: 'user', content: msg});
-    chatHistory.push({role: 'assistant', content: aiText});
-  }
-}
-
-function appendMsg(text, who) {
-  const m = document.getElementById('messages');
-  const d = document.createElement('div');
-  d.className = `msg msg-${who}`;
-  d.textContent = text;
-  m.appendChild(d);
-  return d;
-}
-
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(`page-${id}`).classList.add('active');
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
+async function send(){
+  if(sending)return;
+  const inp=document.getElementById('cin'),msg=inp.value.trim();if(!msg)return;
+  inp.value='';sending=true;
+  document.getElementById('cbtn').disabled=true;
+  document.getElementById('chat-status').textContent='TRANSMITTING...';
+  addMsg('user',msg);
+  const aiEl=addMsg('ai','');aiEl.classList.add('typing');
+  let full='';
+  try{
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,history:hist})});
+    aiEl.classList.remove('typing');
+    if(!res.ok){const err=await res.json().catch(()=>({error:'HTTP '+res.status}));aiEl.className='merr';aiEl.textContent=err.error+(res.status===400&&(err.error||'').includes('ANTHROPIC')?' — Sjekk .env filen':'');document.getElementById('chat-status').textContent='ERROR';return}
+    const reader=res.body.getReader(),dec=new TextDecoder();
+    while(true){const{done,value}=await reader.read();if(done)break;for(const line of dec.decode(value).split('\n')){if(!line.startsWith('data: '))continue;try{const d=JSON.parse(line.slice(6));if(d.t==='text'){full+=d.v;aiEl.textContent=full;document.getElementById('cmsgs').scrollTop=9999}}catch{}}}
+    hist.push({role:'user',content:msg},{role:'assistant',content:full});if(hist.length>20)hist=hist.slice(-20);
+    document.getElementById('chat-status').textContent='READY';
+  }catch(e){aiEl.classList.remove('typing');aiEl.className='merr';aiEl.textContent='TILKOBLING FEILET — er python3 app.py kjørende?';document.getElementById('chat-status').textContent='OFFLINE'}
+  finally{sending=false;document.getElementById('cbtn').disabled=false}
 }
 </script>
 </body>
