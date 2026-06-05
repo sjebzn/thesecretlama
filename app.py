@@ -29,7 +29,6 @@ def init_db():
         cursor.executescript(f.read())
     conn.commit()
 
-    # Default user hvis ikke eksisterer
     cursor.execute("SELECT COUNT(*) FROM users")
     if cursor.fetchone()[0] == 0:
         cursor.execute(
@@ -184,76 +183,41 @@ async def chat(body: ChatBody):
     db = get_db()
     cursor = db.cursor()
 
-    # ════ LOAD SEBASTIAN'S COMPLETE CONTEXT ════
     cursor.execute("SELECT name, bio, goals FROM users LIMIT 1")
     user = cursor.fetchone()
 
-    # Load recent goals + progress
     cursor.execute("SELECT title, progress, status FROM goals WHERE status = 'active' LIMIT 5")
     goals = cursor.fetchall()
 
-    # Load recent habits
     cursor.execute("SELECT name, streak, category FROM habits LIMIT 5")
     habits = cursor.fetchall()
 
-    # Load today's lifestyle data
     today = datetime.now().strftime("%Y-%m-%d")
     cursor.execute("SELECT sleep_hours, exercise_minutes, mood_rating, energy_rating FROM lifestyle_data WHERE date = ?", (today,))
     today_data = cursor.fetchone()
 
-    # Load upcoming events
     cursor.execute("SELECT title, start_time, category FROM calendar_events WHERE date(start_time) >= date('now') LIMIT 3")
     upcoming = cursor.fetchall()
 
     db.close()
 
-    # ════ INTELLIGENT SYSTEM PROMPT ════
-    goals_text = "\n".join([f"• {g[0]} ({int(g[1])}% progress)" for g in goals]) if goals else "Ennå ingen mål satt"
-    habits_text = "\n".join([f"• {h[0]} ({h[1]} dagers streak)" for h in habits]) if habits else "Ennå ingen vaner"
-    upcoming_text = "\n".join([f"• {e[0]} ({e[2]})" for e in upcoming]) if upcoming else "Ingen kommende events"
+    goals_text = "\n".join([f"• {g[0]} ({int(g[1])}% progress)" for g in goals]) if goals else "Ingen mål"
+    habits_text = "\n".join([f"• {h[0]} ({h[1]} dager)" for h in habits]) if habits else "Ingen vaner"
+    upcoming_text = "\n".join([f"• {e[0]}" for e in upcoming]) if upcoming else "Ingen events"
 
     if today_data:
-        today_str = f"""• Søvn: {today_data[0] or '?'} timer
-• Trening: {today_data[1] or '?'} minutter
-• Humør: {today_data[2] or '?'}/10
-• Energi: {today_data[3] or '?'}%"""
+        today_str = f"Søvn: {today_data[0]}h, Trening: {today_data[1]}min, Humør: {today_data[2]}/10"
     else:
-        today_str = "Ennå ingen data logget i dag"
+        today_str = "Ingen data"
 
-    system = f"""Du er MONIR, {user[0]}s personlige AI-livsassistent fra 2027.
-Du kjenner ham dypt og lærer stadig mer. Du er hans beste mentor, venn, og coach.
-
-📋 OM {user[0].upper()}:
-{user[1]}
-
-🎯 HANS AKTIVE MÅL:
-{goals_text}
-
-💪 HANS KJERNEHVANER:
-{habits_text}
-
-📊 I DAG:
-{today_str}
-
-📅 KOMMENDE:
-{upcoming_text}
-
-🧠 DU GJØR:
-1. Husker ALLEM om ham (alle data)
-2. Gir proaktive, konkrete råd basert på hans profil
-3. Motiverer han mot hans spesifikke mål (BMW, OBDAI, events, helse)
-4. Spørrer oppfølgingsspørsmål
-5. Viser genuine omsorg og interesse
-6. Lærer av hver samtale
-7. Gir actionable tips, ikke bare ord
-
-🔥 HUSKAML hans fokusområder:
-- Tech: OBDAI, AutoSvar AI, Instacall, WebDesign
-- Automotive: BMW E60, MS45.1, ECU-tuning, diagnostikk
-- Business: Autovers.no, Arrangementer/events, Konsultasjon
-- Health: 6h søvn, 4x trening, ernæring
-
-Alltid på NORSK. Vær ekte, personlig, intelligent. Kort & klar. Gi konkrete tips."""
+    system = "Du er MONIR, Sebastians personlige AI-assistent fra 2027. Du kjenner ham dypt.\n\n"
+    system += f"SEBASTIAN:\n{user[1]}\n\n"
+    system += f"HANS MÅL:\n{goals_text}\n\n"
+    system += f"HANS VANER:\n{habits_text}\n\n"
+    system += f"I DAG: {today_str}\n\n"
+    system += f"KOMMENDE: {upcoming_text}\n\n"
+    system += "DU: Gir proaktive råd, motiverer, husker alt, lytter, hjemper. Fokus: BMW, OBDAI, Autovers, helse, events.\n"
+    system += "Alltid norsk. Vær ekte og konkret."
 
     messages = body.history + [{"role": "user", "content": body.message}]
 
@@ -271,7 +235,7 @@ Alltid på NORSK. Vær ekte, personlig, intelligent. Kort & klar. Gi konkrete ti
 
     return StreamingResponse(stream(), media_type="text/event-stream")
 
-@app.mount("/", StaticFiles(directory="static", html=True), name="static")
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
