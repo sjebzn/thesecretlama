@@ -212,10 +212,13 @@ async def chat(body: ChatBody):
     habits_text = "\n".join([f"• {h[0]} ({h[1]} dagers streak)" for h in habits]) if habits else "Ennå ingen vaner"
     upcoming_text = "\n".join([f"• {e[0]} ({e[2]})" for e in upcoming]) if upcoming else "Ingen kommende events"
 
-    today_str = f"""• Søvn: {today_data[0] or '?'} timer
+    if today_data:
+        today_str = f"""• Søvn: {today_data[0] or '?'} timer
 • Trening: {today_data[1] or '?'} minutter
 • Humør: {today_data[2] or '?'}/10
-• Energi: {today_data[3] or '?'}%""" if today_data else "Ennå ingen data logget i dag"
+• Energi: {today_data[3] or '?'}%"""
+    else:
+        today_str = "Ennå ingen data logget i dag"
 
     system = f"""Du er MONIR, {user[0]}s personlige AI-livsassistent fra 2027.
 Du kjenner ham dypt og lærer stadig mer. Du er hans beste mentor, venn, og coach.
