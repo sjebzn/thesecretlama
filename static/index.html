@@ -2,257 +2,185 @@
 <html lang="no">
 <head>
 <meta charset="UTF-8">
-<title>MONIR // 2027</title>
+<title>MONIR // 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
+:root{--c:#00ff88;--c2:#00d4ff;--cl:#ffaa00}
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden;background:#020a14;color:#00ff88;font-family:'Share Tech Mono',monospace}
+html,body{width:100%;height:100%;overflow:hidden;background:#020a14;color:var(--c);font-family:'Share Tech Mono',monospace}
 #bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
 .hexgrid{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg width='56' height='48' viewBox='0 0 56 48' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M28 2l26 15v14L28 46 2 31V17L28 2z' fill='none' stroke='rgba(0,255,136,0.04)' stroke-width='1'/%3E%3C/svg%3E")}
 .scanlines{position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.05) 2px,rgba(0,0,0,0.05) 4px);pointer-events:none;z-index:998}
 .vignette{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,0.65) 100%);pointer-events:none;z-index:0}
 
-#app{position:fixed;top:0;left:0;width:100%;height:100%;z-index:2;display:grid;grid-template-rows:44px 1fr 210px;grid-template-columns:255px 1fr 270px;gap:7px;padding:9px}
+/* ── BOOT ── */
+#boot{position:fixed;top:0;left:0;width:100%;height:100%;background:#020a14;z-index:999;display:flex;align-items:center;justify-content:center;transition:opacity .8s ease}
+#boot.hidden{opacity:0;pointer-events:none}
+.tech-text{font-family:'Orbitron',sans-serif;font-size:13px;letter-spacing:4px;color:var(--c);opacity:0;animation:boot-in .5s ease forwards;margin:6px 0}
+.tech-text:nth-child(2){animation-delay:.6s}
+.tech-text:nth-child(3){animation-delay:1.2s}
+@keyframes boot-in{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
 
-/* HEADER */
-header{grid-column:1/-1;grid-row:1;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid rgba(0,255,136,0.15);background:rgba(0,10,20,0.4)}
-.htitle{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;letter-spacing:5px;animation:glitch 10s infinite}
-.htitle b{color:#00d4ff}
-@keyframes glitch{0%,87%,100%{clip-path:none;transform:none;color:#00ff88}88%{clip-path:inset(20% 0 50% 0);transform:translateX(-4px);color:#ff0066}89%{clip-path:none;transform:none}90%{clip-path:inset(60% 0 10% 0);transform:translateX(4px);color:#00d4ff}91%{clip-path:none;transform:none;color:#00ff88}}
-.hmid{display:flex;align-items:center;gap:12px;font-size:9px;letter-spacing:2px;color:rgba(0,255,136,0.35)}
-.hclk{font-family:'Orbitron',sans-serif;font-size:14px;color:#00d4ff;letter-spacing:3px}
-.odot{width:5px;height:5px;border-radius:50%;background:#00ff88;box-shadow:0 0 6px #00ff88;animation:od 2s ease-in-out infinite;flex-shrink:0}
-@keyframes od{0%,100%{opacity:1}50%{opacity:0.15}}
-.pill{padding:2px 8px;border:1px solid currentColor;font-size:8px;letter-spacing:1px}
-.pill.on{color:#00ff88}
-.pill.warn{color:#ff4466}
+/* ── LAYOUT ── */
+#app{position:fixed;top:0;left:0;width:100%;height:100%;z-index:2;display:grid;grid-template-columns:220px 1fr;grid-template-rows:1fr;gap:0}
 
-/* PANELS */
-.panel{background:rgba(0,12,24,0.85);border:1px solid rgba(0,255,136,0.15);position:relative;overflow:hidden;padding:11px 12px;backdrop-filter:blur(20px)}
-.panel::before,.panel::after{content:'';position:absolute;width:10px;height:10px;border-color:rgba(0,255,136,0.4);border-style:solid}
-.panel::before{top:-1px;left:-1px;border-width:1px 0 0 1px}
-.panel::after{bottom:-1px;right:-1px;border-width:0 1px 1px 0}
-.ptop{position:absolute;top:0;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,136,0.4),transparent)}
-.ptitle{font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:3px;color:rgba(0,255,136,0.3);margin-bottom:9px;margin-top:2px}
+/* ── SIDEBAR ── */
+#sidebar{display:flex;flex-direction:column;gap:0;background:rgba(0,8,18,0.95);border-right:1px solid rgba(0,255,136,0.12);padding:16px 12px;overflow-y:auto}
+#sidebar::-webkit-scrollbar{width:2px}
+#sidebar::-webkit-scrollbar-thumb{background:rgba(0,255,136,0.15)}
+.avatar{width:52px;height:52px;border-radius:50%;border:2px solid var(--c);background:radial-gradient(circle,rgba(0,255,136,0.2),rgba(0,10,30,0.9));display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 8px;animation:pav 3.5s ease-in-out infinite}
+@keyframes pav{0%,100%{box-shadow:0 0 0 2px rgba(0,255,136,0.1),0 0 18px rgba(0,255,136,0.3)}50%{box-shadow:0 0 0 4px rgba(0,255,136,0.2),0 0 36px rgba(0,255,136,0.5)}}
+.name{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;text-align:center;letter-spacing:2px;margin-bottom:3px}
+.status{font-size:7px;color:rgba(0,212,255,0.5);text-align:center;letter-spacing:1px;margin-bottom:14px}
+.stat{margin-bottom:8px}
+.stat-label{font-size:7px;letter-spacing:1px;color:rgba(255,255,255,0.3);display:block;margin-bottom:3px}
+.stat-bar{height:2px;background:rgba(255,255,255,0.06);border-radius:1px;overflow:hidden}
+.stat-fill{height:100%;background:linear-gradient(90deg,var(--c),var(--c2));border-radius:1px}
+nav{display:flex;flex-direction:column;gap:4px;margin:14px 0}
+.nav-btn{background:transparent;border:1px solid rgba(0,255,136,0.1);color:rgba(0,255,136,0.45);font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;padding:9px 10px;text-align:left;cursor:pointer;transition:all .2s}
+.nav-btn:hover{background:rgba(0,255,136,0.06);border-color:rgba(0,255,136,0.3);color:var(--c)}
+.nav-btn.active{background:rgba(0,255,136,0.08);border-color:rgba(0,255,136,0.35);color:var(--c)}
+.nav-btn.legal-nav{border-color:rgba(255,170,0,0.15);color:rgba(255,170,0,0.45)}
+.nav-btn.legal-nav:hover,.nav-btn.legal-nav.active{background:rgba(255,170,0,0.08);border-color:rgba(255,170,0,0.4);color:var(--cl)}
+.sidebar-footer{font-size:7px;color:rgba(0,255,136,0.3);text-align:center;margin-top:auto;padding-top:14px;letter-spacing:1px;line-height:1.6;border-top:1px solid rgba(0,255,136,0.08)}
 
-@keyframes fa{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-@keyframes fb{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-@keyframes fc{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-@keyframes fd{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-@keyframes fe{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.fa{animation:fa 5s ease-in-out infinite}.fb{animation:fb 6.5s ease-in-out infinite;animation-delay:-2s}.fc{animation:fc 4.5s ease-in-out infinite;animation-delay:-1s}.fd{animation:fd 7s ease-in-out infinite;animation-delay:-3s}.fe{animation:fe 5.5s ease-in-out infinite;animation-delay:-1.5s}
+/* ── CONTENT AREA ── */
+#content{display:flex;flex-direction:column;overflow:hidden;position:relative}
 
-/* LEFT */
-#col-l{grid-column:1;grid-row:2;display:flex;flex-direction:column;gap:7px}
-.uavt{width:50px;height:50px;border-radius:50%;border:2px solid #00ff88;background:radial-gradient(circle,rgba(0,255,136,0.2),rgba(0,10,30,0.9));display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:20px;font-weight:700;margin:0 auto 7px;animation:pav 3.5s ease-in-out infinite}
-@keyframes pav{0%,100%{box-shadow:0 0 0 2px rgba(0,255,136,0.1),0 0 18px rgba(0,255,136,0.3)}50%{box-shadow:0 0 0 4px rgba(0,255,136,0.2),0 0 36px rgba(0,255,136,0.5),0 0 60px rgba(0,212,255,0.15)}}
-.uname{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;text-align:center;letter-spacing:2px;margin-bottom:2px}
-.utags{font-size:7px;color:rgba(0,212,255,0.5);text-align:center;letter-spacing:1px;margin-bottom:10px;line-height:1.6}
-.gauges{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px}
-.gauge-wrap{text-align:center}
-.gl{font-size:7px;letter-spacing:1px;color:rgba(255,255,255,0.3);margin-top:2px}
+/* ── HEADER BAR ── */
+#topbar{display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:44px;border-bottom:1px solid rgba(0,255,136,0.12);background:rgba(0,5,12,0.6);flex-shrink:0}
+.htitle{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:900;letter-spacing:5px;animation:glitch 10s infinite}
+@keyframes glitch{0%,87%,100%{clip-path:none;transform:none;color:var(--c)}88%{clip-path:inset(20% 0 50% 0);transform:translateX(-4px);color:#ff0066}89%{clip-path:none;transform:none}90%{clip-path:inset(60% 0 10% 0);transform:translateX(4px);color:var(--c2)}91%{clip-path:none;transform:none}}
+.hclk{font-family:'Orbitron',sans-serif;font-size:13px;color:var(--c2);letter-spacing:3px}
+.odot{width:5px;height:5px;border-radius:50%;background:var(--c);box-shadow:0 0 6px var(--c);animation:od 2s ease-in-out infinite}
+@keyframes od{0%,100%{opacity:1}50%{opacity:.15}}
 
-/* habits */
-.hi{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:background 0.2s;border-radius:2px;padding-left:2px}
-.hi:last-child{border-bottom:none}
-.hi:hover{background:rgba(0,255,136,0.04)}
-.hcat{width:3px;height:26px;border-radius:1px;flex-shrink:0}
-.hinfo{flex:1;min-width:0}
-.hn{font-size:9px;color:rgba(255,255,255,0.7);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hf{font-size:7px;color:rgba(255,255,255,0.25);letter-spacing:1px;margin-top:1px}
-.hck{width:16px;height:16px;border:1px solid rgba(255,255,255,0.2);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;transition:all 0.2s}
-.hck.done{border-color:#00ff88;background:rgba(0,255,136,0.15);color:#00ff88}
-.hs{font-size:8px;color:#ffaa00;white-space:nowrap;margin-right:4px}
+/* ── PAGES ── */
+.page{display:none;flex:1;flex-direction:column;overflow:hidden;padding:0}
+.page.active{display:flex}
+.page-header{padding:14px 16px 10px;border-bottom:1px solid rgba(0,255,136,0.08);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.page-title{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:3px;color:var(--c)}
+.page-body{flex:1;overflow-y:auto;padding:14px 16px}
+.page-body::-webkit-scrollbar{width:2px}
+.page-body::-webkit-scrollbar-thumb{background:rgba(0,255,136,0.15)}
+.card{background:rgba(0,12,26,0.7);border:1px solid rgba(0,255,136,0.12);padding:14px;margin-bottom:10px;position:relative}
+.card::before,.card::after{content:'';position:absolute;width:8px;height:8px;border-color:rgba(0,255,136,0.35);border-style:solid}
+.card::before{top:-1px;left:-1px;border-width:1px 0 0 1px}
+.card::after{bottom:-1px;right:-1px;border-width:0 1px 1px 0}
+.card-label{font-size:7px;letter-spacing:2px;color:rgba(0,255,136,0.3);margin-bottom:8px}
+.card-val{font-family:'Orbitron',sans-serif;font-size:22px;color:var(--c)}
 
-/* CENTER */
-#col-c{grid-column:2;grid-row:2;display:flex;flex-direction:column;align-items:center;justify-content:space-between;position:relative;padding:8px 0}
-.ring{position:absolute;border-radius:50%;border:1px solid rgba(0,255,136,0.06);animation:spin linear infinite}
-.ring.dot::after{content:'';position:absolute;border-radius:50%;box-shadow:0 0 10px currentColor;top:-3px;left:50%;transform:translateX(-50%)}
-@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-#fig-area{position:relative;display:flex;flex-direction:column;align-items:center;flex:1;justify-content:center}
-#fig-wrap{animation:breathe 4s ease-in-out infinite;position:relative;z-index:5}
-@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.015)}}
-.fig-anno{position:absolute;font-size:8px;letter-spacing:1px;white-space:nowrap;z-index:6;pointer-events:none;animation:fa 4s ease-in-out infinite;color:rgba(0,212,255,0.7)}
-.fig-anno.r{right:-95px;text-align:left}
-.fig-anno.r::before{content:'── ';opacity:0.4}
-.fig-anno.l{left:-95px;text-align:right}
-.fig-anno.l::after{content:' ──';opacity:0.4}
-.flbl{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:5px;color:rgba(0,255,136,0.2);margin-top:6px}
+/* ── CHAT PAGE ── */
+#page-chat{background:rgba(0,4,10,0.85)}
+#chat-header{padding:7px 14px;border-bottom:1px solid rgba(0,255,136,0.08);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;gap:6px}
+.chat-mode-btn{padding:5px 10px;border:1px solid rgba(0,255,136,0.25);background:rgba(0,255,136,0.05);color:rgba(0,255,136,0.55);font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1px;cursor:pointer;transition:all .2s}
+.chat-mode-btn:hover{background:rgba(0,255,136,0.12);border-color:var(--c);color:var(--c)}
+.chat-mode-btn.active{background:rgba(0,255,136,0.12);border-color:var(--c);color:var(--c)}
+.legal-btn{border-color:rgba(255,170,0,0.25);color:rgba(255,170,0,0.55);background:rgba(255,170,0,0.04)}
+.legal-btn:hover,.legal-btn.active{background:rgba(255,170,0,0.12);border-color:var(--cl);color:var(--cl);box-shadow:0 0 10px rgba(255,170,0,0.15)}
 
-/* QUICK ACTIONS */
-#qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%;padding:0 10px 4px}
-.qa{background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.2);padding:10px 6px;text-align:center;cursor:pointer;transition:all 0.2s;font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:1px;color:rgba(0,255,136,0.7);position:relative;overflow:hidden}
-.qa::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,255,136,0.06),transparent);transition:left 0.4s}
-.qa:hover{background:rgba(0,255,136,0.12);border-color:rgba(0,255,136,0.5);color:#00ff88;box-shadow:0 0 12px rgba(0,255,136,0.15)}
-.qa:hover::before{left:100%}
-.qa:active{transform:scale(0.97)}
-.qa-icon{display:block;font-size:18px;margin-bottom:4px}
-.qa.primary{border-color:rgba(0,212,255,0.4);color:rgba(0,212,255,0.8);background:rgba(0,212,255,0.05)}
-.qa.primary:hover{background:rgba(0,212,255,0.12);border-color:#00d4ff;color:#00d4ff;box-shadow:0 0 12px rgba(0,212,255,0.2)}
+/* banners */
+.chat-banner{display:none;padding:6px 14px;font-size:7px;letter-spacing:1px;justify-content:space-between;align-items:center;flex-shrink:0}
+.chat-banner.active{display:flex}
+#onb-banner{background:rgba(255,136,0,0.06);border-bottom:1px solid rgba(255,136,0,0.2);color:rgba(255,136,0,0.65)}
+#legal-banner{background:rgba(255,170,0,0.05);border-bottom:1px solid rgba(255,170,0,0.2);color:rgba(255,170,0,0.7)}
+.banner-exit{cursor:pointer;padding:2px 8px;border:1px solid rgba(255,0,102,0.25);color:rgba(255,0,102,0.5);font-size:7px;letter-spacing:1px;transition:all .2s}
+.banner-exit:hover{border-color:#ff0066;color:#ff0066;background:rgba(255,0,102,0.07)}
 
-/* RIGHT */
-#col-r{grid-column:3;grid-row:2;display:flex;flex-direction:column;gap:7px}
-.gi{margin-bottom:8px;cursor:pointer;padding:3px;border-radius:2px;transition:background 0.2s}
-.gi:hover{background:rgba(0,255,136,0.04)}
-.gi-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
-.gn{font-size:9px;color:rgba(255,255,255,0.65);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:6px}
-.gp{font-size:9px;color:#00d4ff;font-family:'Orbitron',sans-serif}
-.gbar{height:2px;background:rgba(255,255,255,0.06);position:relative;overflow:hidden}
-.gfill{height:100%;background:linear-gradient(90deg,#0055ff,#00d4ff,#00ff88);box-shadow:0 0 6px rgba(0,212,255,0.5);transition:width 1.5s ease}
-.gbar::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent);animation:shimmer 3s linear infinite}
-@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
-.gi-hint{font-size:7px;color:rgba(0,212,255,0.3);letter-spacing:1px;text-align:right;margin-top:1px}
+/* sources row */
+#src-row{display:none;padding:5px 14px;gap:5px;flex-wrap:wrap;flex-shrink:0;border-bottom:1px solid rgba(255,170,0,0.1);align-items:center}
+#src-row.active{display:flex}
+.src-lbl{font-size:7px;letter-spacing:1px;color:rgba(255,170,0,0.4)}
+.src-chip{padding:2px 8px;border:1px solid rgba(255,170,0,0.3);font-size:7px;color:rgba(255,170,0,0.5);letter-spacing:1px}
 
-/* TODAY - clickable */
-.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
-.dc{background:rgba(0,255,136,0.03);border:1px solid rgba(0,255,136,0.1);padding:8px 6px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative}
-.dc:hover{background:rgba(0,255,136,0.08);border-color:rgba(0,255,136,0.35);box-shadow:0 0 10px rgba(0,255,136,0.1)}
-.dc:hover .dc-edit{opacity:1}
-.dc-edit{position:absolute;top:3px;right:4px;font-size:7px;color:rgba(0,255,136,0.3);opacity:0;transition:opacity 0.2s}
-.dv{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:700;line-height:1}
-.dl{font-size:7px;letter-spacing:1px;color:rgba(255,255,255,0.22);margin-top:3px}
-
-/* EVENTS */
-.evi{display:flex;gap:6px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);align-items:flex-start}
-.evi:last-child{border-bottom:none}
-.eline{width:1px;flex-shrink:0;background:rgba(255,0,102,0.4);align-self:stretch;margin-top:2px}
-.etit{flex:1;font-size:9px;color:rgba(255,255,255,0.65);line-height:1.4}
-.edt{font-size:7px;color:rgba(255,0,102,0.5);white-space:nowrap}
-.add-event-btn{width:100%;margin-top:6px;padding:5px;background:rgba(255,0,102,0.06);border:1px dashed rgba(255,0,102,0.25);color:rgba(255,0,102,0.5);font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:2px;cursor:pointer;transition:all 0.2s}
-.add-event-btn:hover{background:rgba(255,0,102,0.12);border-color:rgba(255,0,102,0.5);color:#ff0066}
-
-/* CHAT */
-#chat{grid-column:1/-1;grid-row:3;display:flex;gap:7px}
-#chat-main{flex:1;display:flex;flex-direction:column;background:rgba(0,5,12,0.8);border:1px solid rgba(0,255,136,0.12);border-top:2px solid rgba(0,255,136,0.25)}
-#chat-header{padding:4px 12px;border-bottom:1px solid rgba(0,255,136,0.08);display:flex;justify-content:space-between;align-items:center}
-#cmsgs{flex:1;overflow-y:auto;padding:6px 14px;font-size:11px;line-height:1.8}
+/* messages */
+#cmsgs{flex:1;overflow-y:auto;padding:10px 14px;font-size:11px;line-height:1.85}
 #cmsgs::-webkit-scrollbar{width:2px}
-#cmsgs::-webkit-scrollbar-thumb{background:rgba(0,255,136,0.2)}
-.mu{color:rgba(0,212,255,0.9);margin-bottom:3px}
-.mu::before{content:'YOU \203A  ';font-size:8px;color:rgba(0,212,255,0.4);letter-spacing:2px}
-.ma{color:rgba(0,255,136,0.95);margin-bottom:3px}
-.ma::before{content:'MONIR \203A  ';font-size:8px;color:rgba(0,255,136,0.4);letter-spacing:2px}
-.merr{color:#ff4466;margin-bottom:3px}
-.merr::before{content:'ERR \203A  ';font-size:8px;color:rgba(255,68,102,0.4);letter-spacing:2px}
-.typing::after{content:'▋';animation:blink 0.7s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+#cmsgs::-webkit-scrollbar-thumb{background:rgba(0,255,136,0.15)}
+.msg{margin-bottom:6px;white-space:pre-wrap;word-break:break-word}
+.msg-user{color:rgba(0,212,255,0.9)}
+.msg-user::before{content:'YOU › ';font-size:7px;color:rgba(0,212,255,0.35);letter-spacing:2px}
+.msg-ai{color:rgba(0,255,136,0.95)}
+.msg-ai::before{content:'MONIR › ';font-size:7px;color:rgba(0,255,136,0.35);letter-spacing:2px}
+.msg-legal{color:rgba(255,200,80,0.95)}
+.msg-legal::before{content:'MONIR.LEGAL › ';font-size:7px;color:rgba(255,170,0,0.4);letter-spacing:2px}
+.msg-sep{font-size:7px;color:rgba(0,255,136,0.2);text-align:center;padding:6px;border-bottom:1px solid rgba(0,255,136,0.06);margin-bottom:8px;letter-spacing:.1em}
 
-/* prompts */
-#prompts{display:flex;gap:5px;flex-wrap:wrap;padding:5px 12px;border-top:1px solid rgba(0,255,136,0.06)}
-.prompt-chip{padding:4px 10px;border:1px solid rgba(0,255,136,0.2);font-size:8px;letter-spacing:1px;color:rgba(0,255,136,0.55);cursor:pointer;transition:all 0.2s;white-space:nowrap}
-.prompt-chip:hover{border-color:rgba(0,255,136,0.5);color:#00ff88;background:rgba(0,255,136,0.07)}
+/* quick chips */
+#chips{display:flex;gap:5px;flex-wrap:wrap;padding:6px 14px;border-top:1px solid rgba(0,255,136,0.06);flex-shrink:0}
+.chip{padding:4px 10px;border:1px solid rgba(0,255,136,0.18);font-size:7px;letter-spacing:1px;color:rgba(0,255,136,0.5);cursor:pointer;transition:all .2s;white-space:nowrap}
+.chip:hover{border-color:rgba(0,255,136,0.4);color:var(--c);background:rgba(0,255,136,0.06)}
+.chip.legal-chip{border-color:rgba(255,170,0,0.2);color:rgba(255,170,0,0.45)}
+.chip.legal-chip:hover{border-color:rgba(255,170,0,0.45);color:var(--cl);background:rgba(255,170,0,0.06)}
 
-#cside{display:flex;flex-direction:column;gap:6px;width:280px}
-.cinp-wrap{flex:1;position:relative;background:rgba(0,12,26,0.9);border:1px solid rgba(0,255,136,0.2)}
-.cinp-wrap::before{content:'INPUT:\00a0';position:absolute;top:8px;left:10px;font-size:8px;color:rgba(0,255,136,0.2);letter-spacing:1px;pointer-events:none}
-#cin{width:100%;height:100%;background:transparent;border:none;padding:24px 10px 10px;color:#00ff88;font-family:'Share Tech Mono',monospace;font-size:11px;outline:none;resize:none}
+/* input area */
+.input-area{display:flex;gap:6px;padding:8px 14px;border-top:1px solid rgba(0,255,136,0.1);flex-shrink:0}
+.input-area.legal-mode{border-top-color:rgba(255,170,0,0.2)}
+#cin{flex:1;background:rgba(0,12,26,0.8);border:1px solid rgba(0,255,136,0.2);color:var(--c);font-family:'Share Tech Mono',monospace;font-size:11px;padding:10px 12px;outline:none;resize:none;min-height:44px;max-height:90px}
 #cin::placeholder{color:rgba(0,255,136,0.12)}
-.cinp-wrap:focus-within{border-color:rgba(0,255,136,0.45);box-shadow:0 0 14px rgba(0,255,136,0.05)}
-#cbtn{background:rgba(0,255,136,0.07);border:1px solid rgba(0,255,136,0.25);color:#00ff88;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:3px;padding:12px;cursor:pointer;transition:all 0.2s}
-#cbtn:hover{background:rgba(0,255,136,0.15);box-shadow:0 0 16px rgba(0,255,136,0.15)}
-#cbtn:disabled{opacity:0.35;cursor:not-allowed}
+#cin:focus{border-color:rgba(0,255,136,0.4)}
+#cin.legal-input{border-color:rgba(255,170,0,0.25);color:rgba(255,200,80,0.9)}
+#cin.legal-input::placeholder{color:rgba(255,170,0,0.15)}
+#cin.legal-input:focus{border-color:rgba(255,170,0,0.5)}
+#cbtn{background:rgba(0,255,136,0.07);border:1px solid rgba(0,255,136,0.25);color:var(--c);font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;padding:10px 14px;cursor:pointer;transition:all .2s;white-space:nowrap}
+#cbtn:hover{background:rgba(0,255,136,0.15);box-shadow:0 0 14px rgba(0,255,136,0.15)}
+#cbtn.legal-send{background:rgba(255,170,0,0.07);border-color:rgba(255,170,0,0.3);color:var(--cl)}
+#cbtn.legal-send:hover{background:rgba(255,170,0,0.15);box-shadow:0 0 14px rgba(255,170,0,0.15)}
+#cbtn:disabled{opacity:.3;cursor:not-allowed}
+#mic-btn{background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);color:var(--c2);font-size:14px;padding:0 12px;cursor:pointer;transition:all .2s}
+#mic-btn:hover{background:rgba(0,212,255,0.12);border-color:var(--c2)}
+#mic-btn.listening{background:rgba(255,0,102,0.1);border-color:#ff0066;color:#ff0066;animation:mpu .8s ease-in-out infinite}
+@keyframes mpu{0%,100%{box-shadow:0 0 6px rgba(255,0,102,0.3)}50%{box-shadow:0 0 20px rgba(255,0,102,0.7)}}
 
-/* MODAL */
-.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,5,15,0.85);backdrop-filter:blur(8px);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s}
-.modal-overlay.open{opacity:1;pointer-events:all}
-.modal-box{background:rgba(0,15,30,0.97);border:1px solid rgba(0,255,136,0.3);padding:24px;min-width:320px;max-width:480px;position:relative;animation:modal-in 0.2s ease-out}
-@keyframes modal-in{from{transform:scale(0.95) translateY(-10px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
-.modal-box::before,.modal-box::after{content:'';position:absolute;width:12px;height:12px;border-color:#00ff88;border-style:solid}
-.modal-box::before{top:-1px;left:-1px;border-width:1px 0 0 1px}
-.modal-box::after{bottom:-1px;right:-1px;border-width:0 1px 1px 0}
-.modal-title{font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:3px;color:#00ff88;margin-bottom:16px;border-bottom:1px solid rgba(0,255,136,0.15);padding-bottom:10px}
-.modal-label{font-size:9px;letter-spacing:2px;color:rgba(0,255,136,0.4);margin-bottom:6px;display:block}
-.modal-big-val{font-family:'Orbitron',sans-serif;font-size:48px;font-weight:700;text-align:center;color:#00ff88;margin:12px 0}
-.modal-big-val span{font-size:16px;color:rgba(0,255,136,0.5)}
+/* ── NOTES PAGE ── */
+.note-item{display:flex;gap:8px;align-items:flex-start;padding:8px;border:1px solid rgba(0,255,136,0.1);border-radius:1px;background:rgba(0,255,136,0.02);margin-bottom:6px}
+.note-bar{width:3px;flex-shrink:0;align-self:stretch;border-radius:1px;min-height:20px}
+.note-meta{font-size:6.5px;color:rgba(0,212,255,0.35);letter-spacing:.08em;margin-bottom:2px}
+.note-text{font-size:.8rem;color:rgba(0,255,136,0.85);line-height:1.5}
+.note-del{cursor:pointer;color:rgba(255,0,102,0.3);font-size:.75rem;padding:2px 4px;flex-shrink:0;transition:color .2s}
+.note-del:hover{color:#ff0066}
 
-/* custom range */
-input[type=range]{-webkit-appearance:none;width:100%;height:3px;background:rgba(255,255,255,0.1);outline:none;margin:8px 0}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00ff88;box-shadow:0 0 10px rgba(0,255,136,0.6);cursor:pointer;transition:transform 0.1s}
-input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.3)}
-input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gradient(90deg,#00ff88 var(--pct,50%),rgba(255,255,255,0.1) var(--pct,50%))}
-.range-labels{display:flex;justify-content:space-between;font-size:8px;color:rgba(255,255,255,0.25);margin-bottom:12px}
+/* ── LIFESTYLE PAGE ── */
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.dc{background:rgba(0,255,136,0.03);border:1px solid rgba(0,255,136,0.1);padding:12px 10px;text-align:center;cursor:pointer;transition:all .2s}
+.dc:hover{background:rgba(0,255,136,0.07);border-color:rgba(0,255,136,0.3)}
+.dv{font-family:'Orbitron',sans-serif;font-size:24px;font-weight:700;line-height:1}
+.dl{font-size:7px;letter-spacing:1px;color:rgba(255,255,255,0.2);margin-top:4px}
 
-/* number counter */
-.counter{display:flex;align-items:center;justify-content:center;gap:16px;margin:12px 0}
-.counter-btn{width:40px;height:40px;border:1px solid rgba(0,255,136,0.3);background:rgba(0,255,136,0.07);color:#00ff88;font-size:20px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center}
-.counter-btn:hover{background:rgba(0,255,136,0.15);border-color:#00ff88}
-.counter-val{font-family:'Orbitron',sans-serif;font-size:36px;font-weight:700;color:#00ff88;min-width:80px;text-align:center}
+/* ── INPUTS ── */
+.field{margin-bottom:10px}
+.field label{display:block;font-size:7px;letter-spacing:1px;color:rgba(0,255,136,0.35);margin-bottom:4px}
+.field input,.field textarea{width:100%;background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.2);padding:9px 11px;color:var(--c);font-family:'Share Tech Mono',monospace;font-size:11px;outline:none}
+.field input:focus,.field textarea:focus{border-color:rgba(0,255,136,0.4)}
+.field input::placeholder,.field textarea::placeholder{color:rgba(0,255,136,0.12)}
+.field textarea{resize:vertical;min-height:60px}
+.btn{background:rgba(0,255,136,0.07);border:1px solid rgba(0,255,136,0.25);color:var(--c);font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;padding:10px 16px;cursor:pointer;transition:all .2s;width:100%}
+.btn:hover{background:rgba(0,255,136,0.15);box-shadow:0 0 12px rgba(0,255,136,0.12)}
+.input-row{display:flex;gap:6px}
+.input-row input{flex:1;background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.2);padding:9px 11px;color:var(--c);font-family:'Share Tech Mono',monospace;font-size:11px;outline:none}
+.input-row input:focus{border-color:rgba(0,255,136,0.4)}
+.input-row button{background:rgba(0,255,136,0.07);border:1px solid rgba(0,255,136,0.25);color:var(--c);font-family:'Orbitron',sans-serif;font-size:10px;padding:9px 14px;cursor:pointer;transition:all .2s}
+.input-row button:hover{background:rgba(0,255,136,0.15)}
 
-/* text input */
-.modal-input{width:100%;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.25);padding:10px 12px;color:#00ff88;font-family:'Share Tech Mono',monospace;font-size:12px;outline:none;margin-bottom:12px}
-.modal-input:focus{border-color:rgba(0,255,136,0.5)}
-.modal-input::placeholder{color:rgba(0,255,136,0.15)}
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
+.toast-item{background:rgba(0,15,30,0.97);border:1px solid rgba(0,255,136,0.4);padding:8px 18px;font-size:9px;letter-spacing:2px;color:var(--c);box-shadow:0 0 20px rgba(0,255,136,0.2);animation:tin .3s ease,tout .3s ease 2.5s forwards;white-space:nowrap}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes tout{from{opacity:1}to{opacity:0;transform:translateY(-6px)}}
 
-.modal-btns{display:flex;gap:8px;margin-top:16px}
-.btn-cancel{flex:1;padding:10px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.3);font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all 0.2s}
-.btn-cancel:hover{border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.6)}
-.btn-save{flex:2;padding:10px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.35);color:#00ff88;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all 0.2s}
-.btn-save:hover{background:rgba(0,255,136,0.2);box-shadow:0 0 14px rgba(0,255,136,0.2)}
-
-/* TOAST */
-#toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
-.toast-item{background:rgba(0,20,40,0.95);border:1px solid rgba(0,255,136,0.4);padding:8px 18px;font-size:10px;letter-spacing:2px;color:#00ff88;box-shadow:0 0 20px rgba(0,255,136,0.2);animation:toast-in 0.3s ease,toast-out 0.3s ease 2.5s forwards;white-space:nowrap}
-@keyframes toast-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-@keyframes toast-out{from{opacity:1}to{opacity:0;transform:translateY(-8px)}}
-
-/* FLOATING STRINGS */
-.fstr{position:fixed;white-space:nowrap;font-size:8px;letter-spacing:2px;pointer-events:none;z-index:1;text-shadow:0 0 8px currentColor}
-
-/* VOICE / MIC */
-#mic-btn{
-  background:rgba(0,212,255,0.07);border:1px solid rgba(0,212,255,0.25);
-  color:#00d4ff;font-size:16px;padding:0 14px;cursor:pointer;transition:all 0.2s;
-  flex-shrink:0;
-}
-#mic-btn:hover{background:rgba(0,212,255,0.15);border-color:#00d4ff;box-shadow:0 0 14px rgba(0,212,255,0.3)}
-#mic-btn.listening{
-  background:rgba(255,0,102,0.12);border-color:#ff0066;color:#ff0066;
-  animation:mic-pulse 0.8s ease-in-out infinite;
-}
-@keyframes mic-pulse{0%,100%{box-shadow:0 0 8px rgba(255,0,102,0.4)}50%{box-shadow:0 0 24px rgba(255,0,102,0.8)}}
-
-/* VOICE WAVEFORM */
-#waveform{
-  position:fixed;bottom:220px;left:50%;transform:translateX(-50%);
-  display:none;align-items:center;gap:3px;z-index:50;
-  background:rgba(0,10,22,0.9);border:1px solid rgba(255,0,102,0.4);
-  padding:10px 18px;
-}
+/* ── VOICE WAVEFORM ── */
+#waveform{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);display:none;align-items:center;gap:3px;z-index:50;background:rgba(0,8,20,0.9);border:1px solid rgba(255,0,102,0.4);padding:10px 18px}
 #waveform.active{display:flex}
-#waveform span{display:inline-block;width:3px;background:#ff0066;border-radius:2px;animation:wave 0.6s ease-in-out infinite}
-#waveform span:nth-child(2){animation-delay:0.1s}
-#waveform span:nth-child(3){animation-delay:0.2s}
-#waveform span:nth-child(4){animation-delay:0.3s}
-#waveform span:nth-child(5){animation-delay:0.4s}
-#waveform span:nth-child(6){animation-delay:0.15s}
-#waveform span:nth-child(7){animation-delay:0.25s}
-@keyframes wave{0%,100%{height:4px}50%{height:22px}}
-.wave-label{font-size:9px;letter-spacing:3px;color:rgba(255,0,102,0.7);margin-left:10px}
+#waveform span{display:inline-block;width:3px;background:#ff0066;border-radius:2px;animation:wave .6s ease-in-out infinite}
+#waveform span:nth-child(2){animation-delay:.1s}#waveform span:nth-child(3){animation-delay:.2s}
+#waveform span:nth-child(4){animation-delay:.3s}#waveform span:nth-child(5){animation-delay:.4s}
+@keyframes wave{0%,100%{height:4px}50%{height:20px}}
+.wave-lbl{font-size:8px;letter-spacing:3px;color:rgba(255,0,102,0.7);margin-left:8px}
 
-/* MEMORY CHIP */
-.mem-chip{cursor:pointer;font-size:8px;letter-spacing:2px;color:rgba(0,212,255,0.45);border:1px solid rgba(0,212,255,0.18);padding:2px 8px;transition:all 0.2s}
-.mem-chip:hover{color:#00d4ff;border-color:#00d4ff;background:rgba(0,212,255,0.05);box-shadow:0 0 10px rgba(0,212,255,0.1)}
-
-/* HUSK BUTTON */
-.husk-btn{display:inline-block;cursor:pointer;font-size:10px;color:rgba(0,212,255,0.2);margin-left:8px;transition:color 0.2s;vertical-align:middle;user-select:none}
-.husk-btn:hover{color:#00d4ff}
-
-/* ONBOARDING BANNER */
-#onb-banner{display:none;background:rgba(255,136,0,0.06);border-bottom:1px solid rgba(255,136,0,0.2);padding:5px 12px;font-size:8px;letter-spacing:1px;color:rgba(255,136,0,0.65);justify-content:space-between;align-items:center}
-#onb-banner.active{display:flex}
-.onb-exit{cursor:pointer;color:rgba(255,0,102,0.55);font-size:8px;letter-spacing:1px;padding:3px 8px;border:1px solid rgba(255,0,102,0.25);transition:all 0.2s}
-.onb-exit:hover{color:#ff0066;border-color:#ff0066;background:rgba(255,0,102,0.07)}
-
-/* IRON MAN HUD RINGS */
-.hud-ring{position:absolute;border-radius:50%;pointer-events:none}
-.arc-reactor{
-  position:absolute;width:60px;height:60px;border-radius:50%;
-  background:radial-gradient(circle,rgba(0,212,255,0.25) 0%,rgba(0,100,255,0.08) 50%,transparent 70%);
-  box-shadow:0 0 20px rgba(0,212,255,0.3),inset 0 0 20px rgba(0,212,255,0.15);
-  animation:arc-pulse 2s ease-in-out infinite;
-  z-index:3;
-}
-@keyframes arc-pulse{0%,100%{box-shadow:0 0 20px rgba(0,212,255,0.3),inset 0 0 20px rgba(0,212,255,0.15)}50%{box-shadow:0 0 40px rgba(0,212,255,0.6),inset 0 0 30px rgba(0,212,255,0.25),0 0 80px rgba(255,136,0,0.1)}}
+/* ── LEGAL RISK COLORS ── */
+.risk-high{color:#ff4466}
+.risk-mid{color:#ffaa00}
+.risk-low{color:#00ff88}
 </style>
 </head>
 <body>
@@ -261,324 +189,149 @@ input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gr
 <div class="vignette"></div>
 <div class="scanlines"></div>
 
-<!-- BOOT SEQUENCE -->
 <div id="boot">
   <div style="text-align:center">
     <div class="tech-text">⚛ MONIR INITIALIZING</div>
-    <div class="tech-text">⚛ LASTER MINNE OG KONTEKST</div>
+    <div class="tech-text">⚛ LASTER MINNE OG JURIDISK MOTOR</div>
     <div class="tech-text">⚛ KLAR — 6. JUNI 2026</div>
   </div>
 </div>
 
 <div id="toast"></div>
+<div id="waveform"><span></span><span></span><span></span><span></span><span></span><span class="wave-lbl">MONIR LYTTER...</span></div>
 
 <div id="app">
   <!-- SIDEBAR -->
   <div id="sidebar">
-    <div class="avatar" id="avatar">👋</div>
+    <div class="avatar">👋</div>
     <div class="name" id="user-name">Sebastian</div>
-    <div class="status" id="user-status">Enerji: 78% • Mood: Optimist</div>
+    <div class="status" id="user-status">Online • 2026</div>
 
-    <div class="stats">
-      <div class="stat">
-        <span class="stat-label">💪 Aktivitet</span>
-        <div class="stat-bar"><div class="stat-fill" style="width:65%"></div></div>
-      </div>
-      <div class="stat">
-        <span class="stat-label">😴 Søvn</span>
-        <div class="stat-bar"><div class="stat-fill" style="width:72%"></div></div>
-      </div>
-      <div class="stat">
-        <span class="stat-label">🧠 Fokus</span>
-        <div class="stat-bar"><div class="stat-fill" style="width:81%"></div></div>
-      </div>
-      <div class="stat">
-        <span class="stat-label">❤️ Helse</span>
-        <div class="stat-bar"><div class="stat-fill" style="width:88%"></div></div>
-      </div>
-    </div>
+    <div class="stat"><span class="stat-label">💪 Aktivitet</span><div class="stat-bar"><div class="stat-fill" style="width:65%"></div></div></div>
+    <div class="stat"><span class="stat-label">😴 Søvn</span><div class="stat-bar"><div class="stat-fill" style="width:72%"></div></div></div>
+    <div class="stat"><span class="stat-label">🧠 Fokus</span><div class="stat-bar"><div class="stat-fill" style="width:81%"></div></div></div>
+    <div class="stat"><span class="stat-label">❤️ Helse</span><div class="stat-bar"><div class="stat-fill" style="width:88%"></div></div></div>
 
     <nav>
-      <button class="nav-btn active" onclick="showPage('chat')">💬 MONIR</button>
-      <button class="nav-btn" onclick="showPage('dashboard')">📊 DASHBOARD</button>
-      <button class="nav-btn" onclick="showPage('profile')">👤 PROFIL</button>
-      <button class="nav-btn" onclick="showPage('lifestyle')">💪 LIVSSTIL</button>
-      <button class="nav-btn" onclick="showPage('notes')" id="notes-nav">💾 <span id="notes-count">MINNE</span></button>
+      <button class="nav-btn active" onclick="showPage('chat',this)">💬 MONIR</button>
+      <button class="nav-btn legal-nav" onclick="showPage('chat',this);enableLegal()">⚖️ JURIDISK</button>
+      <button class="nav-btn" onclick="showPage('lifestyle',this)">💪 LIVSSTIL</button>
+      <button class="nav-btn" onclick="showPage('notes',this)">💾 <span id="notes-count">MINNE</span></button>
+      <button class="nav-btn" onclick="showPage('profile',this)">👤 PROFIL</button>
     </nav>
 
-    <div style="font-size:.7rem;color:rgba(0,255,136,.4);text-align:center;margin-top:auto">
-      MONIR • 6. juni 2026 • 01:01
-    </div>
-  </div>
-  <div class="hclk" id="clk">--:--:--</div>
-</header>
-
-  <!-- STICK FIGURE CANVAS -->
-  <div id="canvas-container">
-    <svg id="stick-figure" viewBox="0 0 200 400">
-      <!-- Head -->
-      <circle cx="100" cy="60" r="20" stroke="url(#glow)" stroke-width="2" fill="none"/>
-      <circle cx="95" cy="55" r="2" fill="var(--c)"/>
-      <circle cx="105" cy="55" r="2" fill="var(--c)"/>
-
-      <!-- Body -->
-      <line x1="100" y1="80" x2="100" y2="140" stroke="var(--c)" stroke-width="3" id="body"/>
-
-      <!-- Arms -->
-      <line x1="100" y1="100" x2="70" y2="120" stroke="var(--c)" stroke-width="2" id="left-arm"/>
-      <line x1="100" y1="100" x2="130" y2="120" stroke="var(--c)" stroke-width="2" id="right-arm"/>
-
-      <!-- Legs -->
-      <line x1="100" y1="140" x2="85" y2="180" stroke="var(--c)" stroke-width="2" id="left-leg"/>
-      <line x1="100" y1="140" x2="115" y2="180" stroke="var(--c)" stroke-width="2" id="right-leg"/>
-
-      <!-- Glow effect -->
-      <defs>
-        <radialGradient id="glow">
-          <stop offset="0%" stop-color="var(--c)" stop-opacity="1"/>
-          <stop offset="100%" stop-color="var(--c)" stop-opacity="0.3"/>
-        </radialGradient>
-      </defs>
-    </svg>
-
-    <div style="text-align:center;margin-top:20px;font-size:.8rem;color:rgba(0,255,136,.6)">
-      <div id="figure-status">Morgen rutine</div>
-      <div style="font-size:.7rem;margin-top:4px" id="figure-emoji">🌅</div>
-    </div>
+    <div class="sidebar-footer" id="sf">MONIR<br>6. juni 2026<br>Loading...</div>
   </div>
 
   <!-- CONTENT -->
   <div id="content">
-    <!-- CHAT (default) -->
+    <div id="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="htitle">MONIR</div>
+        <div class="odot"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:7px;letter-spacing:2px;color:rgba(0,255,136,0.25)" id="mode-lbl">NORMAL MODE</span>
+        <div class="hclk" id="clk">--:--</div>
+      </div>
+    </div>
+
+    <!-- ── CHAT PAGE ── -->
     <div id="page-chat" class="page active">
-      <div class="header" style="display:flex;justify-content:space-between;align-items:center">
-        <div class="title">💬 MONIR</div>
-        <div style="display:flex;gap:6px">
-          <button id="tts-btn" onclick="toggleTTS()" title="MONIR snakker (tekst til tale)" style="padding:6px 10px;border:1px solid rgba(0,255,136,.3);background:rgba(0,255,136,.05);color:rgba(0,255,136,.6);cursor:pointer;border-radius:2px;font-size:.8rem;transition:all .2s">🔇</button>
-          <button id="onb-btn" onclick="startOnboarding()" title="Kartlegg meg — MONIR stiller dype spørsmål" style="padding:6px 10px;border:1px solid rgba(0,255,136,.3);background:rgba(0,255,136,.05);color:rgba(0,255,136,.6);cursor:pointer;border-radius:2px;font-size:.8rem;transition:all .2s">🧬 KARTLEGG</button>
+      <div id="chat-header">
+        <span style="font-size:7px;letter-spacing:3px;color:rgba(0,255,136,0.25)">MONIR.TERMINAL</span>
+        <div style="display:flex;gap:5px">
+          <button class="chat-mode-btn" id="tts-btn" onclick="toggleTTS()" title="MONIR snakker">🔇</button>
+          <button class="chat-mode-btn" onclick="startOnboarding()" title="Kartlegg deg">🧬 KARTLEGG</button>
+          <button class="chat-mode-btn legal-btn" id="legal-mode-btn" onclick="toggleLegalMode()" title="Juridisk modus">⚖️ JURIDISK</button>
         </div>
       </div>
-      <div id="onb-banner" style="display:none;background:rgba(255,136,0,.06);border:1px solid rgba(255,136,0,.2);padding:6px 10px;font-size:.75rem;color:rgba(255,136,0,.7);margin-bottom:8px;display:none;justify-content:space-between;align-items:center">
-        <span>🧬 Kartleggingsmodus — MONIR stiller spørsmål</span>
-        <span onclick="stopOnboarding()" style="cursor:pointer;color:rgba(255,0,102,.6);padding:2px 8px;border:1px solid rgba(255,0,102,.3);font-size:.7rem">AVSLUTT ✕</span>
+
+      <div id="onb-banner" class="chat-banner">
+        <span>🧬 DYBDEKARTLEGGING AKTIV — MONIR stiller spørsmål for å bli kjent med deg</span>
+        <span class="banner-exit" onclick="stopOnboarding()">AVSLUTT ✕</span>
       </div>
-      <div id="messages"></div>
-      <div class="input-area">
-        <button id="mic-btn" onclick="toggleVoice()" title="Tal til MONIR" style="padding:9px 12px;border:1px solid rgba(0,255,136,.3);background:rgba(0,255,136,.05);color:rgba(0,255,136,.7);cursor:pointer;border-radius:2px;font-size:.9rem;transition:all .2s;white-space:nowrap">🎤</button>
-        <input type="text" id="chat-input" placeholder="Skriv eller tal til MONIR..." onkeydown="handleKey(event)"/>
-        <button class="btn-send" onclick="sendMessage()">▶</button>
+      <div id="legal-banner" class="chat-banner">
+        <span>⚖️ LEGALSTREETSMARTER AKTIV — Sjekker norske rettskilder</span>
+        <span class="banner-exit" onclick="disableLegal()">AVSLUTT ✕</span>
+      </div>
+      <div id="src-row">
+        <span class="src-lbl">KILDER:</span>
+      </div>
+
+      <div id="cmsgs">
+        <div class="msg msg-ai">Hei Sebastian. Jeg er MONIR — klar. Trykk ⚖️ JURIDISK for rettslig research, 🧬 KARTLEGG for at jeg skal bli kjent med deg, eller spør meg om hva som helst.</div>
+      </div>
+
+      <div id="chips">
+        <div class="chip" onclick="quickSend('Hva bør jeg fokusere på i dag?')">FOKUS I DAG</div>
+        <div class="chip" onclick="quickSend('Analyser mine vaner og gi konkrete råd')">ANALYSER VANER</div>
+        <div class="chip" onclick="quickSend('Hva er status på OBDAI og Autovers?')">PROSJEKT STATUS</div>
+        <div class="chip" onclick="quickSend('Oppsummer uken min og gi motivasjon')">UKE RAPPORT</div>
+      </div>
+
+      <div class="input-area" id="input-area">
+        <button id="mic-btn" onclick="toggleVoice()" title="Tal til MONIR">🎤</button>
+        <textarea id="cin" placeholder="Skriv til MONIR... (Enter = send)" onkeydown="handleKey(event)" rows="2"></textarea>
+        <button id="cbtn" onclick="send()">SEND ›</button>
       </div>
     </div>
 
-    <!-- DASHBOARD -->
-    <div id="page-dashboard" class="page">
-      <div class="header">
-        <div class="title">📊 DASHBOARD</div>
-      </div>
-      <div id="dashboard-today" style="color:rgba(0,255,136,.7);font-size:.85rem;line-height:1.8">
-        Laster data...
-      </div>
-      <div class="gauge-wrap">
-        <svg width="52" height="52" viewBox="0 0 52 52">
-          <circle cx="26" cy="26" r="21" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3" transform="rotate(-90 26 26)" stroke-dasharray="100 132"/>
-          <circle cx="26" cy="26" r="21" fill="none" stroke="#00d4ff" stroke-width="3" stroke-linecap="round" transform="rotate(-90 26 26)" stroke-dasharray="85 132"/>
-          <text x="26" y="30" text-anchor="middle" fill="#00d4ff" font-size="11" font-family="Orbitron,sans-serif" font-weight="700">85%</text>
-        </svg>
-        <div class="gl">FOKUS</div>
-      </div>
-      <div class="profile-card">
-        <div class="profile-label">Navn</div>
-        <div class="profile-value" id="profile-name">Sebastian</div>
-        <div class="profile-label">Bio</div>
-        <textarea id="profile-bio" placeholder="Skriv om deg...">En praktisk, ambisiøs person</textarea>
-        <button class="btn-send" style="width:100%;margin-top:8px" onclick="updateProfile()">Lagre</button>
-      </div>
-      <div class="profile-card">
-        <div class="profile-label">Mål for året</div>
-        <textarea id="profile-goals" placeholder="Hva vil du oppnå?">Bedre helse, mer produktivitet, meningsfulle relasjoner</textarea>
-        <button class="btn-send" style="width:100%;margin-top:8px" onclick="updateProfile()">Lagre</button>
-      </div>
-    </div>
-
-    <!-- NOTES / MEMORY -->
-    <div id="page-notes" class="page">
-      <div class="header">
-        <div class="title">💾 MONIRS MINNE</div>
-      </div>
-      <p style="font-size:.8rem;color:rgba(0,255,136,.5);margin-bottom:12px">MONIR lærer automatisk fra samtalene. Her er hva den har lært om deg.</p>
-      <div id="notes-list" style="display:flex;flex-direction:column;gap:8px"></div>
-      <div style="margin-top:16px">
-        <div class="profile-label">Legg til manuelt</div>
-        <div class="input-row">
-          <input type="text" id="manual-note" placeholder="Skriv et faktum om deg selv..."/>
-          <button class="btn-send" onclick="addManualNote()">+</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- LIFESTYLE -->
+    <!-- ── LIFESTYLE PAGE ── -->
     <div id="page-lifestyle" class="page">
-      <div class="header">
-        <div class="title">💪 LIVSSTIL & VANER</div>
-      </div>
-      <div class="profile-card">
-        <div class="profile-label">Log i dag</div>
-        <div class="input-row">
-          <input type="number" id="sleep" placeholder="Timer søvn" step="0.5" min="0" max="12"/>
-          <input type="number" id="exercise" placeholder="Trening (min)" min="0"/>
+      <div class="page-header"><div class="page-title">💪 LIVSSTIL</div></div>
+      <div class="page-body">
+        <div class="dgrid">
+          <div class="dc"><div class="dv" id="dv-sl" style="color:var(--c)">–</div><div class="dl">TIMER SØVN</div></div>
+          <div class="dc"><div class="dv" id="dv-ex" style="color:var(--c2)">–</div><div class="dl">MIN TRENING</div></div>
+          <div class="dc"><div class="dv" id="dv-mo" style="color:#aa00ff">–</div><div class="dl">HUMØR /10</div></div>
+          <div class="dc"><div class="dv" id="dv-wa" style="color:#ffaa00">–</div><div class="dl">GLASS VANN</div></div>
         </div>
-        <div class="input-row">
-          <input type="number" id="water" placeholder="Vann (glas)" min="0"/>
-          <input type="number" id="mood" placeholder="Humør (1-10)" min="1" max="10"/>
+        <div class="card">
+          <div class="card-label">LOG I DAG</div>
+          <div class="input-row" style="margin-bottom:6px">
+            <input type="number" id="sleep" placeholder="Timer søvn" step="0.5" min="0" max="12"/>
+            <input type="number" id="exercise" placeholder="Trening (min)" min="0"/>
+          </div>
+          <div class="input-row" style="margin-bottom:10px">
+            <input type="number" id="water" placeholder="Vann (glass)" min="0"/>
+            <input type="number" id="mood" placeholder="Humør (1-10)" min="1" max="10"/>
+          </div>
+          <button class="btn" onclick="logLifestyle()">LOGG I DAG</button>
         </div>
-        <button class="btn-send" style="width:100%;margin-top:8px" onclick="logLifestyle()">Logg</button>
-      </div>
-      <div class="profile-card">
-        <div class="profile-label">Dine vaner</div>
-        <div id="habits-list"></div>
       </div>
     </div>
 
-  </div>
-  <div class="panel fb" style="flex:1;overflow-y:auto">
-    <div class="ptop"></div>
-    <div class="ptitle">// vaner — klikk for å markere</div>
-    <div id="habits"></div>
-  </div>
-</div>
+    <!-- ── NOTES PAGE ── -->
+    <div id="page-notes" class="page">
+      <div class="page-header"><div class="page-title">💾 MONIRS MINNE</div></div>
+      <div class="page-body">
+        <p style="font-size:.75rem;color:rgba(0,255,136,.4);margin-bottom:12px;line-height:1.6">MONIR lærer automatisk fra samtalene — også juridiske fakta du deler. Her er alt den har lært om deg.</p>
+        <div id="notes-list"></div>
+        <div class="card" style="margin-top:10px">
+          <div class="card-label">LEGG TIL MANUELT</div>
+          <div class="input-row">
+            <input type="text" id="manual-note" placeholder="Skriv et faktum om deg selv..."/>
+            <button onclick="addManualNote()">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-<!-- CENTER -->
-<div id="col-c">
-  <!-- Iron Man HUD rings -->
-  <div class="ring dot" style="width:190px;height:190px;animation-duration:16s;color:#00ff88"></div>
-  <div class="ring dot" style="width:260px;height:260px;animation-duration:27s;animation-direction:reverse;color:#00d4ff"></div>
-  <div class="ring" style="width:340px;height:340px;animation-duration:45s;opacity:0.25;border-color:rgba(255,136,0,0.15)"></div>
-  <div class="ring" style="width:420px;height:420px;animation-duration:80s;animation-direction:reverse;opacity:0.15;border-style:dashed"></div>
-  <!-- Segmented HUD arc overlay -->
-  <svg style="position:absolute;width:300px;height:300px;pointer-events:none;z-index:1" viewBox="0 0 300 300">
-    <!-- outer arc segments (Iron Man style) -->
-    <circle cx="150" cy="150" r="140" fill="none" stroke="rgba(255,136,0,0.12)" stroke-width="1" stroke-dasharray="8 6"/>
-    <circle cx="150" cy="150" r="128" fill="none" stroke="rgba(0,212,255,0.1)" stroke-width="1" stroke-dasharray="4 20"/>
-    <!-- tick marks -->
-    <g stroke="rgba(0,255,136,0.3)" stroke-width="1">
-      <line x1="150" y1="10" x2="150" y2="22"/><line x1="150" y1="278" x2="150" y2="290"/>
-      <line x1="10" y1="150" x2="22" y2="150"/><line x1="278" y1="150" x2="290" y2="150"/>
-      <line x1="49" y1="49" x2="57" y2="57"/><line x1="243" y1="243" x2="251" y2="251"/>
-      <line x1="251" y1="49" x2="243" y2="57"/><line x1="57" y1="243" x2="49" y2="251"/>
-    </g>
-    <!-- corner brackets -->
-    <path d="M20 60 L20 20 L60 20" fill="none" stroke="rgba(255,136,0,0.3)" stroke-width="1.5"/>
-    <path d="M240 20 L280 20 L280 60" fill="none" stroke="rgba(255,136,0,0.3)" stroke-width="1.5"/>
-    <path d="M20 240 L20 280 L60 280" fill="none" stroke="rgba(255,136,0,0.3)" stroke-width="1.5"/>
-    <path d="M280 240 L280 280 L240 280" fill="none" stroke="rgba(255,136,0,0.3)" stroke-width="1.5"/>
-    <!-- labels -->
-    <text x="150" y="7" text-anchor="middle" fill="rgba(255,136,0,0.4)" font-size="7" font-family="Orbitron,sans-serif" letter-spacing="2">SCAN</text>
-    <text x="293" y="153" fill="rgba(0,212,255,0.3)" font-size="6" font-family="Orbitron,sans-serif">360°</text>
-  </svg>
-  <!-- Arc reactor core -->
-  <div class="arc-reactor" style="position:absolute;z-index:2"></div>
+    <!-- ── PROFILE PAGE ── -->
+    <div id="page-profile" class="page">
+      <div class="page-header"><div class="page-title">👤 PROFIL</div></div>
+      <div class="page-body">
+        <div class="card">
+          <div class="field"><label>NAVN</label><input type="text" id="profile-name" value="Sebastian"/></div>
+          <div class="field"><label>BIO</label><textarea id="profile-bio" placeholder="Skriv om deg..."></textarea></div>
+          <div class="field"><label>MÅL FOR ÅRET</label><textarea id="profile-goals" placeholder="Hva vil du oppnå?"></textarea></div>
+          <button class="btn" onclick="updateProfile()">LAGRE PROFIL</button>
+        </div>
+      </div>
+    </div>
 
-  <div id="fig-area">
-    <div id="fig-wrap">
-      <div class="fig-anno r" style="top:4px;animation-delay:-1s">HUMØR: <b id="an-mood" style="color:#fff">9/10</b></div>
-      <div class="fig-anno l" style="top:44px;animation-delay:-0.5s">HRV: <b style="color:#fff">68ms</b></div>
-      <div class="fig-anno r" style="top:84px;animation-delay:-2s">FOKUS: <b style="color:#fff">HIGH</b></div>
-      <div class="fig-anno l" style="top:128px;animation-delay:-1.5s">TRENING: <b id="an-ex" style="color:#fff">45min</b></div>
-      <svg width="140" height="255" viewBox="0 0 140 255" filter="drop-shadow(0 0 10px rgba(0,255,136,0.6))">
-        <circle cx="70" cy="40" r="30" fill="none" stroke="rgba(0,255,136,0.08)" stroke-width="7"/>
-        <circle cx="70" cy="40" r="22" fill="rgba(0,255,136,0.04)" stroke="#00ff88" stroke-width="2.5"/>
-        <circle cx="62" cy="37" r="2.5" fill="rgba(0,255,136,0.2)" stroke="#00ff88" stroke-width="1.5"><animate attributeName="r" values="2.5;2.5;2.5;0.8;2.5" dur="5s" repeatCount="indefinite"/></circle>
-        <circle cx="78" cy="37" r="2.5" fill="rgba(0,255,136,0.2)" stroke="#00ff88" stroke-width="1.5"><animate attributeName="r" values="2.5;2.5;2.5;0.8;2.5" dur="5s" repeatCount="indefinite"/></circle>
-        <circle cx="62" cy="37" r="1" fill="#00ff88"/><circle cx="78" cy="37" r="1" fill="#00ff88"/>
-        <path d="M64 46 Q70 51 76 46" fill="none" stroke="rgba(0,255,136,0.4)" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="70" y1="62" x2="70" y2="68" stroke="#00ff88" stroke-width="2.5"/>
-        <line x1="70" y1="68" x2="70" y2="150" stroke="#00ff88" stroke-width="2.5"/>
-        <line x1="55" y1="100" x2="85" y2="100" stroke="rgba(0,255,136,0.15)" stroke-width="1" stroke-dasharray="2 3"/>
-        <line x1="70" y1="86" x2="32" y2="115" stroke="#00ff88" stroke-width="2.5" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" values="0 70 86;-16 70 86;0 70 86" dur="2.8s" repeatCount="indefinite" calcMode="spline" keySplines="0.5 0 0.5 1;0.5 0 0.5 1"/></line>
-        <line x1="70" y1="86" x2="108" y2="115" stroke="#00ff88" stroke-width="2.5" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" values="0 70 86;16 70 86;0 70 86" dur="2.8s" repeatCount="indefinite" calcMode="spline" keySplines="0.5 0 0.5 1;0.5 0 0.5 1"/></line>
-        <line x1="70" y1="150" x2="44" y2="218" stroke="#00ff88" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="70" y1="150" x2="96" y2="218" stroke="#00ff88" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="44" y1="218" x2="31" y2="227" stroke="#00ff88" stroke-width="2" stroke-linecap="round"/>
-        <line x1="96" y1="218" x2="109" y2="227" stroke="#00ff88" stroke-width="2" stroke-linecap="round"/>
-        <line x1="35" y1="0" x2="105" y2="0" stroke="rgba(0,255,136,0.5)" stroke-width="1"><animate attributeName="y1" values="0;255;0" dur="3.5s" repeatCount="indefinite"/><animate attributeName="y2" values="0;255;0" dur="3.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0.5;0" dur="3.5s" repeatCount="indefinite"/></line>
-      </svg>
-      <div class="flbl">SEB.SALIH // ONLINE</div>
-    </div>
   </div>
-
-  <div id="qa-grid">
-    <button class="qa" onclick="openLog('sleep')"><span class="qa-icon">💤</span>LOG SØVN</button>
-    <button class="qa" onclick="openLog('exercise')"><span class="qa-icon">💪</span>TRENING</button>
-    <button class="qa" onclick="openLog('mood')"><span class="qa-icon">🧠</span>HUMØR</button>
-    <button class="qa primary" onclick="openAddEvent()"><span class="qa-icon">📅</span>NY EVENT</button>
-    <button class="qa" onclick="openManualNote()" style="border-color:rgba(0,212,255,0.3);color:rgba(0,212,255,0.7);background:rgba(0,212,255,0.04)"><span class="qa-icon">💾</span>NOTER</button>
-    <button class="qa" onclick="startOnboarding()" style="border-color:rgba(255,136,0,0.35);color:rgba(255,136,0,0.75);background:rgba(255,136,0,0.04)"><span class="qa-icon">🧬</span>KARTLEGG</button>
-  </div>
-</div>
-
-<!-- RIGHT -->
-<div id="col-r">
-  <div class="panel fc" style="flex:1;overflow-y:auto">
-    <div class="ptop"></div>
-    <div class="ptitle">// mål 2026 — klikk for å oppdatere</div>
-    <div id="goals"></div>
-  </div>
-  <div class="panel fd">
-    <div class="ptop"></div>
-    <div class="ptitle">// i dag — klikk for å logge</div>
-    <div class="dgrid">
-      <div class="dc" onclick="openLog('sleep')"><div class="dc-edit">✎</div><div class="dv" id="dv-sl">–</div><div class="dl">TIMER SØVN</div></div>
-      <div class="dc" onclick="openLog('exercise')"><div class="dc-edit">✎</div><div class="dv" id="dv-ex" style="color:#00d4ff">–</div><div class="dl">MIN TRENING</div></div>
-      <div class="dc" onclick="openLog('mood')"><div class="dc-edit">✎</div><div class="dv" id="dv-mo" style="color:#aa00ff">–</div><div class="dl">HUMØR /10</div></div>
-      <div class="dc" onclick="openLog('water')"><div class="dc-edit">✎</div><div class="dv" id="dv-wa" style="color:#ffaa00">–</div><div class="dl">GLASS VANN</div></div>
-    </div>
-  </div>
-  <div class="panel fe">
-    <div class="ptop"></div>
-    <div class="ptitle">// kommende events</div>
-    <div id="events"></div>
-    <button class="add-event-btn" onclick="openAddEvent()">+ LEGG TIL EVENT</button>
-  </div>
-</div>
-
-<!-- CHAT -->
-<div id="chat">
-  <div id="chat-main">
-    <div id="chat-header">
-      <span style="font-size:7px;letter-spacing:3px;color:rgba(0,255,136,0.3)">MONIR.TERMINAL</span>
-      <span id="chat-status" style="font-size:7px;letter-spacing:2px;color:rgba(0,255,136,0.3)">READY</span>
-    </div>
-    <div id="onb-banner">
-      <span>🧬 DYBDEKARTLEGGING AKTIV — MONIR stiller spørsmål for å bli kjent med deg</span>
-      <span class="onb-exit" onclick="stopOnboarding()">AVSLUTT ✕</span>
-    </div>
-    <div id="cmsgs">
-      <div class="ma">Hei Sebastian. Jeg er MONIR — online og klar. Trykk <span style="color:#ffaa00">🧬 KARTLEGG</span> for at jeg skal bli kjent med deg, eller spør meg om hva som helst.</div>
-    </div>
-    <div id="prompts">
-      <div class="prompt-chip" onclick="quickSend('Hva bør jeg fokusere på i dag?')">FOKUS I DAG</div>
-      <div class="prompt-chip" onclick="quickSend('Analyser mine vaner og gi konkrete råd')">ANALYSER VANER</div>
-      <div class="prompt-chip" onclick="quickSend('Hjelp meg med BMW-diagnose')">BMW HJELP</div>
-      <div class="prompt-chip" onclick="quickSend('Oppsummer uken min og gi motivasjon')">UKE RAPPORT</div>
-      <div class="prompt-chip" onclick="quickSend('Hva er status på OBDAI og Autovers?')">PROSJEKT STATUS</div>
-    </div>
-  </div>
-  <div id="cside">
-    <div class="cinp-wrap">
-      <textarea id="cin" placeholder="Skriv til MONIR... (Enter for å sende)" rows="5"></textarea>
-    </div>
-    <div style="display:flex;gap:6px">
-      <button id="mic-btn" onclick="toggleVoice()" title="Tal til MONIR (norsk)">🎤</button>
-      <button id="cbtn" onclick="send()" style="flex:1">SEND ›› MONIR</button>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- VOICE WAVEFORM -->
-<div id="waveform">
-  <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-  <span class="wave-label">MONIR LYTTER...</span>
 </div>
 
 <script>
@@ -586,103 +339,104 @@ input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gr
 const cv=document.getElementById('bg'),cx=cv.getContext('2d');
 function resize(){cv.width=innerWidth;cv.height=innerHeight}
 resize();window.addEventListener('resize',resize);
-const stars=Array.from({length:200},()=>({x:Math.random(),y:Math.random(),r:Math.random()*1.3+0.2,a:Math.random()*0.4+0.1,t:Math.random()*Math.PI*2}));
-const CH='01░▒▓■●◆⊕≡∞∑Δλπβαγ//::──';
-const ptcls=Array.from({length:60},()=>({x:Math.random(),y:Math.random(),ch:CH[Math.floor(Math.random()*CH.length)],sp:0.06+Math.random()*0.18,al:Math.random()*0.1+0.02,col:['#00ff88','#00d4ff','#aa00ff','#ff0066','#ffaa00'][Math.floor(Math.random()*5)],sz:8+Math.floor(Math.random()*7)}));
+const stars=Array.from({length:180},()=>({x:Math.random(),y:Math.random(),r:Math.random()*1.3+0.2,a:Math.random()*0.4+0.1,t:Math.random()*Math.PI*2}));
+const CH='01░▒▓■●◆⊕≡∞Δλπβαγ//::──§¶';
+const ptcls=Array.from({length:50},()=>({x:Math.random(),y:Math.random(),ch:CH[Math.floor(Math.random()*CH.length)],sp:0.06+Math.random()*0.15,al:Math.random()*0.08+0.02,col:['#00ff88','#00d4ff','#aa00ff','#ffaa00'][Math.floor(Math.random()*4)],sz:8+Math.floor(Math.random()*6)}));
 let fr=0;
 (function loop(){fr++;const W=cv.width,H=cv.height,now=fr/60;cx.fillStyle='rgba(2,10,20,0.15)';cx.fillRect(0,0,W,H);stars.forEach(s=>{const a=s.a*(0.5+0.5*Math.sin(now*0.3+s.t));cx.fillStyle=`rgba(180,210,255,${a})`;cx.beginPath();cx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);cx.fill()});ptcls.forEach(p=>{cx.globalAlpha=p.al;cx.fillStyle=p.col;cx.font=p.sz+'px monospace';cx.fillText(p.ch,p.x*W,p.y*H);p.y-=p.sp/H;if(p.y<-0.02){p.y=1.02;p.x=Math.random();p.ch=CH[Math.floor(Math.random()*CH.length)]}});cx.globalAlpha=1;requestAnimationFrame(loop)})();
 
+// ══ INIT ══
 window.addEventListener('load', () => {
-  setTimeout(() => document.getElementById('boot').classList.add('hidden'), 4000);
+  setTimeout(() => document.getElementById('boot').classList.add('hidden'), 3500);
   loadUser();
   loadHistory();
   loadNotes();
-  loadTodayDashboard();
-  animateStickFigure();
-  setInterval(animateStickFigure, 3000);
-  // Update sidebar clock
-  setInterval(() => {
-    const n = new Date();
-    const t = [n.getHours(), n.getMinutes()].map(v=>String(v).padStart(2,'0')).join(':');
-    const footer = document.querySelector('#sidebar > div:last-child');
-    if (footer) footer.textContent = `MONIR • ${n.getDate()}. juni 2026 • ${t}`;
-  }, 30000);
+  loadToday();
+  updateClock();
+  setInterval(updateClock, 30000);
 });
 
+function updateClock() {
+  const n = new Date();
+  const t = [n.getHours(), n.getMinutes()].map(v=>String(v).padStart(2,'0')).join(':');
+  document.getElementById('clk').textContent = t;
+  document.getElementById('sf').innerHTML = `MONIR<br>${n.getDate()}. juni 2026<br>${t}`;
+}
+
 // ══ TOAST ══
-function toast(msg,col='#00ff88'){const el=document.createElement('div');el.className='toast-item';el.style.borderColor=col;el.style.color=col;el.textContent=msg;document.getElementById('toast').appendChild(el);setTimeout(()=>el.remove(),3000)}
-
-// ══ STATIC DATA ══
-const GOALS=[{id:1,t:'OBDAI Production Release',p:45,c:'#00d4ff'},{id:2,t:'Autovers 50k Revenue',p:30,c:'#ff0066'},{id:3,t:'BMW MS45.1 Tuning Suite',p:60,c:'#ffaa00'},{id:4,t:'Health Baseline',p:20,c:'#aa00ff'},{id:5,t:'AutoSvar AI Launch',p:25,c:'#00d4ff'},{id:6,t:'Event Portfolio Build',p:10,c:'#ff0066'}];
-const HABITS=[{n:'Morning Code Review',f:'DAGLIG',s:12,c:'#00d4ff'},{n:'BMW Diagnostics',f:'4x/UKE',s:8,c:'#ffaa00'},{n:'Workout',f:'4x/UKE',s:5,c:'#00ff88'},{n:'Event Planning',f:'3x/UKE',s:4,c:'#ff0066'},{n:'Learn AI/ML',f:'3x/UKE',s:6,c:'#aa00ff'}];
-
-let goalData=[...GOALS];
-let todayData={sleep:null,exercise:null,mood:null,water:null};
-
-function renderGoals(){
-  document.getElementById('goals').innerHTML=goalData.map(g=>`
-    <div class="gi" onclick="openGoalEdit(${g.id})">
-      <div class="gi-h"><span class="gn">${g.t}</span><span class="gp" style="color:${g.c}">${g.p}%</span></div>
-      <div class="gbar"><div class="gfill" style="width:${g.p}%;background:linear-gradient(90deg,${g.c}66,${g.c})"></div></div>
-      <div class="gi-hint">↑ klikk for å oppdatere</div>
-    </div>`).join('');
-}
-renderGoals();
-
-document.getElementById('habits').innerHTML=HABITS.map((h,i)=>`
-  <div class="hi" onclick="toggleHabit(this,${i})" id="habit-${i}">
-    <div class="hcat" style="background:${h.c}"></div>
-    <div class="hinfo"><span class="hn">${h.n}</span><span class="hf">${h.f}</span></div>
-    <span class="hs">${h.s}d 🔥</span>
-    <div class="hck" id="hck-${i}">✓</div>
-  </div>`).join('');
-
-function toggleHabit(el,i){const ck=document.getElementById('hck-'+i);const done=ck.classList.toggle('done');toast(done?'✓ '+HABITS[i].n+' fullført!':'✗ Markering fjernet','#00ff88')}
-
-function renderToday(){
-  const sl=document.getElementById('dv-sl');const ex=document.getElementById('dv-ex');const mo=document.getElementById('dv-mo');const wa=document.getElementById('dv-wa');
-  sl.textContent=todayData.sleep!=null?todayData.sleep:'–';
-  ex.textContent=todayData.exercise!=null?todayData.exercise:'–';
-  mo.textContent=todayData.mood!=null?todayData.mood:'–';
-  wa.textContent=todayData.water!=null?todayData.water:'–';
-  if(todayData.mood){const hp=todayData.mood*10;document.getElementById('g-health').setAttribute('stroke-dasharray',Math.round(hp*1.32)+' 132');document.getElementById('g-health-t').textContent=hp+'%';}
-  if(todayData.sleep){const sp=Math.round(Math.min(100,(todayData.sleep/8)*100));document.getElementById('g-sleep').setAttribute('stroke-dasharray',Math.round(sp*1.32)+' 132');document.getElementById('g-sleep-t').textContent=todayData.sleep+'h';}
-  if(todayData.exercise)document.getElementById('an-ex').textContent=todayData.exercise+'min';
-  if(todayData.mood)document.getElementById('an-mood').textContent=todayData.mood+'/10';
+function toast(msg, col='#00ff88') {
+  const el = document.createElement('div');
+  el.className = 'toast-item';
+  el.style.borderColor = col;
+  el.style.color = col;
+  el.textContent = msg;
+  document.getElementById('toast').appendChild(el);
+  setTimeout(() => el.remove(), 3000);
 }
 
-// ══ API DATA ══
-async function loadData(){
-  try{const r=await fetch('/api/today');if(!r.ok)return;const d=await r.json();if(d.sleep!=null)todayData.sleep=d.sleep;if(d.exercise!=null)todayData.exercise=d.exercise;if(d.mood!=null)todayData.mood=d.mood;if(d.water!=null)todayData.water=d.water;renderToday()}catch(e){}
-  try{const r=await fetch('/api/calendar?days=30');if(!r.ok)return;const d=await r.json();if(d.events&&d.events.length){const col={tech:'#00d4ff',automotive:'#ffaa00',business:'#ff0066',health:'#aa00ff'};document.getElementById('events').innerHTML=d.events.slice(0,4).map(e=>{const dt=new Date(e.start);const ds=dt.toLocaleDateString('no-NO',{month:'short',day:'numeric'});return`<div class="evi"><div class="eline" style="background:${col[e.category]||'#ff0066'}"></div><div><div class="etit">${e.title}</div><div class="edt">${ds}</div></div></div>`}).join('')}}catch(e){}
+// ══ PAGES ══
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const page = document.getElementById('page-' + id);
+  if (page) page.classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (id === 'notes') loadNotes();
+  if (id === 'lifestyle') loadToday();
+  if (id === 'profile') loadUser();
 }
-loadData();
 
-// ══ MEMORY / NOTES ══
-let prevNoteCount = 0;
+// ══ API ══
+async function loadUser() {
+  try {
+    const r = await fetch('/api/user');
+    const d = await r.json();
+    document.getElementById('user-name').textContent = d.name || 'Sebastian';
+    const bio = document.getElementById('profile-bio');
+    const goals = document.getElementById('profile-goals');
+    if (bio) bio.value = d.bio || '';
+    if (goals) goals.value = d.goals || '';
+    const pn = document.getElementById('profile-name');
+    if (pn) pn.value = d.name || 'Sebastian';
+  } catch(e) {}
+}
 
-  await fetch('/api/lifestyle/log', {
+async function updateProfile() {
+  const name = document.getElementById('profile-name')?.value.trim();
+  const bio = document.getElementById('profile-bio')?.value.trim();
+  const goals = document.getElementById('profile-goals')?.value.trim();
+  await fetch('/api/user/update', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({date, sleep_hours: sleep, exercise_minutes: exercise, water_intake: water, mood_rating: mood})
+    body: JSON.stringify({name, bio, goals})
   });
-  alert('Logget! ✅');
+  toast('Profil lagret ✓');
 }
 
-async function loadTodayDashboard() {
+async function loadToday() {
   try {
     const r = await fetch('/api/today');
     const d = await r.json();
-    const el = document.getElementById('dashboard-today');
-    if (!el) return;
-    const rows = [
-      d.sleep != null ? `💤 Søvn: <b>${d.sleep} timer</b>` : '💤 Søvn: <span style="opacity:.4">ikke logget</span>',
-      d.exercise != null ? `💪 Trening: <b>${d.exercise} min</b>` : '💪 Trening: <span style="opacity:.4">ikke logget</span>',
-      d.mood != null ? `😊 Humør: <b>${d.mood}/10</b>` : '😊 Humør: <span style="opacity:.4">ikke logget</span>',
-      d.water != null ? `💧 Vann: <b>${d.water} glass</b>` : '💧 Vann: <span style="opacity:.4">ikke logget</span>',
-    ];
-    el.innerHTML = rows.map(r => `<div style="padding:6px 0;border-bottom:1px solid rgba(0,255,136,.08)">${r}</div>`).join('');
+    document.getElementById('dv-sl').textContent = d.sleep != null ? d.sleep : '–';
+    document.getElementById('dv-ex').textContent = d.exercise != null ? d.exercise : '–';
+    document.getElementById('dv-mo').textContent = d.mood != null ? d.mood : '–';
+    document.getElementById('dv-wa').textContent = d.water != null ? d.water : '–';
   } catch(e) {}
+}
+
+async function logLifestyle() {
+  const today = new Date().toISOString().split('T')[0];
+  const sleep = parseFloat(document.getElementById('sleep')?.value) || null;
+  const exercise = parseInt(document.getElementById('exercise')?.value) || null;
+  const water = parseInt(document.getElementById('water')?.value) || null;
+  const mood = parseInt(document.getElementById('mood')?.value) || null;
+  await fetch('/api/lifestyle/log', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({date: today, sleep_hours: sleep, exercise_minutes: exercise, water_intake: water, mood_rating: mood})
+  });
+  toast('Logget! ✓');
+  loadToday();
 }
 
 async function loadNotes() {
@@ -692,22 +446,21 @@ async function loadNotes() {
     const count = d.notes.length;
     const el = document.getElementById('notes-count');
     if (el) el.textContent = count > 0 ? `MINNE (${count})` : 'MINNE';
-    // Render notes list
     const list = document.getElementById('notes-list');
     if (!list) return;
     if (!d.notes.length) {
-      list.innerHTML = '<div style="color:rgba(0,255,136,.3);font-size:.8rem;text-align:center;padding:20px">MONIR har ikke lært noe ennå — start en samtale!</div>';
+      list.innerHTML = '<div style="color:rgba(0,255,136,.25);font-size:.8rem;text-align:center;padding:24px">Ingen lagrede fakta ennå — start en samtale!</div>';
       return;
     }
-    const cols = {personal:'#aa00ff',health:'#ff0066',business:'#ff4466',tech:'#00d4ff',general:'rgba(0,255,136,.7)',chat:'rgba(0,255,136,.5)',auto:'rgba(0,212,255,.6)'};
+    const cols = {personal:'#aa00ff',health:'#ff4466',business:'#ff0066',tech:'#00d4ff',legal:'#ffaa00',general:'rgba(0,255,136,.7)',auto:'rgba(0,212,255,.6)'};
     list.innerHTML = d.notes.map(n => `
-      <div style="display:flex;gap:8px;align-items:flex-start;padding:8px;border:1px solid rgba(0,255,136,.1);border-radius:2px;background:rgba(0,255,136,.02)">
-        <div style="width:3px;background:${cols[n.category]||'#00ff88'};flex-shrink:0;align-self:stretch;border-radius:1px;min-height:24px"></div>
+      <div class="note-item">
+        <div class="note-bar" style="background:${cols[n.category]||'#00ff88'}"></div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:.65rem;color:rgba(0,212,255,.4);letter-spacing:.08em;margin-bottom:2px">${(n.category||'general').toUpperCase()} // ${(n.at||'').split('T')[0]}</div>
-          <div style="font-size:.82rem;color:rgba(0,255,136,.85);line-height:1.5">${n.note}</div>
+          <div class="note-meta">${(n.category||'general').toUpperCase()} // ${(n.at||'').split('T')[0]}</div>
+          <div class="note-text">${n.note}</div>
         </div>
-        <span onclick="deleteNote(${n.id})" style="cursor:pointer;color:rgba(255,0,102,.3);font-size:.8rem;padding:2px 4px;flex-shrink:0" onmouseover="this.style.color='#ff0066'" onmouseout="this.style.color='rgba(255,0,102,.3)'">✕</span>
+        <span class="note-del" onclick="deleteNote(${n.id})">✕</span>
       </div>`).join('');
   } catch(e) {}
 }
@@ -728,6 +481,7 @@ async function addManualNote() {
   });
   inp.value = '';
   loadNotes();
+  toast('Lagret ✓');
 }
 
 async function loadHistory() {
@@ -735,80 +489,32 @@ async function loadHistory() {
     const r = await fetch('/api/history');
     const d = await r.json();
     if (!d.messages || !d.messages.length) return;
-    const m = document.getElementById('messages');
+    const m = document.getElementById('cmsgs');
     if (!m) return;
-    m.innerHTML = '';
     const sep = document.createElement('div');
-    sep.style.cssText = 'font-size:.65rem;color:rgba(0,255,136,.2);text-align:center;padding:6px;border-bottom:1px solid rgba(0,255,136,.08);margin-bottom:8px;letter-spacing:.1em';
+    sep.className = 'msg-sep';
     sep.textContent = '── forrige sesjon ──';
-    m.appendChild(sep);
-    d.messages.slice(-10).forEach(msg => {
+    m.insertBefore(sep, m.firstChild);
+    const prev = d.messages.slice(-8);
+    prev.forEach(msg => {
       const el = document.createElement('div');
-      el.className = 'msg msg-' + (msg.role === 'user' ? 'user' : 'ai');
-      el.textContent = msg.content;
-      m.appendChild(el);
+      const isLegal = msg.content && msg.content.startsWith('[JURIDISK]');
+      el.className = 'msg ' + (msg.role === 'user' ? 'msg-user' : (isLegal ? 'msg-legal' : 'msg-ai'));
+      el.textContent = msg.content.replace('[JURIDISK] ', '');
+      m.insertBefore(el, sep);
     });
     m.scrollTop = m.scrollHeight;
   } catch(e) {}
 }
 
-// ════════════════════════════════════════════════
-// STICK FIGURE ANIMATION
-// ════════════════════════════════════════════════
-
-function animateStickFigure() {
-  const hour = new Date().getHours();
-  const body = document.getElementById('body');
-  const leftArm = document.getElementById('left-arm');
-  const rightArm = document.getElementById('right-arm');
-  const leftLeg = document.getElementById('left-leg');
-  const rightLeg = document.getElementById('right-leg');
-  const status = document.getElementById('figure-status');
-  const emoji = document.getElementById('figure-emoji');
-
-  let state, st, em;
-
-  if (hour < 9) {
-    state = 'sleeping'; st = '😴 Sovner'; em = '🌙';
-    body.style.transform = 'rotate(-15deg)';
-    leftArm.style.transform = 'rotate(-30deg)';
-    rightArm.style.transform = 'rotate(30deg)';
-  } else if (hour < 12) {
-    state = 'morning'; st = '🌅 Morgenrutine'; em = '☀️';
-    leftArm.style.transform = `rotate(${Math.sin(Date.now()/500)*20}deg)`;
-    rightArm.style.transform = `rotate(${-Math.sin(Date.now()/500)*20}deg)`;
-  } else if (hour < 17) {
-    state = 'working'; st = '💼 I gang'; em = '🎯';
-    leftLeg.style.transform = `rotate(${Math.sin(Date.now()/400)*5}deg)`;
-    rightLeg.style.transform = `rotate(${-Math.sin(Date.now()/400)*5}deg)`;
-  } else if (hour < 20) {
-    state = 'exercise'; st = '💪 Trening'; em = '🔥';
-    leftArm.style.transform = `rotate(${Math.sin(Date.now()/300)*40}deg)`;
-    rightArm.style.transform = `rotate(${Math.sin(Date.now()/300)*40}deg)`;
-  } else {
-    state = 'relaxing'; st = '🌙 Kveld'; em = '✨';
-    body.style.transform = 'rotate(-5deg)';
-  }
-
-  status.textContent = st;
-  emoji.textContent = em;
-}
-
-// ════════════════════════════════════════════════
-// TTS — MONIR SNAKKER
-// ════════════════════════════════════════════════
-
+// ══ TTS ══
 let ttsEnabled = false;
 const synth = window.speechSynthesis;
-
-// Voices load async — cache when ready
 let norVoice = null;
 if (synth) {
   function pickVoice() {
-    const voices = synth.getVoices();
-    norVoice = voices.find(v => v.lang.startsWith('nb') || v.lang.startsWith('no'))
-               || voices.find(v => v.lang.startsWith('sv'))
-               || null;
+    const v = synth.getVoices();
+    norVoice = v.find(x => x.lang.startsWith('nb') || x.lang.startsWith('no')) || v.find(x => x.lang.startsWith('sv')) || null;
   }
   pickVoice();
   synth.onvoiceschanged = pickVoice;
@@ -818,33 +524,23 @@ function toggleTTS() {
   ttsEnabled = !ttsEnabled;
   const btn = document.getElementById('tts-btn');
   btn.textContent = ttsEnabled ? '🔊' : '🔇';
-  btn.style.borderColor = ttsEnabled ? 'var(--c)' : 'rgba(0,255,136,.3)';
-  btn.style.background = ttsEnabled ? 'rgba(0,255,136,.15)' : 'rgba(0,255,136,.05)';
-  btn.style.color = ttsEnabled ? 'var(--c)' : 'rgba(0,255,136,.6)';
+  btn.classList.toggle('active', ttsEnabled);
   if (!ttsEnabled && synth) synth.cancel();
 }
 
 function speakText(text) {
   if (!ttsEnabled || !synth) return;
   synth.cancel();
-  const clean = text.replace(/[*_#`]/g, '').replace(/\n+/g, '. ').slice(0, 800);
+  const clean = text.replace(/[*_#`⚖️🏛️📊📋🎯]/g, '').replace(/\n+/g, '. ').slice(0, 800);
   const utt = new SpeechSynthesisUtterance(clean);
-  utt.lang = 'nb-NO';
-  utt.rate = 1.05;
-  utt.pitch = 0.92;
+  utt.lang = 'nb-NO'; utt.rate = 1.05; utt.pitch = 0.92;
   if (norVoice) utt.voice = norVoice;
-  utt.onstart = () => { document.getElementById('figure-emoji').textContent = '🔊'; };
-  utt.onend = () => animateStickFigure();
   synth.speak(utt);
 }
 
-// ════════════════════════════════════════════════
-// VOICE INPUT
-// ════════════════════════════════════════════════
-
+// ══ VOICE INPUT ══
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recog = null, voiceActive = false;
-
 if (SR) {
   recog = new SR();
   recog.lang = 'nb-NO';
@@ -852,78 +548,162 @@ if (SR) {
   recog.interimResults = false;
   recog.onresult = (e) => {
     const txt = Array.from(e.results).map(r=>r[0].transcript).join(' ');
-    document.getElementById('chat-input').value = txt;
+    document.getElementById('cin').value = txt;
     stopVoice();
-    sendMessage();
+    send();
   };
   recog.onerror = () => stopVoice();
   recog.onend = () => stopVoice();
 }
 
 function toggleVoice() {
-  if (!SR) { alert('Bruk Chrome eller Safari for tale-input'); return; }
+  if (!SR) { toast('Bruk Chrome for tale-input', '#ffaa00'); return; }
   if (voiceActive) { stopVoice(); return; }
   voiceActive = true;
   recog.start();
+  document.getElementById('waveform').classList.add('active');
   const btn = document.getElementById('mic-btn');
-  btn.textContent = '⏹';
-  btn.style.borderColor = '#ff0066';
-  btn.style.color = '#ff0066';
-  btn.style.background = 'rgba(255,0,102,.1)';
+  btn.textContent = '⏹'; btn.classList.add('listening');
 }
 
 function stopVoice() {
   voiceActive = false;
   if (recog) try { recog.stop(); } catch(e) {}
+  document.getElementById('waveform').classList.remove('active');
   const btn = document.getElementById('mic-btn');
-  if (btn) { btn.textContent = '🎤'; btn.style.borderColor = 'rgba(0,255,136,.3)'; btn.style.color = 'rgba(0,255,136,.7)'; btn.style.background = 'rgba(0,255,136,.05)'; }
+  if (btn) { btn.textContent = '🎤'; btn.classList.remove('listening'); }
 }
 
-// ════════════════════════════════════════════════
-// ONBOARDING
-// ════════════════════════════════════════════════
-
+// ══ MODE: ONBOARDING ══
 let chatMode = 'normal';
 
 function startOnboarding() {
   chatMode = 'onboarding';
-  const banner = document.getElementById('onb-banner');
-  if (banner) banner.style.display = 'flex';
-  document.getElementById('chat-input').value = 'Start kartleggingen nå.';
-  sendMessage();
+  document.getElementById('onb-banner').classList.add('active');
+  document.getElementById('cin').value = 'Start kartleggingen nå.';
+  send();
 }
 
 function stopOnboarding() {
   chatMode = 'normal';
-  const banner = document.getElementById('onb-banner');
-  if (banner) banner.style.display = 'none';
+  document.getElementById('onb-banner').classList.remove('active');
+  updateModeUI();
 }
 
-// ════════════════════════════════════════════════
-// CHAT
-// ════════════════════════════════════════════════
+// ══ MODE: LEGAL ══
+function enableLegal() {
+  chatMode = 'legal';
+  document.getElementById('legal-banner').classList.add('active');
+  document.getElementById('legal-mode-btn').classList.add('active');
+  document.getElementById('cbtn').classList.add('legal-send');
+  document.getElementById('cin').classList.add('legal-input');
+  document.getElementById('cin').placeholder = 'Spør om norsk lov, regler, rettigheter... (Enter = send)';
+  document.getElementById('mode-lbl').textContent = 'LEGALSTREETSMARTER';
+  document.getElementById('mode-lbl').style.color = 'rgba(255,170,0,0.5)';
+  showLegalChips();
+}
 
+function disableLegal() {
+  chatMode = 'normal';
+  document.getElementById('legal-banner').classList.remove('active');
+  document.getElementById('legal-mode-btn').classList.remove('active');
+  document.getElementById('cbtn').classList.remove('legal-send');
+  document.getElementById('cin').classList.remove('legal-input');
+  document.getElementById('cin').placeholder = 'Skriv til MONIR... (Enter = send)';
+  document.getElementById('mode-lbl').textContent = 'NORMAL MODE';
+  document.getElementById('mode-lbl').style.color = 'rgba(0,255,136,0.25)';
+  document.getElementById('src-row').classList.remove('active');
+  showNormalChips();
+}
+
+function toggleLegalMode() {
+  if (chatMode === 'legal') { disableLegal(); } else { enableLegal(); }
+}
+
+function updateModeUI() {
+  if (chatMode === 'legal') {
+    document.getElementById('mode-lbl').textContent = 'LEGALSTREETSMARTER';
+    document.getElementById('mode-lbl').style.color = 'rgba(255,170,0,0.5)';
+  } else {
+    document.getElementById('mode-lbl').textContent = 'NORMAL MODE';
+    document.getElementById('mode-lbl').style.color = 'rgba(0,255,136,0.25)';
+  }
+}
+
+const NORMAL_CHIPS = [
+  ['FOKUS I DAG', 'Hva bør jeg fokusere på i dag?'],
+  ['ANALYSER VANER', 'Analyser mine vaner og gi konkrete råd'],
+  ['PROSJEKT STATUS', 'Hva er status på OBDAI og Autovers?'],
+  ['UKE RAPPORT', 'Oppsummer uken min og gi motivasjon'],
+];
+
+const LEGAL_CHIPS = [
+  ['OPPSIGELSE', 'Hva er mine rettigheter om jeg får urettmessig oppsigelse?'],
+  ['LEIEKONTRAKT', 'Hva kan jeg gjøre ved tvist med utleier om depositum?'],
+  ['AS ANSVAR', 'Når har styremedlem og daglig leder personlig ansvar i AS?'],
+  ['INKASSO', 'Hva kan inkasso kreve av meg og hva er mine rettigheter?'],
+  ['KONTRAKT BRUDD', 'Hva skjer juridisk ved kontraktsbrudd fra leverandør?'],
+  ['GDPR', 'Hvilke plikter har mitt AS under GDPR og personvernloven?'],
+];
+
+function showNormalChips() {
+  const el = document.getElementById('chips');
+  el.innerHTML = NORMAL_CHIPS.map(([l, q]) =>
+    `<div class="chip" onclick="quickSend('${q.replace(/'/g, "\\'")}')">${l}</div>`
+  ).join('');
+}
+
+function showLegalChips() {
+  const el = document.getElementById('chips');
+  el.innerHTML = LEGAL_CHIPS.map(([l, q]) =>
+    `<div class="chip legal-chip" onclick="quickSend('${q.replace(/'/g, "\\'")}')">${l}</div>`
+  ).join('');
+}
+
+function quickSend(msg) {
+  document.getElementById('cin').value = msg;
+  send();
+}
+
+// ══ CHAT ══
 function handleKey(e) {
-  if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
 }
 
-async function sendMessage() {
-  const input = document.getElementById('chat-input');
-  const msg = input.value.trim();
+async function send() {
+  const inp = document.getElementById('cin');
+  const msg = inp.value.trim();
   if (!msg) return;
-  input.value = '';
+  inp.value = '';
 
   appendMsg(msg, 'user');
 
-  const res = await fetch('/api/chat', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({message: msg, mode: chatMode})
-  });
+  const isLegal = chatMode === 'legal';
+  const endpoint = isLegal ? '/api/legal' : '/api/chat';
+  const payload = isLegal
+    ? { question: msg }
+    : { message: msg, mode: chatMode };
+
+  const btn = document.getElementById('cbtn');
+  btn.disabled = true;
+
+  let res;
+  try {
+    res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+  } catch(e) {
+    appendMsg('Nettverksfeil — prøv igjen', 'ai');
+    btn.disabled = false;
+    return;
+  }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({error: 'Feil'}));
     appendMsg('FEIL: ' + (err.error || 'Tilkobling feilet'), 'ai');
+    btn.disabled = false;
     return;
   }
 
@@ -931,6 +711,7 @@ async function sendMessage() {
   const dec = new TextDecoder();
   let aiText = '';
   let aiEl = null;
+  const msgClass = isLegal ? 'msg-legal' : 'msg-ai';
 
   while (true) {
     const {done, value} = await reader.read();
@@ -940,45 +721,48 @@ async function sendMessage() {
       if (!line.startsWith('data:')) continue;
       try {
         const ev = JSON.parse(line.slice(5));
-        if (ev.t === 'text') {
-          if (!aiEl) aiEl = appendMsg('', 'ai');
+        if (ev.t === 'sources') {
+          showSources(ev.v);
+        } else if (ev.t === 'text') {
+          if (!aiEl) aiEl = appendMsg('', msgClass.replace('msg-', ''));
           aiText += ev.v;
           aiEl.textContent = aiText;
-          document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+          document.getElementById('cmsgs').scrollTop = document.getElementById('cmsgs').scrollHeight;
         }
-      } catch (_) {}
+      } catch(_) {}
     }
-    prevNoteCount=d.notes.length;
-  }catch(e){}
-}
-loadNotes();
+  }
+
+  btn.disabled = false;
 
   if (aiText) {
     speakText(aiText);
-    // Refresh memory count after 4s (background fact extraction may complete)
     setTimeout(loadNotes, 4000);
   }
 }
 
 function appendMsg(text, who) {
-  const m = document.getElementById('messages');
-  const d = document.createElement('div');
-  d.className = `msg msg-${who}`;
-  d.textContent = text;
-  m.appendChild(d);
+  const m = document.getElementById('cmsgs');
+  const el = document.createElement('div');
+  el.className = 'msg msg-' + who;
+  el.textContent = text;
+  m.appendChild(el);
   m.scrollTop = m.scrollHeight;
-  return d;
+  return el;
 }
 
-function showPage(id, btn) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const page = document.getElementById('page-' + id);
-  if (page) page.classList.add('active');
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  const target = btn || event.target;
-  if (target) target.classList.add('active');
-  if (id === 'dashboard') loadTodayDashboard();
-  if (id === 'notes') loadNotes();
+function showSources(sources) {
+  const row = document.getElementById('src-row');
+  row.classList.add('active');
+  const existing = row.querySelectorAll('.src-chip');
+  existing.forEach(e => e.remove());
+  (Array.isArray(sources) ? sources : [sources]).forEach(s => {
+    const chip = document.createElement('span');
+    chip.className = 'src-chip';
+    chip.textContent = s;
+    row.appendChild(chip);
+  });
+  setTimeout(() => row.classList.remove('active'), 30000);
 }
 </script>
 </body>
