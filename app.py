@@ -1,8 +1,9 @@
+import asyncio
 import json
 import os
 import sqlite3
 from datetime import datetime
-from typing import AsyncIterator, List
+from typing import AsyncIterator
 
 import anthropic
 from fastapi import FastAPI, HTTPException
@@ -28,7 +29,6 @@ def init_db():
     with open("monir.db.init.sql") as f:
         cursor.executescript(f.read())
     conn.commit()
-
     cursor.execute("SELECT COUNT(*) FROM users")
     if cursor.fetchone()[0] == 0:
         cursor.execute(
@@ -49,7 +49,6 @@ def get_db():
 
 class ChatBody(BaseModel):
     message: str
-    history: List[dict] = []
     mode: str = "normal"
 
 class UpdateProfileBody(BaseModel):
@@ -78,6 +77,59 @@ class AddNoteBody(BaseModel):
     category: str = "general"
 
 # ════════════════════════════════════════════════
+# BACKGROUND: AUTO-LEARN FACTS FROM CONVERSATION
+# ════════════════════════════════════════════════
+
+async def extract_facts(user_msg: str, ai_response: str):
+    """Silently extract personal facts from what the user said and save to memory."""
+    if not ANTHROPIC_API_KEY or len(user_msg) < 25:
+        return
+    try:
+        client = anthropic.AsyncAnthropic(api_key=ANTHROPIC_API_KEY)
+        resp = await client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=300,
+            messages=[{
+                "role": "user",
+                "content": (
+                    f"Extract concrete personal facts about Sebastian from what he said.\n"
+                    f"Sebastian said: \"{user_msg}\"\n\n"
+                    "Return a JSON array only: "
+                    "[{\"category\": \"personal|health|business|tech|general\", \"note\": \"specific fact\"}]\n"
+                    "Rules: only concrete specific facts the user revealed about themselves. "
+                    "Ignore questions or generic chat. Max 3 items. Return [] if nothing to extract.\n"
+                    "Return ONLY the JSON array, no other text."
+                )
+            }]
+        )
+        text = resp.content[0].text.strip()
+        if not text.startswith('['):
+            return
+        facts = json.loads(text)
+        if not facts:
+            return
+        db = get_db()
+        cursor = db.cursor()
+        for f in facts[:3]:
+            note = (f.get('note') or '').strip()
+            if len(note) < 10:
+                continue
+            # Simple dedup: skip if very similar note already exists
+            cursor.execute(
+                "SELECT COUNT(*) FROM memory_notes WHERE user_id=1 AND note LIKE ?",
+                ('%' + note[:40] + '%',)
+            )
+            if cursor.fetchone()[0] == 0:
+                cursor.execute(
+                    "INSERT INTO memory_notes (user_id, category, note, source) VALUES (1, ?, ?, 'auto')",
+                    (f.get('category', 'general'), note)
+                )
+        db.commit()
+        db.close()
+    except Exception:
+        pass  # Silent failure — learning is best-effort
+
+# ════════════════════════════════════════════════
 # API ENDPOINTS
 # ════════════════════════════════════════════════
 
@@ -99,17 +151,13 @@ async def get_user():
 async def update_user(body: UpdateProfileBody):
     db = get_db()
     cursor = db.cursor()
-    updates = []
-    values = []
+    updates, values = [], []
     if body.name:
-        updates.append("name = ?")
-        values.append(body.name)
+        updates.append("name = ?"); values.append(body.name)
     if body.bio:
-        updates.append("bio = ?")
-        values.append(body.bio)
+        updates.append("bio = ?"); values.append(body.bio)
     if body.goals:
-        updates.append("goals = ?")
-        values.append(body.goals)
+        updates.append("goals = ?"); values.append(body.goals)
     if updates:
         updates.append("updated_at = CURRENT_TIMESTAMP")
         cursor.execute(f"UPDATE users SET {', '.join(updates)} WHERE id = 1", values)
@@ -133,8 +181,7 @@ async def get_today():
     if data:
         return {
             "sleep": data[3], "exercise": data[4], "water": data[5],
-            "mood": data[6], "energy": data[7], "notes": data[8],
-            "events": events
+            "mood": data[6], "energy": data[7], "notes": data[8], "events": events
         }
     return {"sleep": None, "exercise": None, "water": None, "mood": None, "energy": None, "events": events}
 
@@ -180,6 +227,18 @@ async def add_event(body: AddEventBody):
     db.close()
     return {"status": "added"}
 
+@app.get("/api/history")
+async def get_history(limit: int = 30):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        "SELECT role, content FROM chat_history WHERE user_id = 1 ORDER BY timestamp DESC LIMIT ?",
+        (limit,)
+    )
+    rows = cursor.fetchall()
+    db.close()
+    return {"messages": [{"role": r[0], "content": r[1]} for r in reversed(rows)]}
+
 @app.get("/api/notes")
 async def get_notes():
     db = get_db()
@@ -223,21 +282,27 @@ async def chat(body: ChatBody):
     cursor.execute("SELECT name, bio, goals FROM users LIMIT 1")
     user = cursor.fetchone()
 
-    cursor.execute("SELECT title, progress, status FROM goals WHERE status = 'active' LIMIT 5")
+    cursor.execute("SELECT title, progress FROM goals WHERE status = 'active' LIMIT 5")
     goals = cursor.fetchall()
 
-    cursor.execute("SELECT name, streak, category FROM habits LIMIT 5")
+    cursor.execute("SELECT name, streak FROM habits LIMIT 5")
     habits = cursor.fetchall()
 
     today = datetime.now().strftime("%Y-%m-%d")
     cursor.execute("SELECT sleep_hours, exercise_minutes, mood_rating, energy_rating FROM lifestyle_data WHERE date = ?", (today,))
     today_data = cursor.fetchone()
 
-    cursor.execute("SELECT title, start_time, category FROM calendar_events WHERE date(start_time) >= date('now') LIMIT 3")
+    cursor.execute("SELECT title, start_time FROM calendar_events WHERE date(start_time) >= date('now') LIMIT 3")
     upcoming = cursor.fetchall()
 
     cursor.execute("SELECT category, note FROM memory_notes WHERE user_id = 1 ORDER BY created_at DESC LIMIT 20")
     saved_notes = cursor.fetchall()
+
+    # Load full conversation history from DB — this is how MONIR remembers
+    cursor.execute(
+        "SELECT role, content FROM chat_history WHERE user_id = 1 ORDER BY timestamp DESC LIMIT 30"
+    )
+    db_history = [{"role": r[0], "content": r[1]} for r in reversed(cursor.fetchall())]
 
     db.close()
 
@@ -245,24 +310,21 @@ async def chat(body: ChatBody):
     habits_text = "\n".join([f"• {h[0]} ({h[1]} dager)" for h in habits]) if habits else "Ingen vaner"
     upcoming_text = "\n".join([f"• {e[0]}" for e in upcoming]) if upcoming else "Ingen events"
     notes_text = "\n".join([f"• [{n[0].upper()}] {n[1]}" for n in saved_notes]) if saved_notes else "Ingen lagrede fakta ennå"
-
-    if today_data:
-        today_str = f"Søvn: {today_data[0]}h, Trening: {today_data[1]}min, Humør: {today_data[2]}/10"
-    else:
-        today_str = "Ingen data i dag"
+    today_str = (
+        f"Søvn: {today_data[0]}h, Trening: {today_data[1]}min, Humør: {today_data[2]}/10"
+        if today_data else "Ingen data i dag"
+    )
 
     if body.mode == "onboarding":
         system = (
-            "Du er MONIR i DYBDEKARTLEGGINGS-MODUS. Din oppgave er å bli kjent med Sebastian "
-            "ved å stille ham personlige, innsiktsfulle spørsmål ÉN om gangen.\n\n"
+            "Du er MONIR i DYBDEKARTLEGGINGS-MODUS. Bli kjent med Sebastian ved å stille "
+            "ham personlige, innsiktsfulle spørsmål ÉN om gangen.\n\n"
             f"Det du allerede vet:\n{user[1]}\n\n"
-            "Temaer å utforske: livsvisjon, frykt, verdier, relasjoner, motivasjon, "
-            "BMW-passion, forretningsdrømmer, helse-mål, daglige rutiner, styrker/svakheter, "
-            "hva som gjør ham glad eller frustrert, 5-årsbildet, hva han trenger hjelp med.\n\n"
-            "REGLER: Still ETT spørsmål om gangen. Anerkjenn svaret genuint og kort (1 setning). "
-            "Still deretter neste spørsmål. Du er her for å LYTTE, ikke snakke mye. "
-            "Maks 2 setninger per svar fra deg — resten er spørsmål.\n"
-            "Alltid norsk. Vær ekte, nysgjerrig og empatisk."
+            f"Fakta du har lært:\n{notes_text}\n\n"
+            "Temaer: livsvisjon, frykt, verdier, relasjoner, motivasjon, BMW-passion, "
+            "forretningsdrømmer, helse-mål, daglige rutiner, styrker/svakheter, 5-årsbildet.\n\n"
+            "REGLER: Still ETT spørsmål. Anerkjenn svaret genuint (1 setning). Still neste. "
+            "Du er her for å LYTTE. Maks 2 setninger fra deg per tur. Alltid norsk."
         )
     else:
         system = "Du er MONIR, Sebastians personlige AI-assistent fra 2027. Du kjenner ham dypt.\n\n"
@@ -271,13 +333,14 @@ async def chat(body: ChatBody):
         system += f"VANER:\n{habits_text}\n\n"
         system += f"I DAG: {today_str}\n\n"
         system += f"KOMMENDE: {upcoming_text}\n\n"
-        system += f"MINNE (fakta du har lært om Sebastian):\n{notes_text}\n\n"
-        system += "Gi proaktive råd, motiver, husk alt, hjelp. Fokus: BMW, OBDAI, Autovers, helse, events.\n"
+        system += f"MINNE — fakta du har lært om Sebastian over tid:\n{notes_text}\n\n"
+        system += "Gi proaktive råd, motiver, husk alt, hjelp. Fokus: BMW, OBDAI, Autovers, helse.\n"
         system += "Alltid norsk. Vær ekte og konkret."
 
-    messages = body.history + [{"role": "user", "content": body.message}]
+    messages = db_history + [{"role": "user", "content": body.message}]
 
     async def stream() -> AsyncIterator[str]:
+        full_response = ""
         client = anthropic.AsyncAnthropic(api_key=ANTHROPIC_API_KEY)
         async with client.messages.stream(
             model="claude-sonnet-4-6",
@@ -286,8 +349,34 @@ async def chat(body: ChatBody):
             messages=messages,
         ) as s:
             async for text in s.text_stream:
+                full_response += text
                 yield f"data: {json.dumps({'t': 'text', 'v': text})}\n\n"
         yield f"data: {json.dumps({'t': 'done'})}\n\n"
+
+        # Persist this exchange so MONIR remembers next session
+        try:
+            db2 = get_db()
+            c2 = db2.cursor()
+            c2.execute(
+                "INSERT INTO chat_history (user_id, role, content) VALUES (1, 'user', ?)",
+                (body.message,)
+            )
+            c2.execute(
+                "INSERT INTO chat_history (user_id, role, content) VALUES (1, 'assistant', ?)",
+                (full_response,)
+            )
+            # Keep only the last 200 messages (~100 exchanges)
+            c2.execute(
+                "DELETE FROM chat_history WHERE user_id = 1 AND id NOT IN "
+                "(SELECT id FROM chat_history WHERE user_id = 1 ORDER BY timestamp DESC LIMIT 200)"
+            )
+            db2.commit()
+            db2.close()
+        except Exception:
+            pass
+
+        # Silently extract and learn personal facts in the background
+        asyncio.create_task(extract_facts(body.message, full_response))
 
     return StreamingResponse(stream(), media_type="text/event-stream")
 

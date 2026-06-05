@@ -541,14 +541,45 @@ async function loadData(){
 loadData();
 
 // ══ MEMORY / NOTES ══
+let prevNoteCount = 0;
+
 async function loadNotes(){
   try{
     const r=await fetch('/api/notes');if(!r.ok)return;
     const d=await r.json();
-    document.getElementById('mem-count').textContent='💾 '+d.notes.length;
+    const chip=document.getElementById('mem-count');
+    chip.textContent='💾 '+d.notes.length;
+    if(d.notes.length>prevNoteCount&&prevNoteCount>0){
+      chip.style.color='#00d4ff';chip.style.borderColor='#00d4ff';chip.style.boxShadow='0 0 14px rgba(0,212,255,0.5)';
+      setTimeout(()=>{chip.style.color='';chip.style.borderColor='';chip.style.boxShadow=''},2500);
+    }
+    prevNoteCount=d.notes.length;
   }catch(e){}
 }
 loadNotes();
+
+// ══ LOAD CHAT HISTORY ══
+async function loadHistory(){
+  try{
+    const r=await fetch('/api/history');if(!r.ok)return;
+    const d=await r.json();
+    if(!d.messages||d.messages.length===0)return;
+    const m=document.getElementById('cmsgs');
+    m.innerHTML='';
+    const sep=document.createElement('div');
+    sep.style.cssText='font-size:7px;color:rgba(0,255,136,0.15);letter-spacing:2px;text-align:center;padding:4px 0;border-bottom:1px solid rgba(0,255,136,0.05);margin-bottom:6px';
+    sep.textContent='── FORRIGE SESSION ──';
+    m.appendChild(sep);
+    d.messages.slice(-10).forEach(msg=>{
+      const el=document.createElement('div');
+      el.className=msg.role==='user'?'mu':'ma';
+      el.textContent=msg.content;
+      m.appendChild(el);
+    });
+    m.scrollTop=m.scrollHeight;
+  }catch(e){}
+}
+loadHistory();
 
 async function saveAsNote(text,category){
   if(!text||text.length<5)return;
@@ -752,22 +783,17 @@ async function send(){
   const aiEl=addMsg('ai','');aiEl.classList.add('typing');
   let full='';
   try{
-    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,history:hist,mode:chatMode})});
+    const res=await fetch('/api/chat',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:msg,mode:chatMode})
+    });
     aiEl.classList.remove('typing');
     if(!res.ok){const err=await res.json().catch(()=>({error:'HTTP '+res.status}));aiEl.className='merr';aiEl.textContent=err.error+(res.status===400&&(err.error||'').includes('ANTHROPIC')?' — Sjekk .env filen':'');document.getElementById('chat-status').textContent='ERROR';return}
     const reader=res.body.getReader(),dec=new TextDecoder();
     while(true){const{done,value}=await reader.read();if(done)break;for(const line of dec.decode(value).split('\n')){if(!line.startsWith('data: '))continue;try{const d=JSON.parse(line.slice(6));if(d.t==='text'){full+=d.v;aiEl.textContent=full;document.getElementById('cmsgs').scrollTop=9999}}catch{}}}
-    // Add memory-save button to every AI response
-    if(full.length>15){
-      const husk=document.createElement('span');
-      husk.className='husk-btn';husk.textContent='💾';husk.title='Lagre i MONIR-minnet';
-      const captured=full;const cat=chatMode==='onboarding'?'personal':'chat';
-      husk.onclick=()=>saveAsNote(captured,cat);
-      aiEl.appendChild(husk);
-    }
-    hist.push({role:'user',content:msg},{role:'assistant',content:full});
-    if(hist.length>20)hist=hist.slice(-20);
     document.getElementById('chat-status').textContent=chatMode==='onboarding'?'VENTER PÅ SVAR...':'READY';
+    // After 4 sec, refresh memory counter — facts may have been auto-extracted
+    setTimeout(loadNotes,4000);
   }catch(e){
     aiEl.classList.remove('typing');aiEl.className='merr';
     aiEl.textContent='TILKOBLING FEILET — er python3 app.py kjørende?';
