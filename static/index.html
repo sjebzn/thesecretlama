@@ -3,415 +3,661 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>🦙 Meta Ads AI</title>
+<title>META ADS SYSTEMS — JARVIS</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#04040f;--card:rgba(10,10,30,0.85);
-  --p1:#7c3aed;--p2:#06b6d4;--p3:#f472b6;
-  --g1:linear-gradient(135deg,#7c3aed,#06b6d4);
-  --border:rgba(124,58,237,0.25);
+  --cyan:#00d4ff;--navy:#0a0e27;--dark:#050817;--accent:#ff6b00;
+  --cyan-glow:0 0 20px rgba(0,212,255,0.6);--cyan-glow-heavy:0 0 50px rgba(0,212,255,0.8);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:#e2e8f0}
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-thumb{background:rgba(124,58,237,0.4);border-radius:2px}
+html,body{height:100%;background:var(--navy);color:var(--cyan);
+  font-family:'Courier Prime',monospace;overflow:hidden}
 
-/* ── Stars ── */
-#stars{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
-.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle var(--d) infinite var(--delay)}
-@keyframes twinkle{0%,100%{opacity:.1}50%{opacity:.8}}
-
-/* ── Sidebar ── */
-#sidebar{
-  position:fixed;left:0;top:0;width:240px;height:100vh;z-index:50;
-  background:rgba(4,4,18,0.95);backdrop-filter:blur(20px);
-  border-right:1px solid var(--border);display:flex;flex-direction:column;
-  transition:transform .3s ease
+/* SCANLINES */
+body::before{
+  content:'';position:fixed;top:0;left:0;width:100%;height:100%;
+  background:repeating-linear-gradient(0deg,transparent 0,rgba(0,0,0,.05) 2px,transparent 4px);
+  pointer-events:none;z-index:9999;animation:scanlines 8s linear infinite
 }
-.logo{padding:24px 20px;border-bottom:1px solid var(--border)}
-.logo h1{font-size:1.2rem;font-weight:700;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.logo p{font-size:.7rem;color:#64748b;margin-top:2px}
-nav{padding:12px;flex:1}
-.nav-item{
-  display:flex;align-items:center;gap:12px;padding:11px 14px;
-  border-radius:10px;cursor:pointer;color:#64748b;font-size:.875rem;font-weight:500;
-  transition:all .2s;margin-bottom:2px;border:1px solid transparent
+@keyframes scanlines{0%{transform:translateY(0)}100%{transform:translateY(4px)}}
+
+/* BOOT SEQUENCE */
+#boot-screen{
+  position:fixed;inset:0;background:var(--dark);z-index:10000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  opacity:1;transition:opacity .8s ease;animation:boot-fade 5s ease forwards
 }
-.nav-item:hover{background:rgba(124,58,237,.12);color:#a78bfa;border-color:rgba(124,58,237,.2)}
-.nav-item.active{background:rgba(124,58,237,.18);color:#a78bfa;border-color:rgba(124,58,237,.35);
-  box-shadow:0 0 12px rgba(124,58,237,.2)}
-.nav-icon{width:18px;height:18px;flex-shrink:0}
-.sidebar-footer{padding:16px;border-top:1px solid var(--border)}
-.status-dot{width:8px;height:8px;border-radius:50%;background:#10b981;
-  box-shadow:0 0 8px #10b981;animation:pulse-dot 2s infinite}
-@keyframes pulse-dot{0%,100%{box-shadow:0 0 6px #10b981}50%{box-shadow:0 0 14px #10b981}}
+#boot-screen.hidden{opacity:0;pointer-events:none}
+@keyframes boot-fade{0%{opacity:1}85%{opacity:1}100%{opacity:0}}
 
-/* ── Main ── */
-#main{margin-left:240px;padding:24px;min-height:100vh;position:relative;z-index:1}
-.page{display:none}.page.active{display:block}
-
-/* ── Header ── */
-.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
-.page-title{font-size:1.5rem;font-weight:700}
-.page-subtitle{font-size:.8rem;color:#64748b;margin-top:2px}
-.header-actions{display:flex;gap:10px;align-items:center}
-
-/* ── Demo banner ── */
-#demo-banner{
-  background:linear-gradient(90deg,rgba(245,158,11,.12),rgba(245,158,11,.04));
-  border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:10px 16px;
-  display:flex;align-items:center;gap:10px;margin-bottom:20px;font-size:.8rem;color:#fbbf24
+.arc-reactor{
+  width:120px;height:120px;border:3px solid var(--cyan);border-radius:50%;
+  position:relative;box-shadow:inset 0 0 30px rgba(0,212,255,.4),
+    0 0 50px rgba(0,212,255,.6);animation:arc-reactor-spin 3s linear infinite
 }
+.arc-reactor::before{
+  content:'';position:absolute;inset:15%;background:var(--cyan);border-radius:50%;
+  box-shadow:0 0 20px var(--cyan);opacity:.6;animation:arc-pulse 2s ease-in-out infinite
+}
+.arc-reactor::after{
+  content:'';position:absolute;inset:8px;border:2px solid var(--cyan);
+  border-radius:50%;opacity:.3;animation:arc-ring 4s ease-in-out infinite
+}
+@keyframes arc-reactor-spin{to{transform:rotate(360deg)}}
+@keyframes arc-pulse{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.3);opacity:.2}}
+@keyframes arc-ring{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:.8;transform:scale(1.2)}}
 
-/* ── Cards ── */
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
-@media(min-width:1400px){.stats-grid{grid-template-columns:repeat(6,1fr)}}
+.boot-text{
+  position:absolute;bottom:40px;text-align:center;font-size:.9rem;
+  letter-spacing:.05em;opacity:0;animation:boot-text-fade .4s ease forwards
+}
+.boot-text:nth-child(1){animation-delay:0.3s}
+.boot-text:nth-child(2){animation-delay:1.2s}
+.boot-text:nth-child(3){animation-delay:2.4s}
+.boot-text:nth-child(4){animation-delay:3.6s}
+@keyframes boot-text-fade{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+
+/* HUD BRACKETS */
+.hud-bracket{
+  position:relative;font-family:'Orbitron',sans-serif;font-weight:700
+}
+.hud-bracket::before,.hud-bracket::after{
+  content:'';position:absolute;border:2px solid var(--cyan);
+  box-shadow:var(--cyan-glow);width:14px;height:14px
+}
+.hud-bracket::before{top:0;left:0;border-right:none;border-bottom:none}
+.hud-bracket::after{bottom:0;right:0;border-left:none;border-top:none}
+
 .stat-card{
-  background:var(--card);backdrop-filter:blur(16px);
-  border:1px solid var(--border);border-radius:14px;padding:20px;
-  transition:all .3s;position:relative;overflow:hidden
+  background:linear-gradient(135deg,rgba(0,212,255,.05),rgba(0,212,255,.02));
+  border:1px solid rgba(0,212,255,.3);border-radius:0;padding:16px;
+  position:relative;min-height:100px;display:flex;flex-direction:column;
+  justify-content:space-between;transition:all .3s;overflow:hidden
 }
 .stat-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:var(--g1);opacity:0;transition:opacity .3s
+  content:'';position:absolute;inset:0;background:repeating-linear-gradient(
+    90deg,transparent,transparent 2px,rgba(0,212,255,.1) 2px,rgba(0,212,255,.1) 4px);
+  pointer-events:none;opacity:0;transition:opacity .3s
 }
-.stat-card:hover{transform:translateY(-3px);border-color:rgba(124,58,237,.5);
-  box-shadow:0 8px 30px rgba(124,58,237,.15)}
+.stat-card:hover{
+  border-color:var(--cyan);box-shadow:inset 0 0 20px rgba(0,212,255,.15),var(--cyan-glow);
+  transform:translateY(-4px)
+}
 .stat-card:hover::before{opacity:1}
-.stat-label{font-size:.72rem;color:#64748b;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
-.stat-value{font-size:1.6rem;font-weight:700;margin:6px 0 4px;font-family:'JetBrains Mono',monospace}
-.stat-change{font-size:.75rem}
-.stat-change.up{color:#10b981}.stat-change.down{color:#ef4444}
-.stat-icon{position:absolute;right:16px;top:16px;font-size:1.4rem;opacity:.6}
 
-/* ── Charts ── */
-.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px}
+.stat-label{
+  font-size:.65rem;color:rgba(0,212,255,.6);text-transform:uppercase;
+  letter-spacing:.1em;font-weight:700;margin-bottom:4px
+}
+.stat-value{
+  font-size:1.8rem;font-weight:900;color:var(--cyan);text-shadow:var(--cyan-glow);
+  font-family:'Orbitron',sans-serif;margin:4px 0
+}
+.stat-change{
+  font-size:.65rem;color:rgba(0,212,255,.5);letter-spacing:.05em
+}
+
+/* SIDEBAR */
+#sidebar{
+  position:fixed;left:0;top:0;width:280px;height:100vh;z-index:50;
+  background:linear-gradient(180deg,rgba(10,14,39,.98),rgba(5,8,17,.98));
+  border-right:2px solid var(--cyan);display:flex;flex-direction:column;
+  box-shadow:inset -1px 0 20px rgba(0,212,255,.1);overflow-y:auto
+}
+
+.logo{padding:24px 16px;border-bottom:2px solid var(--cyan);position:relative;
+  z-index:10;text-align:center}
+.logo h1{
+  font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;
+  color:var(--cyan);text-shadow:var(--cyan-glow);letter-spacing:.1em;margin-bottom:4px
+}
+.logo-sub{
+  font-size:.65rem;color:rgba(0,212,255,.4);letter-spacing:.05em;
+  text-transform:uppercase
+}
+
+.radar-container{
+  width:120px;height:120px;margin:20px auto;position:relative;
+  border:2px solid var(--cyan);border-radius:50%;
+  box-shadow:inset 0 0 20px rgba(0,212,255,.2),var(--cyan-glow);
+  overflow:hidden
+}
+.radar-circle{
+  position:absolute;border:1px solid rgba(0,212,255,.3);border-radius:50%;
+  left:50%;top:50%;transform:translate(-50%,-50%)
+}
+.radar-circle:nth-child(1){width:30%;height:30%}
+.radar-circle:nth-child(2){width:60%;height:60%}
+.radar-circle:nth-child(3){width:90%;height:90%}
+.radar-dot{
+  position:absolute;width:6px;height:6px;background:var(--accent);
+  border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%);
+  box-shadow:0 0 12px var(--accent);animation:radar-pulse 2s infinite
+}
+@keyframes radar-pulse{0%{transform:translate(-50%,-50%) scale(1);opacity:1}
+  100%{transform:translate(-50%,-50%) scale(2);opacity:0}}
+.radar-scan{
+  position:absolute;width:100%;height:100%;top:0;left:0;
+  background:conic-gradient(from 0deg,rgba(0,212,255,.4),transparent);
+  animation:radar-spin 4s linear infinite;opacity:.5
+}
+@keyframes radar-spin{to{transform:rotate(360deg)}}
+
+nav{flex:1;padding:16px;display:flex;flex-direction:column;gap:4px}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:11px 12px;
+  border:1px solid transparent;cursor:pointer;color:rgba(0,212,255,.5);
+  font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  position:relative;transition:all .25s;
+  font-family:'Orbitron',sans-serif
+}
+.nav-item::before{
+  content:'';position:absolute;left:0;top:0;width:3px;height:0;
+  background:var(--cyan);transition:height .25s
+}
+.nav-item:hover{
+  color:var(--cyan);border-color:rgba(0,212,255,.3);
+  background:rgba(0,212,255,.08);box-shadow:inset 0 0 12px rgba(0,212,255,.1)
+}
+.nav-item.active{
+  color:var(--cyan);border:1px solid var(--cyan);background:rgba(0,212,255,.15);
+  box-shadow:inset 0 0 20px rgba(0,212,255,.2),var(--cyan-glow);font-weight:900
+}
+.nav-item.active::before{height:100%}
+
+.sidebar-footer{
+  padding:16px;border-top:2px solid var(--cyan);display:flex;align-items:center;
+  gap:8px;font-size:.7rem;color:rgba(0,212,255,.6)
+}
+.status-indicator{
+  width:10px;height:10px;background:var(--cyan);border-radius:2px;
+  box-shadow:var(--cyan-glow);animation:pulse-indicator 1s infinite
+}
+@keyframes pulse-indicator{0%,100%{box-shadow:var(--cyan-glow)}50%{box-shadow:0 0 30px rgba(0,212,255,.8)}}
+
+/* MAIN */
+#main{margin-left:280px;padding:24px;min-height:100vh;position:relative;z-index:1}
+.page{display:none}.page.active{display:block}
+
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:30px;position:relative}
+.page-header::before{
+  content:'';position:absolute;bottom:-12px;left:0;width:200px;height:2px;
+  background:linear-gradient(90deg,var(--cyan),transparent);box-shadow:var(--cyan-glow)
+}
+.page-title{
+  font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;
+  color:var(--cyan);text-shadow:var(--cyan-glow);letter-spacing:.05em;
+  text-transform:uppercase
+}
+.page-subtitle{
+  font-size:.75rem;color:rgba(0,212,255,.5);margin-top:4px;letter-spacing:.05em
+}
+
+/* STATS GRID */
+.stats-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px;
+  margin-bottom:30px
+}
+@media(min-width:1600px){.stats-grid{grid-template-columns:repeat(6,1fr)}}
+
+/* GLASS CARD */
 .glass-card{
-  background:var(--card);backdrop-filter:blur(16px);
-  border:1px solid var(--border);border-radius:14px;padding:20px
+  background:linear-gradient(135deg,rgba(0,212,255,.04),rgba(0,212,255,.01));
+  border:1px solid rgba(0,212,255,.25);padding:20px;position:relative;
+  overflow:hidden
 }
-.card-title{font-size:.85rem;font-weight:600;color:#94a3b8;text-transform:uppercase;
-  letter-spacing:.05em;margin-bottom:16px}
+.glass-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+  opacity:.5
+}
 
-/* ── Table ── */
-.table-wrap{overflow-x:auto}
+.card-title{
+  font-family:'Orbitron',sans-serif;font-size:.75rem;font-weight:700;
+  color:rgba(0,212,255,.7);text-transform:uppercase;letter-spacing:.1em;
+  margin-bottom:16px;text-shadow:0 0 10px rgba(0,212,255,.3)
+}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;margin-top:12px}
 table{width:100%;border-collapse:collapse}
-th{font-size:.72rem;font-weight:600;color:#64748b;text-transform:uppercase;
-  letter-spacing:.05em;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border)}
-td{padding:12px 14px;font-size:.85rem;border-bottom:1px solid rgba(124,58,237,.08)}
-tr:hover td{background:rgba(124,58,237,.06)}
-.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;
-  border-radius:20px;font-size:.7rem;font-weight:600}
-.badge-active{background:rgba(16,185,129,.12);color:#10b981;border:1px solid rgba(16,185,129,.25)}
-.badge-paused{background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.25)}
+th{
+  font-family:'Orbitron',sans-serif;font-size:.65rem;font-weight:700;
+  color:rgba(0,212,255,.6);text-transform:uppercase;letter-spacing:.08em;
+  padding:10px 12px;text-align:left;border-bottom:1px solid rgba(0,212,255,.2);
+  background:rgba(0,212,255,.03)
+}
+td{
+  padding:10px 12px;font-size:.8rem;border-bottom:1px solid rgba(0,212,255,.1);
+  font-family:'Courier Prime',monospace
+}
+tr:hover td{background:rgba(0,212,255,.08);box-shadow:inset 0 0 10px rgba(0,212,255,.1)}
 
-/* ── Buttons ── */
-.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;
-  border-radius:9px;font-size:.825rem;font-weight:600;cursor:pointer;
-  border:none;transition:all .2s}
-.btn-primary{background:var(--g1);color:#fff;box-shadow:0 0 20px rgba(124,58,237,.3)}
-.btn-primary:hover{box-shadow:0 0 30px rgba(124,58,237,.5);transform:translateY(-1px)}
-.btn-ghost{background:rgba(124,58,237,.1);color:#a78bfa;border:1px solid var(--border)}
-.btn-ghost:hover{background:rgba(124,58,237,.2);border-color:rgba(124,58,237,.5)}
+.badge{
+  display:inline-block;padding:3px 9px;font-size:.65rem;font-weight:700;
+  border:1px solid;text-transform:uppercase;letter-spacing:.03em;
+  font-family:'Orbitron',sans-serif;border-radius:0
+}
+.badge-active{
+  border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,.1);
+  box-shadow:0 0 10px rgba(0,212,255,.4)
+}
+.badge-paused{
+  border-color:var(--accent);color:var(--accent);background:rgba(255,107,0,.1);
+  box-shadow:0 0 8px rgba(255,107,0,.3)
+}
 
-/* ── Select ── */
-select{background:rgba(10,10,30,.9);color:#e2e8f0;border:1px solid var(--border);
-  border-radius:8px;padding:7px 12px;font-size:.8rem;cursor:pointer;outline:none}
-select:focus{border-color:var(--p1)}
+/* BUTTONS */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;padding:9px 16px;
+  border:1px solid var(--cyan);background:rgba(0,212,255,.1);color:var(--cyan);
+  font-family:'Orbitron',sans-serif;font-size:.75rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.05em;cursor:pointer;
+  transition:all .25s;position:relative;overflow:hidden
+}
+.btn::before{
+  content:'';position:absolute;inset:0;background:linear-gradient(
+    90deg,transparent,rgba(255,255,255,.2),transparent);
+  transform:translateX(-100%);animation:btn-shine 3s infinite
+}
+@keyframes btn-shine{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.btn:hover{
+  background:rgba(0,212,255,.2);box-shadow:inset 0 0 15px rgba(0,212,255,.2),
+    0 0 20px rgba(0,212,255,.4);transform:translateY(-2px)
+}
 
-/* ── Chat FAB ── */
+select,input{
+  background:rgba(0,0,0,.5);border:1px solid var(--cyan);color:var(--cyan);
+  font-family:'Courier Prime',monospace;font-size:.8rem;padding:8px 12px;
+  outline:none;transition:all .2s;letter-spacing:.02em
+}
+select:focus,input:focus{
+  border-color:var(--cyan);box-shadow:inset 0 0 10px rgba(0,212,255,.2),
+    0 0 15px rgba(0,212,255,.4)
+}
+
+/* DEMO BANNER */
+#demo-banner{
+  background:rgba(255,107,0,.08);border:1px solid var(--accent);
+  padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;
+  gap:10px;font-size:.8rem;color:var(--accent);font-family:'Orbitron',sans-serif;
+  box-shadow:inset 0 0 10px rgba(255,107,0,.1)
+}
+
+/* ARC REACTOR (CHAT FAB) */
 #chat-fab{
-  position:fixed;bottom:28px;right:28px;width:58px;height:58px;
-  background:var(--g1);border-radius:50%;cursor:pointer;z-index:200;
-  display:flex;align-items:center;justify-content:center;font-size:1.5rem;
-  box-shadow:0 0 30px rgba(124,58,237,.5),0 4px 20px rgba(0,0,0,.4);
-  transition:transform .2s;animation:fab-pulse 2.5s infinite
+  position:fixed;bottom:28px;right:28px;width:80px;height:80px;
+  border:3px solid var(--cyan);border-radius:50%;cursor:pointer;z-index:200;
+  display:flex;align-items:center;justify-content:center;font-size:2rem;
+  background:radial-gradient(circle,rgba(0,212,255,.2),rgba(0,212,255,.05));
+  box-shadow:inset 0 0 30px rgba(0,212,255,.3),0 0 50px rgba(0,212,255,.6),
+    0 0 100px rgba(0,212,255,.3);animation:reactor-glow 2s ease-in-out infinite;
+  transition:transform .2s
 }
-@keyframes fab-pulse{
-  0%,100%{box-shadow:0 0 30px rgba(124,58,237,.5),0 4px 20px rgba(0,0,0,.4)}
-  50%{box-shadow:0 0 50px rgba(124,58,237,.8),0 0 80px rgba(6,182,212,.3),0 4px 20px rgba(0,0,0,.4)}
+@keyframes reactor-glow{
+  0%,100%{box-shadow:inset 0 0 30px rgba(0,212,255,.3),0 0 50px rgba(0,212,255,.6),
+    0 0 100px rgba(0,212,255,.3)}
+  50%{box-shadow:inset 0 0 50px rgba(0,212,255,.5),0 0 80px rgba(0,212,255,.8),
+    0 0 150px rgba(0,212,255,.5)}
 }
-#chat-fab:hover{transform:scale(1.08)}
+#chat-fab:hover{transform:scale(1.1)}
+#chat-fab::before{
+  content:'';position:absolute;inset:8px;border:2px solid var(--cyan);
+  border-radius:50%;opacity:.6;animation:reactor-ring 3s linear infinite
+}
+@keyframes reactor-ring{to{transform:rotate(360deg)}}
+
 #chat-fab-badge{
-  position:absolute;top:-2px;right:-2px;width:18px;height:18px;
-  background:#ef4444;border-radius:50%;font-size:.65rem;font-weight:700;
-  display:flex;align-items:center;justify-content:center;color:#fff;display:none
+  position:absolute;top:-8px;right:-8px;width:24px;height:24px;
+  background:var(--accent);border:2px solid var(--navy);border-radius:50%;
+  font-size:.65rem;font-weight:700;color:var(--navy);display:flex;
+  align-items:center;justify-content:center;box-shadow:0 0 15px var(--accent);
+  display:none
 }
 
-/* ── Chat Panel ── */
+/* CHAT PANEL */
 #chat-panel{
   position:fixed;bottom:0;right:0;width:420px;height:650px;z-index:199;
-  background:rgba(5,5,18,.97);backdrop-filter:blur(24px);
-  border:1px solid var(--border);border-bottom:none;border-right:none;
-  border-radius:20px 0 0 0;
-  display:flex;flex-direction:column;
-  transform:translateY(110%);transition:transform .35s cubic-bezier(.4,0,.2,1)
+  background:linear-gradient(135deg,rgba(10,14,39,.95),rgba(5,8,17,.95));
+  border:2px solid var(--cyan);border-bottom:none;border-right:none;
+  display:flex;flex-direction:column;transform:translateY(110%);
+  transition:transform .4s cubic-bezier(.4,0,.2,1);
+  box-shadow:inset 0 1px 20px rgba(0,212,255,.1),-50px -30px 80px rgba(0,0,0,.5)
 }
 #chat-panel.open{transform:translateY(0)}
+
 .chat-header{
-  padding:16px 20px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:12px
+  padding:14px 16px;border-bottom:2px solid var(--cyan);
+  display:flex;align-items:center;gap:10px;position:relative;
+  background:linear-gradient(90deg,rgba(0,212,255,.1),transparent)
 }
+.chat-header::after{
+  content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,var(--cyan),transparent)
+}
+
 .ai-avatar{
-  width:38px;height:38px;border-radius:50%;background:var(--g1);
-  display:flex;align-items:center;justify-content:center;font-size:1.1rem;
-  flex-shrink:0;box-shadow:0 0 14px rgba(124,58,237,.5)
+  width:40px;height:40px;border-radius:50%;border:2px solid var(--cyan);
+  background:radial-gradient(circle,rgba(0,212,255,.2),rgba(0,212,255,.05));
+  display:flex;align-items:center;justify-content:center;font-size:1.2rem;
+  flex-shrink:0;box-shadow:inset 0 0 15px rgba(0,212,255,.3),var(--cyan-glow);
+  position:relative
 }
-.ai-avatar.thinking{animation:avatar-spin 1s linear infinite}
-@keyframes avatar-spin{to{transform:rotate(360deg) scale(1.05)}}
-.chat-title{font-size:.9rem;font-weight:700}
-.chat-subtitle{font-size:.7rem;color:#64748b}
-.chat-close{margin-left:auto;background:none;border:none;color:#64748b;
-  font-size:1.3rem;cursor:pointer;transition:color .2s;line-height:1}
-.chat-close:hover{color:#e2e8f0}
-#chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
-.msg{max-width:88%;animation:msg-in .25s ease}
+.ai-avatar.thinking::after{
+  content:'';position:absolute;inset:0;border:2px solid var(--cyan);
+  border-radius:50%;animation:avatar-scan 1s linear infinite;border-left-color:transparent;
+  border-bottom-color:transparent
+}
+@keyframes avatar-scan{to{transform:rotate(360deg)}}
+
+.chat-title{
+  font-family:'Orbitron',sans-serif;font-size:.85rem;font-weight:700;
+  color:var(--cyan);letter-spacing:.05em
+}
+.chat-subtitle{
+  font-size:.65rem;color:rgba(0,212,255,.5);font-family:'Courier Prime',monospace;
+  letter-spacing:.02em
+}
+
+.chat-close{
+  margin-left:auto;background:none;border:1px solid var(--cyan);color:var(--cyan);
+  font-size:1.2rem;cursor:pointer;width:28px;height:28px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;font-weight:700;font-family:'Orbitron',sans-serif
+}
+.chat-close:hover{
+  background:rgba(0,212,255,.2);box-shadow:0 0 15px rgba(0,212,255,.4)
+}
+
+#chat-messages{
+  flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;
+  gap:10px;background:repeating-linear-gradient(0deg,transparent,
+    transparent 10px,rgba(0,212,255,.02) 10px,rgba(0,212,255,.02) 12px)
+}
+
+.msg{
+  max-width:88%;animation:msg-in .25s ease;font-size:.8rem;
+  font-family:'Courier Prime',monospace;line-height:1.5
+}
 @keyframes msg-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
 .msg-user{
-  align-self:flex-end;background:rgba(124,58,237,.2);
-  border:1px solid rgba(124,58,237,.3);border-radius:16px 16px 4px 16px;
-  padding:11px 15px;font-size:.85rem;line-height:1.5
+  align-self:flex-end;background:rgba(0,212,255,.12);
+  border:1px solid var(--cyan);border-radius:2px;padding:9px 12px;
+  color:var(--cyan);text-shadow:0 0 8px rgba(0,212,255,.3)
 }
+
 .msg-ai{
-  align-self:flex-start;background:rgba(13,13,35,.9);
-  border:1px solid rgba(6,182,212,.2);border-radius:16px 16px 16px 4px;
-  padding:11px 15px;font-size:.85rem;line-height:1.6
+  align-self:flex-start;background:rgba(0,100,150,.08);
+  border:1px solid rgba(0,212,255,.3);border-radius:2px;padding:9px 12px;
+  color:rgba(0,212,255,.9)
 }
-.msg-ai pre{background:rgba(0,0,0,.3);border-radius:6px;padding:8px;
-  font-family:'JetBrains Mono',monospace;font-size:.75rem;overflow-x:auto;margin-top:8px}
+
 .tool-indicator{
-  align-self:flex-start;font-size:.72rem;color:#06b6d4;
-  background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.15);
-  border-radius:20px;padding:4px 12px;animation:tool-blink 1s infinite
+  align-self:flex-start;font-size:.7rem;color:var(--accent);
+  background:rgba(255,107,0,.1);border:1px solid var(--accent);
+  border-radius:0;padding:4px 10px;animation:tool-blink 1s infinite;
+  font-family:'Orbitron',sans-serif;font-weight:700;letter-spacing:.03em;
+  text-transform:uppercase
 }
 @keyframes tool-blink{0%,100%{opacity:.6}50%{opacity:1}}
-.typing-indicator{
-  align-self:flex-start;display:flex;gap:5px;align-items:center;padding:12px 16px;
-  background:rgba(13,13,35,.9);border:1px solid rgba(6,182,212,.2);
-  border-radius:16px 16px 16px 4px
-}
-.dot{width:7px;height:7px;background:#06b6d4;border-radius:50%;animation:bounce .9s infinite}
-.dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
-@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-7px)}}
-.chat-input-area{padding:14px;border-top:1px solid var(--border)}
-.chat-input-row{display:flex;gap:8px;align-items:flex-end}
-#chat-input{
-  flex:1;background:rgba(10,10,30,.9);border:1px solid var(--border);
-  border-radius:12px;padding:11px 14px;color:#e2e8f0;font-family:inherit;
-  font-size:.85rem;resize:none;outline:none;max-height:120px;
-  transition:border-color .2s;line-height:1.5
-}
-#chat-input:focus{border-color:rgba(124,58,237,.5)}
-.icon-btn{
-  width:40px;height:40px;border-radius:10px;border:none;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;font-size:1rem;
-  flex-shrink:0;transition:all .2s
-}
-.send-btn{background:var(--g1);color:#fff;box-shadow:0 0 14px rgba(124,58,237,.3)}
-.send-btn:hover{box-shadow:0 0 24px rgba(124,58,237,.5);transform:scale(1.05)}
-.voice-btn{background:rgba(10,10,30,.9);color:#64748b;border:1px solid var(--border)}
-.voice-btn:hover{background:rgba(124,58,237,.15);color:#a78bfa}
-.voice-btn.listening{background:rgba(239,68,68,.15);color:#ef4444;
-  border-color:rgba(239,68,68,.3);animation:voice-pulse 1s infinite}
-@keyframes voice-pulse{0%,100%{box-shadow:0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 16px rgba(239,68,68,.4)}}
-.quick-prompts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-.qp{
-  font-size:.72rem;padding:5px 11px;border-radius:20px;cursor:pointer;
-  background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);
-  color:#a78bfa;transition:all .15s;white-space:nowrap
-}
-.qp:hover{background:rgba(124,58,237,.18);border-color:rgba(124,58,237,.4)}
 
-/* ── Settings modal ── */
+.typing-indicator{
+  align-self:flex-start;display:flex;gap:5px;align-items:flex-end;
+  padding:10px 12px;background:rgba(0,100,150,.1);border:1px solid rgba(0,212,255,.3);
+  border-radius:2px
+}
+.dot{
+  width:6px;height:6px;background:var(--cyan);border-radius:50%;
+  animation:type-bounce .8s infinite;box-shadow:0 0 8px rgba(0,212,255,.6)
+}
+.dot:nth-child(2){animation-delay:.1s}.dot:nth-child(3){animation-delay:.2s}
+@keyframes type-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+.chat-input-area{
+  padding:12px;border-top:2px solid var(--cyan);
+  background:linear-gradient(0deg,rgba(0,212,255,.05),transparent)
+}
+
+.quick-prompts{
+  display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px
+}
+.qp{
+  font-size:.65rem;padding:4px 10px;border:1px solid var(--cyan);
+  color:var(--cyan);background:rgba(0,212,255,.08);cursor:pointer;
+  font-family:'Orbitron',sans-serif;font-weight:700;letter-spacing:.03em;
+  border-radius:0;transition:all .15s;text-transform:uppercase;white-space:nowrap;
+  box-shadow:inset 0 0 6px rgba(0,212,255,.1)
+}
+.qp:hover{
+  background:rgba(0,212,255,.15);box-shadow:inset 0 0 12px rgba(0,212,255,.2),
+    0 0 12px rgba(0,212,255,.4)
+}
+
+.chat-input-row{
+  display:flex;gap:8px;align-items:flex-end
+}
+
+#chat-input{
+  flex:1;background:rgba(0,0,0,.6);border:1px solid var(--cyan);
+  border-radius:0;padding:9px 12px;color:var(--cyan);outline:none;
+  max-height:120px;resize:none;font-family:'Courier Prime',monospace;font-size:.8rem
+}
+#chat-input::placeholder{color:rgba(0,212,255,.3)}
+
+.icon-btn{
+  width:36px;height:36px;border-radius:0;border:1px solid var(--cyan);
+  background:rgba(0,212,255,.08);cursor:pointer;display:flex;
+  align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;
+  color:var(--cyan);transition:all .2s;font-weight:700
+}
+.icon-btn:hover{
+  background:rgba(0,212,255,.15);box-shadow:0 0 15px rgba(0,212,255,.4)
+}
+.icon-btn.voice-btn.listening{
+  background:rgba(255,107,0,.15);border-color:var(--accent);color:var(--accent);
+  box-shadow:0 0 15px var(--accent);animation:voice-pulse 1s infinite
+}
+@keyframes voice-pulse{0%,100%{box-shadow:0 0 10px var(--accent)}
+  50%{box-shadow:0 0 25px var(--accent)}}
+
+/* SETTINGS MODAL */
 #settings-modal{
-  display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
-  z-index:300;align-items:center;justify-content:center
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);
+  z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(4px)
 }
 #settings-modal.open{display:flex}
-.modal-box{
-  background:rgba(8,8,24,.98);border:1px solid var(--border);
-  border-radius:16px;padding:28px;width:420px;
-  box-shadow:0 20px 60px rgba(0,0,0,.5)
-}
-.modal-title{font-size:1.1rem;font-weight:700;margin-bottom:6px}
-.modal-sub{font-size:.8rem;color:#64748b;margin-bottom:20px}
-.form-group{margin-bottom:14px}
-label{display:block;font-size:.78rem;font-weight:600;color:#94a3b8;margin-bottom:6px}
-input[type=text],input[type=password]{
-  width:100%;background:rgba(10,10,30,.9);border:1px solid var(--border);
-  border-radius:9px;padding:10px 14px;color:#e2e8f0;font-family:'JetBrains Mono',monospace;
-  font-size:.8rem;outline:none;transition:border-color .2s
-}
-input:focus{border-color:rgba(124,58,237,.5)}
 
-/* ── Animations ── */
-@keyframes fade-up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-.au{opacity:0;animation:fade-up .45s ease forwards}
+.modal-box{
+  background:linear-gradient(135deg,rgba(10,14,39,.95),rgba(5,8,17,.95));
+  border:2px solid var(--cyan);padding:24px;width:380px;
+  box-shadow:0 0 50px rgba(0,212,255,.4),inset 0 0 30px rgba(0,212,255,.1)
+}
+
+.modal-title{
+  font-family:'Orbitron',sans-serif;font-size:.95rem;font-weight:900;
+  color:var(--cyan);margin-bottom:4px;text-shadow:var(--cyan-glow);
+  text-transform:uppercase;letter-spacing:.05em
+}
+
+.modal-sub{
+  font-size:.75rem;color:rgba(0,212,255,.5);margin-bottom:16px;
+  font-family:'Courier Prime',monospace
+}
+
+.form-group{margin-bottom:12px}
+label{
+  display:block;font-size:.7rem;font-weight:700;color:rgba(0,212,255,.6);
+  margin-bottom:4px;font-family:'Orbitron',sans-serif;text-transform:uppercase;
+  letter-spacing:.05em
+}
+
+/* CHARTS */
+.charts-row{
+  display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px;
+  margin-top:20px
+}
+
+/* UTILITIES */
+.spin{animation:spinner .6s linear infinite}
+@keyframes spinner{to{transform:rotate(360deg)}}
+.gtext{color:var(--cyan);text-shadow:var(--cyan-glow)}
+.au{opacity:0;animation:fade-up .4s ease forwards}
 .au-1{animation-delay:.05s}.au-2{animation-delay:.1s}.au-3{animation-delay:.15s}
 .au-4{animation-delay:.2s}.au-5{animation-delay:.25s}.au-6{animation-delay:.3s}
 .au-7{animation-delay:.35s}.au-8{animation-delay:.4s}
-
-/* ── Spinner ── */
-.spin{animation:spinner .7s linear infinite}
-@keyframes spinner{to{transform:rotate(360deg)}}
-
-/* ── Number animation ── */
-.num-animate{transition:all .8s cubic-bezier(.4,0,.2,1)}
-
-/* ── Gradient text ── */
-.gtext{background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-
-/* ── Platform badges ── */
-.platform{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;
-  padding:2px 8px;border-radius:4px;font-weight:500}
+@keyframes fade-up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════ STARS ═══════════════════ -->
-<canvas id="stars"></canvas>
+<!-- BOOT SEQUENCE -->
+<div id="boot-screen">
+  <div class="arc-reactor"></div>
+  <div class="boot-text">⬤ SYSTEM INITIALIZING</div>
+  <div class="boot-text">⬤ NEURAL NETWORK LOADING</div>
+  <div class="boot-text">⬤ META ADS INTERFACE ONLINE</div>
+  <div class="boot-text">⬤ JARVIS READY FOR DEPLOYMENT</div>
+</div>
 
-<!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+<!-- SIDEBAR -->
 <aside id="sidebar">
   <div class="logo">
-    <h1>🦙 Meta Ads AI</h1>
-    <p>Powered by Claude</p>
+    <h1>⚛ JARVIS</h1>
+    <div class="logo-sub">META ADS SYSTEM</div>
   </div>
+
+  <div class="radar-container">
+    <div class="radar-scan"></div>
+    <div class="radar-circle"></div>
+    <div class="radar-circle"></div>
+    <div class="radar-circle"></div>
+    <div class="radar-dot"></div>
+  </div>
+
   <nav>
     <div class="nav-item active" onclick="showPage('dashboard')">
-      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10-3a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1v-7z"/></svg>
-      Dashboard
+      ▤ DASHBOARD
     </div>
     <div class="nav-item" onclick="showPage('campaigns')">
-      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-1 1h-2"/></svg>
-      Kampanjer
+      ▥ CAMPAIGNS
     </div>
     <div class="nav-item" onclick="showPage('analytics')">
-      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
-      Analyse
+      ▦ ANALYTICS
     </div>
     <div class="nav-item" onclick="openSettings()">
-      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
-      Innstillinger
+      ⚙ SYSTEMS
     </div>
   </nav>
+
   <div class="sidebar-footer">
-    <div style="display:flex;align-items:center;gap:8px">
-      <div class="status-dot"></div>
-      <span style="font-size:.75rem;color:#64748b" id="sidebar-status">Laster...</span>
-    </div>
+    <div class="status-indicator"></div>
+    <span id="sidebar-status">SYSTEM READY</span>
   </div>
 </aside>
 
-<!-- ═══════════════════ MAIN ═══════════════════ -->
+<!-- MAIN -->
 <main id="main">
 
-  <!-- ── DASHBOARD PAGE ── -->
+  <!-- DASHBOARD PAGE -->
   <div id="page-dashboard" class="page active">
     <div class="page-header au au-1">
       <div>
-        <div class="page-title gtext">Dashboard Oversikt</div>
-        <div class="page-subtitle" id="last-updated">Henter data...</div>
+        <div class="page-title">⬤ DASHBOARD ANALYSIS</div>
+        <div class="page-subtitle" id="last-updated">⌚ UPDATING...</div>
       </div>
-      <div class="header-actions">
+      <div style="display:flex;gap:10px">
         <select id="date-range" onchange="loadDashboard()">
-          <option value="last_7d">Siste 7 dager</option>
-          <option value="last_30d" selected>Siste 30 dager</option>
-          <option value="last_90d">Siste 90 dager</option>
-          <option value="this_month">Denne måneden</option>
+          <option value="last_7d">7 DAYS</option>
+          <option value="last_30d" selected>30 DAYS</option>
+          <option value="last_90d">90 DAYS</option>
+          <option value="this_month">THIS MONTH</option>
         </select>
-        <button class="btn btn-primary" onclick="loadDashboard()">
-          <svg id="refresh-icon" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-          Oppdater
+        <button class="btn" onclick="loadDashboard()">
+          <span id="refresh-icon">↻</span> SCAN
         </button>
       </div>
     </div>
 
     <div id="demo-banner" class="au au-2" style="display:none">
-      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-      <span><strong>Demo-modus</strong> – Ingen Meta Ads-legitimasjon konfigurert. Data er fiktiv. Gå til <strong>Innstillinger</strong> for å koble til din konto.</span>
+      ⚠ DEMO MODE ACTIVE — Configure credentials in SYSTEMS panel
     </div>
 
     <!-- Stats -->
     <div class="stats-grid">
-      <div class="stat-card au au-2">
-        <div class="stat-icon">💸</div>
-        <div class="stat-label">Totalt forbruk</div>
-        <div class="stat-value gtext" id="stat-spend">—</div>
-        <div class="stat-change up">↑ vs. forrige periode</div>
+      <div class="stat-card au au-2 hud-bracket">
+        <div class="stat-label">$ TOTAL SPEND</div>
+        <div class="stat-value" id="stat-spend">—</div>
+        <div class="stat-change">USD</div>
       </div>
-      <div class="stat-card au au-3">
-        <div class="stat-icon">📈</div>
-        <div class="stat-label">ROAS</div>
-        <div class="stat-value" id="stat-roas" style="color:#10b981">—</div>
-        <div class="stat-change up" id="stat-roas-label">Inntekt / forbruk</div>
+      <div class="stat-card au au-3 hud-bracket">
+        <div class="stat-label">⬆ ROAS</div>
+        <div class="stat-value" id="stat-roas">—</div>
+        <div class="stat-change">RETURN RATIO</div>
       </div>
-      <div class="stat-card au au-3">
-        <div class="stat-icon">👁️</div>
-        <div class="stat-label">Impressioner</div>
-        <div class="stat-value" id="stat-impressions" style="color:#06b6d4">—</div>
-        <div class="stat-change" id="stat-impressions-label" style="color:#64748b">visninger</div>
+      <div class="stat-card au au-3 hud-bracket">
+        <div class="stat-label">👁 IMPRESSIONS</div>
+        <div class="stat-value" id="stat-impressions">—</div>
+        <div class="stat-change">VIEWS</div>
       </div>
-      <div class="stat-card au au-4">
-        <div class="stat-icon">🖱️</div>
-        <div class="stat-label">Klikk</div>
-        <div class="stat-value" id="stat-clicks" style="color:#a78bfa">—</div>
-        <div class="stat-change" id="stat-ctr-label" style="color:#64748b">CTR</div>
+      <div class="stat-card au au-4 hud-bracket">
+        <div class="stat-label">🖱 CLICKS</div>
+        <div class="stat-value" id="stat-clicks">—</div>
+        <div class="stat-change" id="stat-ctr-label">CTR</div>
       </div>
-      <div class="stat-card au au-5">
-        <div class="stat-icon">🛒</div>
-        <div class="stat-label">Konverteringer</div>
-        <div class="stat-value" id="stat-conv" style="color:#f472b6">—</div>
-        <div class="stat-change up" id="stat-conv-label">kjøp</div>
+      <div class="stat-card au au-5 hud-bracket">
+        <div class="stat-label">🛒 CONVERSIONS</div>
+        <div class="stat-value" id="stat-conv">—</div>
+        <div class="stat-change">PURCHASES</div>
       </div>
-      <div class="stat-card au au-6">
-        <div class="stat-icon">👥</div>
-        <div class="stat-label">Rekkevidde</div>
-        <div class="stat-value" id="stat-reach" style="color:#fb923c">—</div>
-        <div class="stat-change" style="color:#64748b">unike profiler</div>
+      <div class="stat-card au au-6 hud-bracket">
+        <div class="stat-label">👥 REACH</div>
+        <div class="stat-value" id="stat-reach">—</div>
+        <div class="stat-change">UNIQUE</div>
       </div>
     </div>
 
     <!-- Charts -->
     <div class="charts-row au au-7">
       <div class="glass-card">
-        <div class="card-title">Forbruk over tid (kr/dag)</div>
+        <div class="card-title">⬆ SPEND ANALYSIS (USD/DAY)</div>
         <canvas id="spend-chart" height="90"></canvas>
       </div>
       <div class="glass-card">
-        <div class="card-title">Kampanjeforbruk</div>
+        <div class="card-title">⚖ CAMPAIGN ALLOCATION</div>
         <canvas id="campaign-chart" height="90"></canvas>
       </div>
     </div>
 
     <!-- Campaigns table -->
     <div class="glass-card au au-8">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-        <div class="card-title" style="margin:0">Aktive kampanjer</div>
-        <button class="btn btn-ghost" onclick="showPage('campaigns')" style="font-size:.75rem;padding:6px 12px">
-          Se alle →
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="card-title" style="margin:0">▤ ACTIVE CAMPAIGNS</div>
+        <button class="btn" onclick="showPage('campaigns')" style="font-size:.7rem;padding:6px 10px">
+          FULL VIEW →
         </button>
       </div>
       <div class="table-wrap">
         <table id="dash-campaigns-table">
           <thead>
             <tr>
-              <th>Kampanje</th>
-              <th>Status</th>
-              <th>Forbruk</th>
-              <th>Impressioner</th>
-              <th>Klikk</th>
+              <th>CAMPAIGN</th>
+              <th>STATUS</th>
+              <th>SPEND</th>
+              <th>IMPRESSIONS</th>
+              <th>CLICKS</th>
               <th>CTR</th>
               <th>CPC</th>
             </tr>
           </thead>
           <tbody id="dash-campaigns-body">
-            <tr><td colspan="7" style="text-align:center;color:#64748b;padding:30px">
-              <div style="display:flex;justify-content:center;gap:6px">
+            <tr><td colspan="7" style="text-align:center;padding:30px">
+              <div style="display:flex;justify-content:center;gap:5px">
                 <div class="dot"></div><div class="dot"></div><div class="dot"></div>
               </div>
             </td></tr>
@@ -421,39 +667,37 @@ input:focus{border-color:rgba(124,58,237,.5)}
     </div>
   </div>
 
-  <!-- ── CAMPAIGNS PAGE ── -->
+  <!-- CAMPAIGNS PAGE -->
   <div id="page-campaigns" class="page">
     <div class="page-header au au-1">
       <div>
-        <div class="page-title gtext">Kampanjer</div>
-        <div class="page-subtitle">Alle kampanjer i annonsekontoen</div>
+        <div class="page-title">▥ CAMPAIGN OPERATIONS</div>
+        <div class="page-subtitle">All campaigns in operation</div>
       </div>
-      <div class="header-actions">
-        <select id="campaign-filter" onchange="filterCampaigns()">
-          <option value="ALL">Alle statuser</option>
-          <option value="ACTIVE">Kun aktive</option>
-          <option value="PAUSED">Kun pauset</option>
-        </select>
-      </div>
+      <select id="campaign-filter" onchange="filterCampaigns()">
+        <option value="ALL">ALL STATUS</option>
+        <option value="ACTIVE">ACTIVE ONLY</option>
+        <option value="PAUSED">PAUSED ONLY</option>
+      </select>
     </div>
     <div class="glass-card au au-2">
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Kampanje</th>
-              <th>Mål</th>
-              <th>Status</th>
-              <th>Dagsbudsjett</th>
-              <th>Forbruk</th>
+              <th>CAMPAIGN</th>
+              <th>OBJECTIVE</th>
+              <th>STATUS</th>
+              <th>DAILY BUDGET</th>
+              <th>SPEND</th>
               <th>CTR</th>
               <th>CPC</th>
-              <th>Klikk</th>
+              <th>CLICKS</th>
             </tr>
           </thead>
           <tbody id="campaigns-body">
-            <tr><td colspan="8" style="text-align:center;color:#64748b;padding:40px">
-              <div style="display:flex;justify-content:center;gap:6px">
+            <tr><td colspan="8" style="text-align:center;padding:40px">
+              <div style="display:flex;justify-content:center;gap:5px">
                 <div class="dot"></div><div class="dot"></div><div class="dot"></div>
               </div>
             </td></tr>
@@ -463,34 +707,34 @@ input:focus{border-color:rgba(124,58,237,.5)}
     </div>
   </div>
 
-  <!-- ── ANALYTICS PAGE ── -->
+  <!-- ANALYTICS PAGE -->
   <div id="page-analytics" class="page">
     <div class="page-header au au-1">
       <div>
-        <div class="page-title gtext">Analyse</div>
-        <div class="page-subtitle">Ytelsesanalyse og innsikt</div>
+        <div class="page-title">▦ PERFORMANCE ANALYTICS</div>
+        <div class="page-subtitle">Advanced metrics analysis</div>
       </div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" class="au au-2">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px" class="au au-2">
       <div class="glass-card">
-        <div class="card-title">Topp annonser – forbruk</div>
+        <div class="card-title">⬆ TOP ADS BY SPEND</div>
         <canvas id="top-ads-chart" height="180"></canvas>
       </div>
       <div class="glass-card">
-        <div class="card-title">CTR fordeling</div>
+        <div class="card-title">% CTR DISTRIBUTION</div>
         <canvas id="ctr-chart" height="180"></canvas>
       </div>
     </div>
-    <div class="glass-card au au-3" style="margin-top:16px">
-      <div class="card-title">Topp annonser</div>
+    <div class="glass-card au au-3" style="margin-top:20px">
+      <div class="card-title">▤ TOP PERFORMING ADS</div>
       <div class="table-wrap">
         <table id="top-ads-table">
           <thead>
-            <tr><th>Annonse</th><th>Status</th><th>Forbruk</th><th>Impressioner</th><th>Klikk</th><th>CTR</th><th>CPC</th></tr>
+            <tr><th>AD NAME</th><th>STATUS</th><th>SPEND</th><th>IMPRESSIONS</th><th>CLICKS</th><th>CTR</th><th>CPC</th></tr>
           </thead>
           <tbody id="top-ads-body">
-            <tr><td colspan="7" style="text-align:center;color:#64748b;padding:30px">
-              <div style="display:flex;justify-content:center;gap:6px">
+            <tr><td colspan="7" style="text-align:center;padding:30px">
+              <div style="display:flex;justify-content:center;gap:5px">
                 <div class="dot"></div><div class="dot"></div><div class="dot"></div>
               </div>
             </td></tr>
@@ -502,160 +746,105 @@ input:focus{border-color:rgba(124,58,237,.5)}
 
 </main>
 
-<!-- ═══════════════════ CHAT FAB + PANEL ═══════════════════ -->
-<div id="chat-fab" onclick="toggleChat()" title="Snakk med AI-assistenten">
-  🦙
-  <div id="chat-fab-badge">1</div>
+<!-- ARC REACTOR (CHAT FAB) -->
+<div id="chat-fab" onclick="toggleChat()" title="Initialize JARVIS AI">
+  ⚛
 </div>
 
+<!-- CHAT PANEL -->
 <div id="chat-panel">
   <div class="chat-header">
-    <div class="ai-avatar" id="ai-avatar">🦙</div>
+    <div class="ai-avatar" id="ai-avatar">⚛</div>
     <div>
-      <div class="chat-title">Meta Ads AI</div>
-      <div class="chat-subtitle" id="ai-status-text">Klar til å hjelpe</div>
+      <div class="chat-title">JARVIS A.I.</div>
+      <div class="chat-subtitle" id="ai-status-text">SYSTEMS ONLINE</div>
     </div>
     <button class="chat-close" onclick="toggleChat()">✕</button>
   </div>
   <div id="chat-messages">
     <div class="msg msg-ai">
-      Hei! 👋 Jeg er din Meta Ads AI-assistent. Jeg har tilgang til all data fra annonsekontoen din og kan hjelpe deg med:
-      <br><br>
-      • Analyse av kampanjeytelse<br>
-      • Forbruk og ROAS-oversikt<br>
-      • Optimiseringsforslag<br>
-      • Svar på alle spørsmål om annonsene dine
-      <br><br>
-      Hva vil du vite?
+Good afternoon, sir. I am JARVIS, your intelligent AI system for META advertising operations. I have full access to your campaign data and am prepared to provide comprehensive analysis, strategic recommendations, and real-time insights.
+
+How may I be of service?
     </div>
   </div>
   <div class="chat-input-area">
     <div class="quick-prompts" id="quick-prompts">
-      <div class="qp" onclick="sendQuick('Hvordan går det med kampanjene mine?')">📊 Kampanjestatus</div>
-      <div class="qp" onclick="sendQuick('Hva er ROAS for de siste 30 dagene?')">💰 ROAS</div>
-      <div class="qp" onclick="sendQuick('Hvilken kampanje presterer best?')">🏆 Beste kampanje</div>
-      <div class="qp" onclick="sendQuick('Gi meg 3 konkrete råd for å forbedre resultatene')">💡 Optimaliser</div>
+      <div class="qp" onclick="sendQuick('Campaign status report.')">CAMPAIGN STATUS</div>
+      <div class="qp" onclick="sendQuick('ROAS analysis for the past 30 days.')">ROAS REPORT</div>
+      <div class="qp" onclick="sendQuick('Which campaign is performing optimally?')">TOP PERFORMER</div>
+      <div class="qp" onclick="sendQuick('Generate optimization recommendations.')">OPTIMIZE</div>
     </div>
     <div class="chat-input-row">
-      <button class="icon-btn voice-btn" id="voice-btn" onclick="toggleVoice()" title="Taleinngang">🎤</button>
-      <textarea id="chat-input" placeholder="Spør om kampanjer, forbruk, ROAS..." rows="1"
+      <button class="icon-btn voice-btn" id="voice-btn" onclick="toggleVoice()" title="Voice interface">🎤</button>
+      <textarea id="chat-input" placeholder="Query JARVIS..." rows="1"
         onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-      <button class="icon-btn send-btn" onclick="sendMessage()" title="Send">
-        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-        </svg>
+      <button class="icon-btn" onclick="sendMessage()" title="Transmit">
+        ▶
       </button>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════ SETTINGS MODAL ═══════════════════ -->
+<!-- SETTINGS MODAL -->
 <div id="settings-modal" onclick="closeSettingsOnBg(event)">
   <div class="modal-box">
-    <div class="modal-title gtext">⚙️ Innstillinger</div>
-    <div class="modal-sub">Koble til Meta Ads og Anthropic for full funksjonalitet</div>
+    <div class="modal-title">⚙ SYSTEM CONFIGURATION</div>
+    <div class="modal-sub">Initialize APIs for full operational capability</div>
     <div class="form-group">
-      <label>Anthropic API-nøkkel</label>
+      <label>ANTHROPIC API KEY</label>
       <input type="password" id="s-anthropic" placeholder="sk-ant-..." autocomplete="off">
     </div>
     <div class="form-group">
-      <label>Meta Access Token</label>
+      <label>META ACCESS TOKEN</label>
       <input type="password" id="s-meta-token" placeholder="EAAxxxxxxx..." autocomplete="off">
     </div>
     <div class="form-group">
-      <label>Meta Ad Account ID</label>
+      <label>META AD ACCOUNT ID</label>
       <input type="text" id="s-meta-account" placeholder="act_xxxxxxxx">
     </div>
-    <p style="font-size:.75rem;color:#64748b;margin-bottom:20px;line-height:1.6">
-      Legitimasjonen lagres i en <code style="color:#a78bfa">.env</code>-fil på serveren.
-      Du finner API-nøkler i <strong>Meta Business Manager → Innstillinger → Dataaer</strong>.
+    <p style="font-size:.7rem;color:rgba(0,212,255,.5);margin-bottom:16px;line-height:1.5;font-family:'Courier Prime',monospace">
+      Credentials stored securely in system .env file. Retrieve tokens from META BUSINESS MANAGER → SETTINGS → DATA SOURCES.
     </p>
     <div style="display:flex;gap:10px;justify-content:flex-end">
-      <button class="btn btn-ghost" onclick="closeSettings()">Avbryt</button>
-      <button class="btn btn-primary" onclick="saveSettings()">Lagre & start på nytt</button>
+      <button class="btn" onclick="closeSettings()" style="background:rgba(0,0,0,.3);border-color:rgba(0,212,255,.3)">CANCEL</button>
+      <button class="btn" onclick="saveSettings()">SAVE & REBOOT</button>
     </div>
   </div>
 </div>
 
 <script>
-// ════════════════════════════════════════════════
-// STARS BACKGROUND
-// ════════════════════════════════════════════════
-(function(){
-  const c=document.getElementById('stars'),ctx=c.getContext('2d');
-  c.width=window.innerWidth;c.height=window.innerHeight;
-  const stars=Array.from({length:180},()=>({
-    x:Math.random()*c.width,y:Math.random()*c.height,
-    r:Math.random()*1.2+.3,t:Math.random()*3000+1000,
-    d:Math.random()*3000,op:Math.random()
-  }));
-  function draw(ts){
-    ctx.clearRect(0,0,c.width,c.height);
-    stars.forEach(s=>{
-      const a=.1+.7*(1+Math.sin((ts/s.t)+s.d))/2;
-      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(255,255,255,${a})`;ctx.fill();
-    });
-    requestAnimationFrame(draw);
-  }
-  requestAnimationFrame(draw);
-  window.addEventListener('resize',()=>{c.width=window.innerWidth;c.height=window.innerHeight});
-})();
+// BOOT SEQUENCE
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    document.getElementById('boot-screen').classList.add('hidden');
+  },5000);
+});
 
-// ════════════════════════════════════════════════
 // STATE
-// ════════════════════════════════════════════════
 let chatHistory=[];
 let isThinking=false;
-let isListening=false;
 let spendChart,campaignChart,topAdsChart,ctrChart;
 let dashData={};
-let recognition=null;
-const synth=window.speechSynthesis;
 
-// ════════════════════════════════════════════════
 // NAVIGATION
-// ════════════════════════════════════════════════
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
-  const items=document.querySelectorAll('.nav-item');
   const map={dashboard:0,campaigns:1,analytics:2};
-  items[map[id]].classList.add('active');
+  document.querySelectorAll('.nav-item')[map[id]].classList.add('active');
   if(id==='analytics') loadAnalytics();
 }
 
-// ════════════════════════════════════════════════
-// FORMAT HELPERS
-// ════════════════════════════════════════════════
-function fmtNum(n){
-  const v=parseFloat(n)||0;
-  if(v>=1000000) return (v/1000000).toFixed(1)+'M';
-  if(v>=1000) return (v/1000).toFixed(1)+'K';
-  return v.toFixed(0);
-}
-function fmtMoney(n){
-  const v=parseFloat((n+'').replace(/\s/g,''))||0;
-  if(v>=1000000) return 'kr '+(v/1000000).toFixed(2)+'M';
-  if(v>=1000) return 'kr '+(v/1000).toFixed(1)+'K';
-  return 'kr '+v.toFixed(2);
-}
-function fmtPct(n){return (parseFloat(n)||0).toFixed(2)+'%'}
-function statusBadge(s){
-  return s==='ACTIVE'
-    ?'<span class="badge badge-active">● Aktiv</span>'
-    :'<span class="badge badge-paused">⏸ Pauset</span>';
-}
-function objLabel(o){
-  const m={OUTCOME_SALES:'Salg',OUTCOME_AWARENESS:'Rekkevidde',OUTCOME_TRAFFIC:'Trafikk',
-    OUTCOME_ENGAGEMENT:'Engasjement',OUTCOME_LEADS:'Leads'};
-  return m[o]||o||'—';
-}
+// FORMATTING
+function fmtNum(n){const v=parseFloat(n)||0;if(v>=1000000)return(v/1000000).toFixed(1)+'M';if(v>=1000)return(v/1000).toFixed(1)+'K';return v.toFixed(0);}
+function fmtMoney(n){const v=parseFloat((n+'').replace(/\s/g,''))||0;if(v>=1000000)return'$'+(v/1000000).toFixed(2)+'M';if(v>=1000)return'$'+(v/1000).toFixed(1)+'K';return'$'+v.toFixed(2);}
+function fmtPct(n){return(parseFloat(n)||0).toFixed(2)+'%'}
+function statusBadge(s){return s==='ACTIVE'?'<span class="badge badge-active">● ACTIVE</span>':'<span class="badge badge-paused">⏸ PAUSED</span>';}
+function objLabel(o){const m={OUTCOME_SALES:'SALES',OUTCOME_AWARENESS:'AWARENESS',OUTCOME_TRAFFIC:'TRAFFIC',OUTCOME_ENGAGEMENT:'ENGAGEMENT',OUTCOME_LEADS:'LEADS'};return m[o]||o||'—';}
 
-// ════════════════════════════════════════════════
-// DASHBOARD LOAD
-// ════════════════════════════════════════════════
+// DASHBOARD
 async function loadDashboard(){
   const icon=document.getElementById('refresh-icon');
   icon.classList.add('spin');
@@ -666,19 +855,18 @@ async function loadDashboard(){
     renderCampaignsTable(dashData.campaigns);
     renderSpendChart(dashData.trend);
     renderCampaignChart(dashData.campaigns);
-    document.getElementById('last-updated').textContent='Sist oppdatert: '+new Date().toLocaleTimeString('no-NO');
-  }catch(e){console.error(e)}
+    document.getElementById('last-updated').textContent='⌚ '+new Date().toLocaleTimeString('en-GB');
+  }catch(e){}
   icon.classList.remove('spin');
 }
 
 function renderStats(ov){
-  if(!ov||!ov.data||!ov.data[0]) return;
+  if(!ov||!ov.data||!ov.data[0])return;
   const d=ov.data[0];
   const purchases=(d.actions||[]).find(a=>a.action_type==='purchase');
   const revenue=(d.action_values||[]).find(a=>a.action_type==='purchase');
   const spend=parseFloat((d.spend||'0').replace(/\s/g,''));
   const roas=revenue?(parseFloat((revenue.value||'0').replace(/\s/g,''))/spend).toFixed(2):'—';
-
   animateNum('stat-spend',()=>fmtMoney(d.spend||0));
   animateNum('stat-impressions',()=>fmtNum(d.impressions||0));
   animateNum('stat-clicks',()=>fmtNum(d.clicks||0));
@@ -686,319 +874,125 @@ function renderStats(ov){
   animateNum('stat-reach',()=>fmtNum(d.reach||0));
   document.getElementById('stat-roas').textContent=roas==='—'?'—':roas+'x';
   document.getElementById('stat-ctr-label').textContent='CTR: '+fmtPct(d.ctr||0);
-  if(ov._demo) document.getElementById('demo-banner').style.display='flex';
+  if(ov._demo)document.getElementById('demo-banner').style.display='flex';
 }
 
 function animateNum(id,fn){
   const el=document.getElementById(id);
   el.style.opacity='0';el.style.transform='translateY(8px)';
-  setTimeout(()=>{
-    el.textContent=fn();
-    el.style.transition='all .5s ease';
-    el.style.opacity='1';el.style.transform='translateY(0)';
-  },50);
+  setTimeout(()=>{el.textContent=fn();el.style.transition='all .5s ease';el.style.opacity='1';el.style.transform='translateY(0)';},50);
 }
 
 function renderCampaignsTable(data){
   const tbody=document.getElementById('dash-campaigns-body');
-  if(!data||!data.data){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:#64748b;padding:30px">Ingen data</td></tr>';return;}
-  tbody.innerHTML=data.data.slice(0,5).map(c=>{
-    const ins=(c.insights&&c.insights.data&&c.insights.data[0])||{};
-    return `<tr>
-      <td style="font-weight:500">${c.name}</td>
-      <td>${statusBadge(c.status)}</td>
-      <td style="color:#a78bfa;font-family:'JetBrains Mono',monospace">${fmtMoney(ins.spend||0)}</td>
-      <td style="color:#06b6d4">${fmtNum(ins.impressions||0)}</td>
-      <td>${fmtNum(ins.clicks||0)}</td>
-      <td>${fmtPct(ins.ctr||0)}</td>
-      <td style="font-family:'JetBrains Mono',monospace">${fmtMoney(ins.cpc||0)}</td>
-    </tr>`;
-  }).join('');
+  if(!data||!data.data){tbody.innerHTML='<tr><td colspan="7">NO DATA</td></tr>';return;}
+  tbody.innerHTML=data.data.slice(0,5).map(c=>{const ins=(c.insights&&c.insights.data&&c.insights.data[0])||{};return'<tr><td style="font-weight:700">'+c.name+'</td><td>'+statusBadge(c.status)+'</td><td style="color:var(--cyan);font-family:Courier Prime,monospace">'+fmtMoney(ins.spend||0)+'</td><td>'+fmtNum(ins.impressions||0)+'</td><td>'+fmtNum(ins.clicks||0)+'</td><td>'+fmtPct(ins.ctr||0)+'</td><td style="font-family:Courier Prime,monospace">'+fmtMoney(ins.cpc||0)+'</td></tr>';}).join('');
 }
 
 function renderSpendChart(trend){
   const ctx=document.getElementById('spend-chart').getContext('2d');
-  if(spendChart) spendChart.destroy();
+  if(spendChart)spendChart.destroy();
   const data=(trend&&trend.data)||[];
   const labels=data.map(d=>d.date?d.date.slice(5):'');
   const vals=data.map(d=>parseFloat((d.spend||'0').replace(/\s/g,'')));
-  spendChart=new Chart(ctx,{
-    type:'line',
-    data:{
-      labels,
-      datasets:[{
-        label:'Forbruk (kr)',data:vals,
-        borderColor:'#7c3aed',backgroundColor:'rgba(124,58,237,.12)',
-        borderWidth:2,pointRadius:3,pointBackgroundColor:'#7c3aed',
-        tension:.4,fill:true
-      }]
-    },
-    options:{
-      responsive:true,animation:{duration:800},
-      plugins:{legend:{display:false},tooltip:{
-        backgroundColor:'rgba(8,8,24,.95)',borderColor:'rgba(124,58,237,.4)',
-        borderWidth:1,titleColor:'#a78bfa',bodyColor:'#e2e8f0',
-        callbacks:{label:ctx=>'kr '+ctx.raw.toFixed(2)}
-      }},
-      scales:{
-        x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#64748b',font:{size:10}}},
-        y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#64748b',font:{size:10},
-          callback:v=>'kr '+fmtNum(v)}}
-      }
-    }
-  });
+  spendChart=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'USD',data:vals,borderColor:'#00d4ff',backgroundColor:'rgba(0,212,255,.12)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#00d4ff',pointBorderColor:'#0a0e27',pointBorderWidth:2,tension:.4,fill:true}]},options:{responsive:true,animation:{duration:800},plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(10,14,39,.95)',borderColor:'#00d4ff',borderWidth:2,titleColor:'#00d4ff',bodyColor:'var(--cyan)',callbacks:{label:ctx=>'USD '+ctx.raw.toFixed(2)}}},scales:{x:{grid:{color:'rgba(0,212,255,.08)'},ticks:{color:'rgba(0,212,255,.5)',font:{size:9}}},y:{grid:{color:'rgba(0,212,255,.08)'},ticks:{color:'rgba(0,212,255,.5)',callback:v=>'$'+fmtNum(v)}}}}});
 }
 
 function renderCampaignChart(data){
   const ctx=document.getElementById('campaign-chart').getContext('2d');
-  if(campaignChart) campaignChart.destroy();
+  if(campaignChart)campaignChart.destroy();
   const campaigns=(data&&data.data)||[];
-  const labels=campaigns.map(c=>c.name.slice(0,18)+(c.name.length>18?'…':''));
-  const vals=campaigns.map(c=>{
-    const ins=(c.insights&&c.insights.data&&c.insights.data[0])||{};
-    return parseFloat((ins.spend||'0').replace(/\s/g,''));
-  });
-  const colors=['rgba(124,58,237,.8)','rgba(6,182,212,.8)','rgba(244,114,182,.8)','rgba(251,146,60,.8)'];
-  campaignChart=new Chart(ctx,{
-    type:'doughnut',
-    data:{labels,datasets:[{data:vals,backgroundColor:colors,borderWidth:2,
-      borderColor:'rgba(4,4,15,.95)',hoverOffset:8}]},
-    options:{
-      responsive:true,animation:{duration:800},
-      plugins:{
-        legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:10},padding:12}},
-        tooltip:{backgroundColor:'rgba(8,8,24,.95)',borderColor:'rgba(124,58,237,.4)',
-          borderWidth:1,titleColor:'#a78bfa',bodyColor:'#e2e8f0',
-          callbacks:{label:ctx=>`kr ${fmtNum(ctx.raw)} (${((ctx.raw/vals.reduce((a,b)=>a+b,0))*100).toFixed(0)}%)`}}
-      }
-    }
-  });
+  const labels=campaigns.map(c=>c.name.slice(0,14)+(c.name.length>14?'…':''));
+  const vals=campaigns.map(c=>{const ins=(c.insights&&c.insights.data&&c.insights.data[0])||{};return parseFloat((ins.spend||'0').replace(/\s/g,''));});
+  const colors=['rgba(0,212,255,.7)','rgba(0,153,255,.7)','rgba(255,107,0,.7)','rgba(0,212,255,.4)'];
+  campaignChart=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data:vals,backgroundColor:colors,borderWidth:2,borderColor:'var(--navy)',hoverOffset:8}]},options:{responsive:true,animation:{duration:800},plugins:{legend:{position:'bottom',labels:{color:'rgba(0,212,255,.7)',font:{size:9},padding:12}},tooltip:{backgroundColor:'rgba(10,14,39,.95)',borderColor:'#00d4ff',borderWidth:2,titleColor:'#00d4ff',bodyColor:'var(--cyan)',callbacks:{label:ctx=>`$${fmtNum(ctx.raw)} (${((ctx.raw/vals.reduce((a,b)=>a+b,0))*100).toFixed(0)}%)`}}}}});
 }
 
-// ════════════════════════════════════════════════
 // CAMPAIGNS PAGE
-// ════════════════════════════════════════════════
 function filterCampaigns(){
-  if(!dashData.campaigns) return;
+  if(!dashData.campaigns)return;
   const filter=document.getElementById('campaign-filter').value;
   const data=dashData.campaigns.data||[];
   const filtered=filter==='ALL'?data:data.filter(c=>c.status===filter);
   const tbody=document.getElementById('campaigns-body');
-  tbody.innerHTML=filtered.map(c=>{
-    const ins=(c.insights&&c.insights.data&&c.insights.data[0])||{};
-    const budget=c.daily_budget?'kr '+fmtNum(parseInt(c.daily_budget)/100)+'/dag':'—';
-    return `<tr>
-      <td style="font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.name}</td>
-      <td><span style="color:#64748b;font-size:.75rem">${objLabel(c.objective)}</span></td>
-      <td>${statusBadge(c.status)}</td>
-      <td style="font-family:'JetBrains Mono',monospace;font-size:.8rem">${budget}</td>
-      <td style="color:#a78bfa;font-family:'JetBrains Mono',monospace">${fmtMoney(ins.spend||0)}</td>
-      <td>${fmtPct(ins.ctr||0)}</td>
-      <td style="font-family:'JetBrains Mono',monospace">${fmtMoney(ins.cpc||0)}</td>
-      <td style="color:#06b6d4">${fmtNum(ins.clicks||0)}</td>
-    </tr>`;
-  }).join('');
+  tbody.innerHTML=filtered.map(c=>{const ins=(c.insights&&c.insights.data&&c.insights.data[0])||{};const budget=c.daily_budget?'$'+fmtNum(parseInt(c.daily_budget)/100)+'/day':'—';return'<tr><td style="font-weight:700">'+c.name+'</td><td><span style="color:rgba(0,212,255,.6);font-size:.75rem;font-weight:700">'+objLabel(c.objective)+'</span></td><td>'+statusBadge(c.status)+'</td><td style="font-family:Courier Prime,monospace;font-size:.75rem">'+budget+'</td><td style="color:var(--cyan);font-family:Courier Prime,monospace">'+fmtMoney(ins.spend||0)+'</td><td>'+fmtPct(ins.ctr||0)+'</td><td style="font-family:Courier Prime,monospace">'+fmtMoney(ins.cpc||0)+'</td><td>'+fmtNum(ins.clicks||0)+'</td></tr>';}).join('');
 }
 
-// ════════════════════════════════════════════════
 // ANALYTICS PAGE
-// ════════════════════════════════════════════════
-async function loadAnalytics(){
-  try{
-    const res=await fetch('/api/dashboard');
-    const d=await res.json();
-    // top ads
-    const topAds=d.campaigns&&d.campaigns.data?d.campaigns.data:[];
-    renderTopAdsChart(topAds);
-    renderCtrChart(topAds);
-    renderTopAdsTable(topAds);
-  }catch(e){}
-}
+async function loadAnalytics(){try{const res=await fetch('/api/dashboard');const d=await res.json();const topAds=d.campaigns&&d.campaigns.data?d.campaigns.data:[];renderTopAdsChart(topAds);renderCtrChart(topAds);renderTopAdsTable(topAds);}catch(e){}}
 
 function renderTopAdsChart(ads){
   const ctx=document.getElementById('top-ads-chart').getContext('2d');
-  if(topAdsChart) topAdsChart.destroy();
-  const labels=ads.slice(0,5).map(a=>a.name.slice(0,14)+'…');
-  const vals=ads.slice(0,5).map(a=>{
-    const ins=(a.insights&&a.insights.data&&a.insights.data[0])||{};
-    return parseFloat((ins.spend||'0').replace(/\s/g,''));
-  });
-  topAdsChart=new Chart(ctx,{
-    type:'bar',
-    data:{labels,datasets:[{label:'Forbruk',data:vals,
-      backgroundColor:'rgba(124,58,237,.5)',borderColor:'#7c3aed',borderWidth:1,
-      borderRadius:6}]},
-    options:{responsive:true,animation:{duration:800},
-      plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(8,8,24,.95)',
-        borderColor:'rgba(124,58,237,.4)',borderWidth:1,titleColor:'#a78bfa',bodyColor:'#e2e8f0',
-        callbacks:{label:c=>'kr '+fmtNum(c.raw)}}},
-      scales:{x:{grid:{display:false},ticks:{color:'#64748b',font:{size:10}}},
-        y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#64748b',font:{size:10},
-          callback:v=>'kr '+fmtNum(v)}}}}
-  });
+  if(topAdsChart)topAdsChart.destroy();
+  const labels=ads.slice(0,5).map(a=>a.name.slice(0,12)+'…');
+  const vals=ads.slice(0,5).map(a=>{const ins=(a.insights&&a.insights.data&&a.insights.data[0])||{};return parseFloat((ins.spend||'0').replace(/\s/g,''));});
+  topAdsChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'USD',data:vals,backgroundColor:'rgba(0,212,255,.5)',borderColor:'#00d4ff',borderWidth:2}]},options:{responsive:true,animation:{duration:800},plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(10,14,39,.95)',borderColor:'#00d4ff',borderWidth:2,titleColor:'#00d4ff',bodyColor:'var(--cyan)',callbacks:{label:c=>'$'+fmtNum(c.raw)}}},scales:{x:{grid:{display:false},ticks:{color:'rgba(0,212,255,.5)',font:{size:9}}},y:{grid:{color:'rgba(0,212,255,.1)'},ticks:{color:'rgba(0,212,255,.5)',callback:v=>'$'+fmtNum(v)}}}}});
 }
 
 function renderCtrChart(ads){
   const ctx=document.getElementById('ctr-chart').getContext('2d');
-  if(ctrChart) ctrChart.destroy();
-  const labels=ads.slice(0,5).map(a=>a.name.slice(0,12)+'…');
-  const vals=ads.slice(0,5).map(a=>{
-    const ins=(a.insights&&a.insights.data&&a.insights.data[0])||{};
-    return parseFloat(ins.ctr||0);
-  });
-  ctrChart=new Chart(ctx,{
-    type:'radar',
-    data:{labels,datasets:[{label:'CTR %',data:vals,
-      backgroundColor:'rgba(6,182,212,.15)',borderColor:'#06b6d4',
-      pointBackgroundColor:'#06b6d4',borderWidth:2}]},
-    options:{responsive:true,animation:{duration:800},
-      plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(8,8,24,.95)',
-        borderColor:'rgba(6,182,212,.3)',borderWidth:1,titleColor:'#06b6d4',bodyColor:'#e2e8f0',
-        callbacks:{label:c=>c.raw.toFixed(2)+'%'}}},
-      scales:{r:{grid:{color:'rgba(255,255,255,.06)'},ticks:{display:false},
-        pointLabels:{color:'#64748b',font:{size:10}}}}}
-  });
+  if(ctrChart)ctrChart.destroy();
+  const labels=ads.slice(0,5).map(a=>a.name.slice(0,10)+'…');
+  const vals=ads.slice(0,5).map(a=>{const ins=(a.insights&&a.insights.data&&a.insights.data[0])||{};return parseFloat(ins.ctr||0);});
+  ctrChart=new Chart(ctx,{type:'radar',data:{labels,datasets:[{label:'CTR %',data:vals,backgroundColor:'rgba(0,212,255,.15)',borderColor:'#00d4ff',pointBackgroundColor:'#00d4ff',pointBorderColor:'var(--navy)',pointBorderWidth:2,borderWidth:2}]},options:{responsive:true,animation:{duration:800},plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(10,14,39,.95)',borderColor:'rgba(0,212,255,.5)',borderWidth:1,titleColor:'#00d4ff',bodyColor:'var(--cyan)',callbacks:{label:c=>c.raw.toFixed(2)+'%'}}},scales:{r:{grid:{color:'rgba(0,212,255,.1)'},ticks:{display:false},pointLabels:{color:'rgba(0,212,255,.6)',font:{size:9}}}}}});
 }
 
 function renderTopAdsTable(ads){
   const tbody=document.getElementById('top-ads-body');
-  tbody.innerHTML=ads.map(a=>{
-    const ins=(a.insights&&a.insights.data&&a.insights.data[0])||{};
-    return `<tr>
-      <td style="font-weight:500">${a.name}</td>
-      <td>${statusBadge(a.status)}</td>
-      <td style="color:#a78bfa;font-family:'JetBrains Mono',monospace">${fmtMoney(ins.spend||0)}</td>
-      <td style="color:#06b6d4">${fmtNum(ins.impressions||0)}</td>
-      <td>${fmtNum(ins.clicks||0)}</td>
-      <td>${fmtPct(ins.ctr||0)}</td>
-      <td style="font-family:'JetBrains Mono',monospace">${fmtMoney(ins.cpc||0)}</td>
-    </tr>`;
-  }).join('');
+  tbody.innerHTML=ads.map(a=>{const ins=(a.insights&&a.insights.data&&a.insights.data[0])||{};return'<tr><td style="font-weight:700">'+a.name+'</td><td>'+statusBadge(a.status)+'</td><td style="color:var(--cyan);font-family:Courier Prime,monospace">'+fmtMoney(ins.spend||0)+'</td><td>'+fmtNum(ins.impressions||0)+'</td><td>'+fmtNum(ins.clicks||0)+'</td><td>'+fmtPct(ins.ctr||0)+'</td><td style="font-family:Courier Prime,monospace">'+fmtMoney(ins.cpc||0)+'</td></tr>';}).join('');
 }
 
-// ════════════════════════════════════════════════
 // CHAT
-// ════════════════════════════════════════════════
 let chatOpen=false;
-function toggleChat(){
-  chatOpen=!chatOpen;
-  document.getElementById('chat-panel').classList.toggle('open',chatOpen);
-  document.getElementById('chat-fab-badge').style.display='none';
-  if(chatOpen) document.getElementById('chat-input').focus();
-}
-
-function handleKey(e){
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}
-}
-function autoResize(ta){
-  ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,120)+'px';
-}
-function sendQuick(msg){
-  document.getElementById('chat-input').value=msg;
-  sendMessage();
-}
+function toggleChat(){chatOpen=!chatOpen;document.getElementById('chat-panel').classList.toggle('open',chatOpen);document.getElementById('chat-fab-badge').style.display='none';if(chatOpen)document.getElementById('chat-input').focus();}
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
+function autoResize(ta){ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,120)+'px';}
+function sendQuick(msg){document.getElementById('chat-input').value=msg;sendMessage();}
 
 async function sendMessage(){
-  if(isThinking) return;
+  if(isThinking)return;
   const input=document.getElementById('chat-input');
   const msg=input.value.trim();
-  if(!msg) return;
+  if(!msg)return;
   input.value='';input.style.height='auto';
-
   appendMsg(msg,'user');
   document.getElementById('quick-prompts').style.display='none';
-
   isThinking=true;
   const avatar=document.getElementById('ai-avatar');
   const statusTxt=document.getElementById('ai-status-text');
   avatar.classList.add('thinking');
-  statusTxt.textContent='Tenker...';
-
+  statusTxt.textContent='PROCESSING...';
   const typing=appendTyping();
-
   try{
-    const res=await fetch('/api/chat',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({message:msg,history:chatHistory})
-    });
-
-    if(!res.ok){
-      const err=await res.json();
-      removeEl(typing);
-      appendMsg('⚠️ '+( err.error||'Noe gikk galt'),'ai');
-      isThinking=false;avatar.classList.remove('thinking');statusTxt.textContent='Klar til å hjelpe';
-      return;
-    }
-
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,history:chatHistory})});
+    if(!res.ok){const err=await res.json();removeEl(typing);appendMsg('⚠ SYSTEM ERROR: '+(err.error||'UNKNOWN'),'ai');isThinking=false;avatar.classList.remove('thinking');statusTxt.textContent='SYSTEMS ONLINE';return;}
     const reader=res.body.getReader();
     const dec=new TextDecoder();
     let aiText='';
     let aiEl=null;
     let removed=false;
-
     while(true){
       const {done,value}=await reader.read();
-      if(done) break;
+      if(done)break;
       const lines=dec.decode(value).split('\n');
       for(const line of lines){
-        if(!line.startsWith('data:')) continue;
-        try{
-          const ev=JSON.parse(line.slice(5));
-          if(ev.t==='text'){
-            if(!aiEl){removeEl(typing);removed=true;aiEl=appendMsg('','ai');}
-            aiText+=ev.v;
-            aiEl.querySelector('.msg-content').innerHTML=formatAiText(aiText);
-            scrollChat();
-          } else if(ev.t==='tool'){
-            statusTxt.textContent='Henter '+toolLabel(ev.v)+'...';
-            if(!removed){removeEl(typing);removed=true;}
-            appendToolIndicator(toolLabel(ev.v));
-          } else if(ev.t==='done'){
-            // done
-          }
-        }catch(_){}
+        if(!line.startsWith('data:'))continue;
+        try{const ev=JSON.parse(line.slice(5));if(ev.t==='text'){if(!aiEl){removeEl(typing);removed=true;aiEl=appendMsg('','ai');}aiText+=ev.v;aiEl.querySelector('.msg-content').innerHTML=escHtml(aiText);scrollChat();}else if(ev.t==='tool'){statusTxt.textContent='SCANNING '+ev.v.toUpperCase()+'...';if(!removed){removeEl(typing);removed=true;}appendToolIndicator(ev.v.toUpperCase());}}catch(_){}}
       }
     }
-
-    if(aiText){
-      chatHistory.push({role:'user',content:msg});
-      chatHistory.push({role:'assistant',content:aiText});
-      if(chatHistory.length>20) chatHistory=chatHistory.slice(-20);
-      if(!synth.speaking && document.getElementById('voice-btn').dataset.autoRead==='true'){
-        speak(aiText.slice(0,300));
-      }
-    }
-  }catch(e){
-    removeEl(typing);
-    appendMsg('⚠️ Tilkoblingsfeil: '+e.message,'ai');
-  }
-
+    if(aiText){chatHistory.push({role:'user',content:msg});chatHistory.push({role:'assistant',content:aiText});if(chatHistory.length>20)chatHistory=chatHistory.slice(-20);}
+  }catch(e){removeEl(typing);appendMsg('⚠ TRANSMISSION FAILED: '+e.message,'ai');}
   isThinking=false;
   avatar.classList.remove('thinking');
-  statusTxt.textContent='Klar til å hjelpe';
+  statusTxt.textContent='SYSTEMS ONLINE';
   scrollChat();
-}
-
-function toolLabel(name){
-  const m={get_account_overview:'kontooversikt',get_campaigns:'kampanjer',
-    get_campaign_insights:'kampanjeinnsikt',get_top_ads:'topp annonser',get_spend_trend:'forbruksdata'};
-  return m[name]||name;
-}
-
-function formatAiText(txt){
-  return txt
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g,'<em>$1</em>')
-    .replace(/`([^`]+)`/g,'<code style="background:rgba(0,0,0,.3);padding:1px 5px;border-radius:4px;font-family:JetBrains Mono,monospace;font-size:.8em">$1</code>')
-    .replace(/\n/g,'<br>');
 }
 
 function appendMsg(text,who){
   const wrap=document.getElementById('chat-messages');
   const div=document.createElement('div');
   div.className='msg msg-'+who;
-  div.innerHTML=`<span class="msg-content">${who==='user'?escHtml(text):formatAiText(text)}</span>`;
+  div.innerHTML=`<span class="msg-content">${escHtml(text)}</span>`;
   wrap.appendChild(div);scrollChat();
   return div;
 }
@@ -1006,7 +1000,7 @@ function appendMsg(text,who){
 function appendTyping(){
   const wrap=document.getElementById('chat-messages');
   const div=document.createElement('div');
-  div.className='typing-indicator';div.id='typing-ind';
+  div.className='typing-indicator';
   div.innerHTML='<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
   wrap.appendChild(div);scrollChat();return div;
 }
@@ -1015,95 +1009,27 @@ function appendToolIndicator(label){
   const wrap=document.getElementById('chat-messages');
   const div=document.createElement('div');
   div.className='tool-indicator';
-  div.textContent='⚡ Henter '+label+'...';
+  div.textContent='⚡ EXECUTING '+label;
   wrap.appendChild(div);scrollChat();
-  setTimeout(()=>div.remove(),3000);
+  setTimeout(()=>div.remove(),2500);
 }
 
 function removeEl(el){if(el&&el.parentNode)el.parentNode.removeChild(el);}
 function scrollChat(){const m=document.getElementById('chat-messages');m.scrollTop=m.scrollHeight;}
 function escHtml(t){const d=document.createElement('div');d.appendChild(document.createTextNode(t));return d.innerHTML;}
+function toggleVoice(){alert('Voice interface coming online in next update.');}
 
-// ════════════════════════════════════════════════
-// VOICE
-// ════════════════════════════════════════════════
-function toggleVoice(){
-  if(isListening){stopVoice();return;}
-  if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){
-    alert('Nettleseren din støtter ikke talegjenkjenning. Prøv Chrome.');return;
-  }
-  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-  recognition=new SpeechRecognition();
-  recognition.lang='nb-NO';recognition.continuous=false;recognition.interimResults=true;
-  recognition.onstart=()=>{
-    isListening=true;
-    document.getElementById('voice-btn').classList.add('listening');
-    document.getElementById('ai-status-text').textContent='Lytter...';
-  };
-  recognition.onresult=e=>{
-    const transcript=Array.from(e.results).map(r=>r[0].transcript).join('');
-    document.getElementById('chat-input').value=transcript;
-    if(e.results[0].isFinal){stopVoice();sendMessage();}
-  };
-  recognition.onend=()=>stopVoice();
-  recognition.onerror=()=>stopVoice();
-  recognition.start();
-}
-
-function stopVoice(){
-  isListening=false;
-  document.getElementById('voice-btn').classList.remove('listening');
-  document.getElementById('ai-status-text').textContent='Klar til å hjelpe';
-  if(recognition){try{recognition.stop();}catch(_){}}
-}
-
-function speak(text){
-  if(!synth) return;
-  synth.cancel();
-  const utt=new SpeechSynthesisUtterance(text);
-  utt.lang='nb-NO';utt.rate=1.05;
-  const voices=synth.getVoices();
-  const no=voices.find(v=>v.lang.startsWith('nb')||v.lang.startsWith('no'));
-  if(no) utt.voice=no;
-  synth.speak(utt);
-}
-
-// ════════════════════════════════════════════════
 // SETTINGS
-// ════════════════════════════════════════════════
 function openSettings(){document.getElementById('settings-modal').classList.add('open');}
 function closeSettings(){document.getElementById('settings-modal').classList.remove('open');}
 function closeSettingsOnBg(e){if(e.target===document.getElementById('settings-modal'))closeSettings();}
-function saveSettings(){
-  alert('For å lagre innstillinger, oppdater .env-filen på serveren og start app.py på nytt.\n\nANTHROPIC_API_KEY='+document.getElementById('s-anthropic').value+'\nMETA_ACCESS_TOKEN='+document.getElementById('s-meta-token').value+'\nMETA_AD_ACCOUNT_ID='+document.getElementById('s-meta-account').value);
-  closeSettings();
-}
+function saveSettings(){alert('Update .env file on server:\n\nANTHROPIC_API_KEY='+document.getElementById('s-anthropic').value+'\nMETA_ACCESS_TOKEN='+document.getElementById('s-meta-token').value+'\nMETA_AD_ACCOUNT_ID='+document.getElementById('s-meta-account').value+'\n\nThen restart app.py.');closeSettings();}
 
-// ════════════════════════════════════════════════
-// STATUS CHECK
-// ════════════════════════════════════════════════
-async function checkStatus(){
-  try{
-    const res=await fetch('/api/status');
-    const d=await res.json();
-    const el=document.getElementById('sidebar-status');
-    if(d.demo){el.textContent='Demo-modus';el.style.color='#f59e0b';}
-    else{el.textContent='Tilkoblet';el.style.color='#10b981';}
-  }catch(_){
-    document.getElementById('sidebar-status').textContent='Frakoblet';
-  }
-}
+// STATUS
+async function checkStatus(){try{const res=await fetch('/api/status');const d=await res.json();const el=document.getElementById('sidebar-status');el.textContent=d.demo?'DEMO MODE':'SYSTEMS ACTIVE';}catch(_){document.getElementById('sidebar-status').textContent='OFFLINE';}}
 
-// ════════════════════════════════════════════════
 // INIT
-// ════════════════════════════════════════════════
-(async()=>{
-  await checkStatus();
-  await loadDashboard();
-  setTimeout(()=>{
-    document.getElementById('chat-fab-badge').style.display='flex';
-  },3000);
-})();
+(async()=>{await checkStatus();await loadDashboard();setTimeout(()=>{document.getElementById('chat-fab-badge').style.display='flex';},3000);})();
 </script>
 </body>
 </html>
