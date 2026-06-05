@@ -197,6 +197,48 @@ input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gr
 
 /* FLOATING STRINGS */
 .fstr{position:fixed;white-space:nowrap;font-size:8px;letter-spacing:2px;pointer-events:none;z-index:1;text-shadow:0 0 8px currentColor}
+
+/* VOICE / MIC */
+#mic-btn{
+  background:rgba(0,212,255,0.07);border:1px solid rgba(0,212,255,0.25);
+  color:#00d4ff;font-size:16px;padding:0 14px;cursor:pointer;transition:all 0.2s;
+  flex-shrink:0;
+}
+#mic-btn:hover{background:rgba(0,212,255,0.15);border-color:#00d4ff;box-shadow:0 0 14px rgba(0,212,255,0.3)}
+#mic-btn.listening{
+  background:rgba(255,0,102,0.12);border-color:#ff0066;color:#ff0066;
+  animation:mic-pulse 0.8s ease-in-out infinite;
+}
+@keyframes mic-pulse{0%,100%{box-shadow:0 0 8px rgba(255,0,102,0.4)}50%{box-shadow:0 0 24px rgba(255,0,102,0.8)}}
+
+/* VOICE WAVEFORM */
+#waveform{
+  position:fixed;bottom:220px;left:50%;transform:translateX(-50%);
+  display:none;align-items:center;gap:3px;z-index:50;
+  background:rgba(0,10,22,0.9);border:1px solid rgba(255,0,102,0.4);
+  padding:10px 18px;
+}
+#waveform.active{display:flex}
+#waveform span{display:inline-block;width:3px;background:#ff0066;border-radius:2px;animation:wave 0.6s ease-in-out infinite}
+#waveform span:nth-child(2){animation-delay:0.1s}
+#waveform span:nth-child(3){animation-delay:0.2s}
+#waveform span:nth-child(4){animation-delay:0.3s}
+#waveform span:nth-child(5){animation-delay:0.4s}
+#waveform span:nth-child(6){animation-delay:0.15s}
+#waveform span:nth-child(7){animation-delay:0.25s}
+@keyframes wave{0%,100%{height:4px}50%{height:22px}}
+.wave-label{font-size:9px;letter-spacing:3px;color:rgba(255,0,102,0.7);margin-left:10px}
+
+/* IRON MAN HUD RINGS */
+.hud-ring{position:absolute;border-radius:50%;pointer-events:none}
+.arc-reactor{
+  position:absolute;width:60px;height:60px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,212,255,0.25) 0%,rgba(0,100,255,0.08) 50%,transparent 70%);
+  box-shadow:0 0 20px rgba(0,212,255,0.3),inset 0 0 20px rgba(0,212,255,0.15);
+  animation:arc-pulse 2s ease-in-out infinite;
+  z-index:3;
+}
+@keyframes arc-pulse{0%,100%{box-shadow:0 0 20px rgba(0,212,255,0.3),inset 0 0 20px rgba(0,212,255,0.15)}50%{box-shadow:0 0 40px rgba(0,212,255,0.6),inset 0 0 30px rgba(0,212,255,0.25),0 0 80px rgba(255,136,0,0.1)}}
 </style>
 </head>
 <body>
@@ -283,9 +325,34 @@ input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gr
 
 <!-- CENTER -->
 <div id="col-c">
+  <!-- Iron Man HUD rings -->
   <div class="ring dot" style="width:190px;height:190px;animation-duration:16s;color:#00ff88"></div>
   <div class="ring dot" style="width:260px;height:260px;animation-duration:27s;animation-direction:reverse;color:#00d4ff"></div>
-  <div class="ring" style="width:340px;height:340px;animation-duration:45s;opacity:0.3"></div>
+  <div class="ring" style="width:340px;height:340px;animation-duration:45s;opacity:0.25;border-color:rgba(255,136,0,0.15)"></div>
+  <div class="ring" style="width:420px;height:420px;animation-duration:80s;animation-direction:reverse;opacity:0.15;border-style:dashed"></div>
+  <!-- Segmented HUD arc overlay -->
+  <svg style="position:absolute;width:300px;height:300px;pointer-events:none;z-index:1" viewBox="0 0 300 300">
+    <!-- outer arc segments (Iron Man style) -->
+    <circle cx="150" cy="150" r="140" fill="none" stroke="rgba(255,136,0,0.12)" stroke-width="1" stroke-dasharray="8 6"/>
+    <circle cx="150" cy="150" r="128" fill="none" stroke="rgba(0,212,255,0.1)" stroke-width="1" stroke-dasharray="4 20"/>
+    <!-- tick marks -->
+    <g stroke="rgba(0,255,136,0.3)" stroke-width="1">
+      <line x1="150" y1="10" x2="150" y2="22"/><line x1="150" y1="278" x2="150" y2="290"/>
+      <line x1="10" y1="150" x2="22" y2="150"/><line x1="278" y1="150" x2="290" y2="150"/>
+      <line x1="49" y1="49" x2="57" y2="57"/><line x1="243" y1="243" x2="251" y2="251"/>
+      <line x1="251" y1="49" x2="243" y2="57"/><line x1="57" y1="243" x2="49" y2="251"/>
+    </g>
+    <!-- corner brackets -->
+    <path d="M20 60 L20 20 L60 20" fill="none" stroke="rgba(255,136,0,0.3)" stroke-width="1.5"/>
+    <path d="M240 20 L280 20 L280 60" fill="none" stroke="rgba(255,136,0,0.3)" stroke-width="1.5"/>
+    <path d="M20 240 L20 280 L60 280" fill="none" stroke="rgba(255,136,0,0.3)" stroke-width="1.5"/>
+    <path d="M280 240 L280 280 L240 280" fill="none" stroke="rgba(255,136,0,0.3)" stroke-width="1.5"/>
+    <!-- labels -->
+    <text x="150" y="7" text-anchor="middle" fill="rgba(255,136,0,0.4)" font-size="7" font-family="Orbitron,sans-serif" letter-spacing="2">SCAN</text>
+    <text x="293" y="153" fill="rgba(0,212,255,0.3)" font-size="6" font-family="Orbitron,sans-serif">360°</text>
+  </svg>
+  <!-- Arc reactor core -->
+  <div class="arc-reactor" style="position:absolute;z-index:2"></div>
 
   <div id="fig-area">
     <div id="fig-wrap">
@@ -370,9 +437,18 @@ input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gr
     <div class="cinp-wrap">
       <textarea id="cin" placeholder="Skriv til MONIR... (Enter for å sende)" rows="5"></textarea>
     </div>
-    <button id="cbtn" onclick="send()">SEND ›› MONIR</button>
+    <div style="display:flex;gap:6px">
+      <button id="mic-btn" onclick="toggleVoice()" title="Tal til MONIR (norsk)">🎤</button>
+      <button id="cbtn" onclick="send()" style="flex:1">SEND ›› MONIR</button>
+    </div>
   </div>
 </div>
+</div>
+
+<!-- VOICE WAVEFORM -->
+<div id="waveform">
+  <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+  <span class="wave-label">MONIR LYTTER...</span>
 </div>
 
 <script>
@@ -526,6 +602,47 @@ document.getElementById('cin').addEventListener('keydown',e=>{if(e.key==='Enter'
 function addMsg(role,text){const el=document.createElement('div');el.className=role==='user'?'mu':role==='err'?'merr':'ma';el.textContent=text;const m=document.getElementById('cmsgs');m.appendChild(el);m.scrollTop=m.scrollHeight;return el}
 
 function quickSend(msg){document.getElementById('cin').value=msg;send()}
+
+// ══ VOICE INPUT (JARVIS-STYLE) ══
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recog = null, voiceActive = false;
+
+if (SR) {
+  recog = new SR();
+  recog.lang = 'nb-NO';
+  recog.continuous = false;
+  recog.interimResults = false;
+  recog.onresult = (e) => {
+    const txt = Array.from(e.results).map(r=>r[0].transcript).join(' ');
+    document.getElementById('cin').value = txt;
+    stopVoice();
+    send();
+  };
+  recog.onerror = (e) => { stopVoice(); toast('Mikrofon feil: '+e.error,'#ff4466'); };
+  recog.onend = () => stopVoice();
+} else {
+  document.getElementById('mic-btn').title = 'Stemmeinput støttes ikke i denne nettleseren';
+}
+
+function toggleVoice() {
+  if (!SR) { toast('Bruk Chrome/Safari for stemmeinput','#ff4466'); return; }
+  if (voiceActive) { stopVoice(); return; }
+  voiceActive = true;
+  recog.start();
+  document.getElementById('mic-btn').classList.add('listening');
+  document.getElementById('mic-btn').textContent = '⏹';
+  document.getElementById('waveform').classList.add('active');
+  document.getElementById('chat-status').textContent = 'LYTTER...';
+}
+
+function stopVoice() {
+  voiceActive = false;
+  if (recog) try { recog.stop(); } catch(e) {}
+  document.getElementById('mic-btn').classList.remove('listening');
+  document.getElementById('mic-btn').textContent = '🎤';
+  document.getElementById('waveform').classList.remove('active');
+  document.getElementById('chat-status').textContent = 'READY';
+}
 
 async function send(){
   if(sending)return;
