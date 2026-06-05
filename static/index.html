@@ -3,418 +3,498 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MONIR — Personal AI Assistant</title>
+<title>MONIR 2027 — Din Levende Livsassistent</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --cyan:#00d4ff;--navy:#0a0e27;--dark:#050817;--accent:#ff6b00;
-  --cyan-glow:0 0 20px rgba(0,212,255,0.6);--cyan-glow-heavy:0 0 50px rgba(0,212,255,0.8);
-}
+:root{--c:#00ff88;--navy:#0a0e27;--dark:#050817;--acc:#ff00ff;--g:0 0 30px rgba(0,255,136,.5)}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:var(--navy);color:var(--cyan);
-  font-family:'Courier Prime',monospace;overflow:hidden}
+html,body{height:100%;background:var(--navy);color:var(--c);font-family:'Courier Prime',monospace;overflow:hidden}
 
-body::before{
-  content:'';position:fixed;top:0;left:0;width:100%;height:100%;
-  background:repeating-linear-gradient(0deg,transparent 0,rgba(0,0,0,.05) 2px,transparent 4px);
-  pointer-events:none;z-index:9999;animation:scanlines 8s linear infinite
-}
-@keyframes scanlines{0%{transform:translateY(0)}100%{transform:translateY(4px)}}
+body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;
+background:repeating-linear-gradient(0deg,transparent 0,rgba(0,0,0,.1) 2px,transparent 4px);
+pointer-events:none;z-index:9999;animation:scan 8s linear infinite}
+@keyframes scan{0%{transform:translateY(0)}100%{transform:translateY(4px)}}
 
-#boot-screen{
-  position:fixed;inset:0;background:var(--dark);z-index:10000;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  opacity:1;transition:opacity .8s ease;animation:boot-fade 5s ease forwards
-}
-#boot-screen.hidden{opacity:0;pointer-events:none}
-@keyframes boot-fade{0%{opacity:1}85%{opacity:1}100%{opacity:0}}
+#boot{position:fixed;inset:0;background:var(--dark);z-index:10000;
+display:flex;flex-direction:column;align-items:center;justify-content:center;
+opacity:1;animation:boot-out 5s ease forwards}
+#boot.hidden{opacity:0;pointer-events:none}
+@keyframes boot-out{0%{opacity:1}80%{opacity:1}100%{opacity:0}}
 
-.arc-reactor{
-  width:120px;height:120px;border:3px solid var(--cyan);border-radius:50%;
-  position:relative;box-shadow:inset 0 0 30px rgba(0,212,255,.4),
-    0 0 50px rgba(0,212,255,.6);animation:arc-reactor-spin 3s linear infinite
-}
-.arc-reactor::before{
-  content:'';position:absolute;inset:15%;background:var(--cyan);border-radius:50%;
-  box-shadow:0 0 20px var(--cyan);opacity:.6;animation:arc-pulse 2s ease-in-out infinite
-}
-.arc-reactor::after{
-  content:'';position:absolute;inset:8px;border:2px solid var(--cyan);
-  border-radius:50%;opacity:.3;animation:arc-ring 4s ease-in-out infinite
-}
-@keyframes arc-reactor-spin{to{transform:rotate(360deg)}}
-@keyframes arc-pulse{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.3);opacity:.2}}
-@keyframes arc-ring{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:.8;transform:scale(1.2)}}
+.tech-text{font-size:1rem;letter-spacing:.1em;opacity:0;animation:appear .5s ease forwards;margin:6px}
+.tech-text:nth-child(1){animation-delay:.2s}
+.tech-text:nth-child(2){animation-delay:1s}
+.tech-text:nth-child(3){animation-delay:1.8s}
+@keyframes appear{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-.boot-text{
-  text-align:center;font-size:.9rem;letter-spacing:.05em;
-  opacity:0;animation:boot-text-fade .5s ease forwards;margin:8px 0
-}
-.boot-text:nth-child(1){animation-delay:0.3s}
-.boot-text:nth-child(2){animation-delay:1.2s}
-.boot-text:nth-child(3){animation-delay:2.4s}
-@keyframes boot-text-fade{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+body{display:flex;flex-direction:column}
+#app{flex:1;display:flex;overflow:hidden}
 
-body{display:flex}
+/* SIDEBAR */
+#sidebar{width:320px;background:linear-gradient(180deg,rgba(10,14,39,.98),rgba(5,8,17,.98));
+border-right:2px solid var(--c);overflow-y:auto;padding:20px;display:flex;flex-direction:column}
+.avatar{width:100px;height:100px;border-radius:50%;border:3px solid var(--c);
+background:radial-gradient(circle,rgba(0,255,136,.2),rgba(0,255,136,.05));
+display:flex;align-items:center;justify-content:center;font-size:3rem;
+margin:0 auto 20px;box-shadow:inset 0 0 20px rgba(0,255,136,.3),0 0 30px rgba(0,255,136,.5)}
 
-#main{
-  flex:1;display:flex;flex-direction:column;position:relative;z-index:1;
-  background:linear-gradient(135deg,rgba(0,80,120,.1),transparent)
-}
+.name{font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:900;
+color:var(--c);text-shadow:var(--g);text-align:center;margin-bottom:4px}
+.status{font-size:.7rem;color:rgba(0,255,136,.5);text-align:center;margin-bottom:20px}
 
-.header{
-  padding:20px;border-bottom:2px solid var(--cyan);
-  background:linear-gradient(90deg,rgba(0,212,255,.1),transparent);
-  position:relative
-}
-.header::after{
-  content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,var(--cyan),transparent)
-}
+.stats{display:flex;flex-direction:column;gap:12px;margin-bottom:20px;
+padding-bottom:20px;border-bottom:1px solid rgba(0,255,136,.2)}
+.stat{display:flex;justify-content:space-between;align-items:center;font-size:.8rem}
+.stat-label{color:rgba(0,255,136,.6)}
+.stat-bar{flex:1;height:4px;background:rgba(0,255,136,.1);border-radius:2px;margin:0 8px;overflow:hidden}
+.stat-fill{height:100%;background:linear-gradient(90deg,var(--c),var(--acc));
+transition:width .5s ease;box-shadow:0 0 10px var(--c)}
 
-.header-title{
-  font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:900;
-  color:var(--cyan);text-shadow:var(--cyan-glow);letter-spacing:.1em;
-  text-transform:uppercase
-}
-.header-sub{
-  font-size:.7rem;color:rgba(0,212,255,.5);margin-top:2px;letter-spacing:.05em
-}
+nav{flex:1;display:flex;flex-direction:column;gap:4px}
+.nav-btn{padding:11px;border:1px solid transparent;background:transparent;
+color:rgba(0,255,136,.5);cursor:pointer;font-size:.8rem;font-weight:700;
+font-family:'Orbitron',sans-serif;transition:all .2s;border-radius:2px;
+text-transform:uppercase;letter-spacing:.05em}
+.nav-btn:hover,.nav-btn.active{background:rgba(0,255,136,.15);border-color:var(--c);
+color:var(--c);box-shadow:0 0 15px rgba(0,255,136,.3)}
 
-#chat-container{
-  flex:1;display:flex;flex-direction:column;padding:20px;overflow:hidden
-}
+/* MAIN */
+#main{flex:1;display:flex;overflow:hidden}
 
-#messages{
-  flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;
-  margin-bottom:16px;padding-right:8px
-}
+/* STICK FIGURE */
+#canvas-container{width:280px;padding:20px;border-right:2px solid var(--c);
+display:flex;flex-direction:column;align-items:center;justify-content:center;
+background:linear-gradient(135deg,rgba(0,100,80,.1),transparent)}
+svg{width:220px;height:400px}
 
-#messages::-webkit-scrollbar{width:6px}
-#messages::-webkit-scrollbar-track{background:transparent}
-#messages::-webkit-scrollbar-thumb{background:rgba(0,212,255,.3);border-radius:3px}
+/* CONTENT */
+#content{flex:1;padding:20px;overflow-y:auto;display:flex;flex-direction:column}
+.page{display:none}
+.page.active{display:block;animation:fade-in .3s}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
 
-.msg{
-  max-width:85%;animation:msg-in .25s ease;font-size:.85rem;
-  font-family:'Courier Prime',monospace;line-height:1.6
-}
-@keyframes msg-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.header{margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid var(--c);
+position:relative}
+.header::after{content:'';position:absolute;bottom:-2px;left:0;width:200px;height:1px;
+background:linear-gradient(90deg,var(--c),transparent);box-shadow:var(--g)}
+.title{font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:900;
+color:var(--c);text-shadow:var(--g);text-transform:uppercase;letter-spacing:.05em}
 
-.msg-user{
-  align-self:flex-end;background:rgba(0,212,255,.12);
-  border:1px solid var(--cyan);border-radius:2px;padding:10px 14px;
-  color:var(--cyan);text-shadow:0 0 8px rgba(0,212,255,.3)
-}
+/* CALENDAR */
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.cal-day{padding:10px;border:1px solid rgba(0,255,136,.2);border-radius:2px;
+text-align:center;font-size:.75rem;cursor:pointer;transition:all .2s;background:rgba(0,255,136,.02)}
+.cal-day:hover{background:rgba(0,255,136,.1);border-color:var(--c);box-shadow:0 0 10px rgba(0,255,136,.3)}
+.cal-day.today{background:rgba(0,255,136,.2);border-color:var(--c);font-weight:700}
 
-.msg-ai{
-  align-self:flex-start;background:rgba(0,100,150,.08);
-  border:1px solid rgba(0,212,255,.3);border-radius:2px;padding:10px 14px;
-  color:rgba(0,212,255,.9)
-}
+.event{padding:10px;border-left:3px solid var(--c);background:rgba(0,255,136,.08);
+border-radius:2px;margin:8px 0;font-size:.8rem}
+.event-title{font-weight:700;margin-bottom:2px}
+.event-time{color:rgba(0,255,136,.5);font-size:.7rem}
 
-.typing-indicator{
-  align-self:flex-start;display:flex;gap:5px;align-items:flex-end;
-  padding:10px 12px;background:rgba(0,100,150,.1);border:1px solid rgba(0,212,255,.3);
-  border-radius:2px
-}
-.dot{
-  width:6px;height:6px;background:var(--cyan);border-radius:50%;
-  animation:type-bounce .8s infinite;box-shadow:0 0 8px rgba(0,212,255,.6)
-}
-.dot:nth-child(2){animation-delay:.1s}.dot:nth-child(3){animation-delay:.2s}
-@keyframes type-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+/* PROFILE */
+.profile-card{background:rgba(0,255,136,.05);border:1px solid rgba(0,255,136,.2);
+padding:16px;border-radius:4px;margin-bottom:16px}
+.profile-label{color:rgba(0,255,136,.6);font-size:.75rem;font-weight:700;
+text-transform:uppercase;margin-bottom:4px;letter-spacing:.05em}
+.profile-value{color:var(--c);font-size:.9rem;margin-bottom:12px}
+textarea{width:100%;background:rgba(0,255,136,.05);border:1px solid rgba(0,255,136,.2);
+color:var(--c);padding:10px;border-radius:2px;font-family:'Courier Prime',monospace;
+font-size:.8rem;resize:none;outline:none}
+textarea:focus{border-color:var(--c);box-shadow:0 0 10px rgba(0,255,136,.2)}
 
-.input-area{
-  display:flex;flex-direction:column;gap:10px;padding:14px;
-  border-top:2px solid var(--cyan);background:linear-gradient(0deg,rgba(0,212,255,.05),transparent)
-}
+/* CHAT */
+#messages{height:400px;overflow-y:auto;margin-bottom:12px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:85%;animation:msg-in .25s ease;font-size:.85rem;line-height:1.6}
+@keyframes msg-in{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
+.msg-user{align-self:flex-end;background:rgba(0,255,136,.12);border:1px solid var(--c);
+border-radius:2px;padding:10px;color:var(--c)}
+.msg-ai{align-self:flex-start;background:rgba(0,100,80,.1);border:1px solid rgba(0,255,136,.3);
+border-radius:2px;padding:10px;color:rgba(0,255,136,.9)}
 
-.quick-prompts{
-  display:flex;flex-wrap:wrap;gap:6px
-}
-.qp{
-  font-size:.65rem;padding:5px 11px;border:1px solid var(--cyan);
-  color:var(--cyan);background:rgba(0,212,255,.08);cursor:pointer;
-  font-family:'Orbitron',sans-serif;font-weight:700;letter-spacing:.03em;
-  border-radius:0;transition:all .15s;text-transform:uppercase;white-space:nowrap;
-  box-shadow:inset 0 0 6px rgba(0,212,255,.1)
-}
-.qp:hover{
-  background:rgba(0,212,255,.15);box-shadow:inset 0 0 12px rgba(0,212,255,.2),
-    0 0 12px rgba(0,212,255,.4)
-}
+.input-area{display:flex;gap:8px}
+#chat-input{flex:1;background:rgba(0,0,0,.6);border:1px solid var(--c);
+color:var(--c);padding:9px;border-radius:2px;outline:none;font-family:'Courier Prime',monospace;font-size:.85rem}
+#chat-input:focus{border-color:var(--acc);box-shadow:0 0 10px rgba(0,255,136,.2)}
+.btn-send{padding:9px 18px;border:1px solid var(--c);background:rgba(0,255,136,.1);
+color:var(--c);cursor:pointer;border-radius:2px;font-weight:700;transition:all .2s}
+.btn-send:hover{background:rgba(0,255,136,.2);box-shadow:0 0 15px rgba(0,255,136,.3)}
 
-.input-row{
-  display:flex;gap:8px;align-items:flex-end
-}
+/* LIFESTYLE */
+.habit{padding:12px;border:1px solid rgba(0,255,136,.2);border-radius:2px;
+margin:8px 0;display:flex;justify-content:space-between;align-items:center}
+.habit-name{font-weight:700}
+.habit-streak{color:var(--acc);font-weight:700}
 
-#input{
-  flex:1;background:rgba(0,0,0,.6);border:1px solid var(--cyan);
-  border-radius:0;padding:9px 12px;color:var(--cyan);outline:none;
-  max-height:100px;resize:none;font-family:'Courier Prime',monospace;font-size:.85rem
-}
-#input::placeholder{color:rgba(0,212,255,.3)}
-
-.btn-send{
-  width:36px;height:36px;border-radius:0;border:1px solid var(--cyan);
-  background:rgba(0,212,255,.08);cursor:pointer;display:flex;
-  align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;
-  color:var(--cyan);transition:all .2s;font-weight:700
-}
-.btn-send:hover{
-  background:rgba(0,212,255,.15);box-shadow:0 0 15px rgba(0,212,255,.4)
-}
-
-#settings-modal{
-  display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);
-  z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(4px)
-}
-#settings-modal.open{display:flex}
-
-.modal-box{
-  background:linear-gradient(135deg,rgba(10,14,39,.95),rgba(5,8,17,.95));
-  border:2px solid var(--cyan);padding:24px;width:380px;
-  box-shadow:0 0 50px rgba(0,212,255,.4),inset 0 0 30px rgba(0,212,255,.1)
-}
-
-.modal-title{
-  font-family:'Orbitron',sans-serif;font-size:.95rem;font-weight:900;
-  color:var(--cyan);margin-bottom:4px;text-shadow:var(--cyan-glow);
-  text-transform:uppercase;letter-spacing:.05em
-}
-
-.modal-sub{
-  font-size:.75rem;color:rgba(0,212,255,.5);margin-bottom:16px;
-  font-family:'Courier Prime',monospace
-}
-
-.form-group{margin-bottom:12px}
-label{
-  display:block;font-size:.7rem;font-weight:700;color:rgba(0,212,255,.6);
-  margin-bottom:4px;font-family:'Orbitron',sans-serif;text-transform:uppercase;
-  letter-spacing:.05em
-}
-
-input[type="password"]{
-  width:100%;background:rgba(0,0,0,.5);border:1px solid var(--cyan);
-  color:var(--cyan);font-family:'Courier Prime',monospace;font-size:.8rem;
-  padding:8px 12px;outline:none;transition:all .2s;letter-spacing:.02em
-}
-input:focus{
-  border-color:var(--cyan);box-shadow:inset 0 0 10px rgba(0,212,255,.2),
-    0 0 15px rgba(0,212,255,.4)
-}
-
-.modal-buttons{
-  display:flex;gap:10px;justify-content:flex-end;margin-top:20px
-}
-
-.btn{
-  padding:9px 16px;border:1px solid var(--cyan);background:rgba(0,212,255,.1);
-  color:var(--cyan);font-family:'Orbitron',sans-serif;font-size:.75rem;
-  font-weight:700;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;
-  transition:all .25s;border-radius:0
-}
-.btn:hover{
-  background:rgba(0,212,255,.2);box-shadow:inset 0 0 15px rgba(0,212,255,.2),
-    0 0 20px rgba(0,212,255,.4);transform:translateY(-2px)
-}
-.btn-ghost{
-  background:rgba(0,0,0,.3);border-color:rgba(0,212,255,.3)
-}
-
-.settings-btn{
-  position:fixed;bottom:20px;right:20px;width:50px;height:50px;
-  border-radius:50%;border:2px solid var(--cyan);background:rgba(0,212,255,.08);
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  color:var(--cyan);font-size:1.2rem;transition:all .2s;z-index:100
-}
-.settings-btn:hover{
-  background:rgba(0,212,255,.15);box-shadow:0 0 15px rgba(0,212,255,.4)
-}
+.input-row{display:flex;gap:8px;margin:8px 0}
+input{flex:1;background:rgba(0,0,0,.6);border:1px solid var(--c);color:var(--c);
+padding:8px;border-radius:2px;outline:none;font-family:'Courier Prime',monospace;font-size:.8rem}
+input:focus{border-color:var(--acc)}
 </style>
 </head>
 <body>
 
 <!-- BOOT SEQUENCE -->
-<div id="boot-screen">
-  <div class="arc-reactor"></div>
-  <div class="boot-text">⬤ NEURAL NETWORK INITIALIZING</div>
-  <div class="boot-text">⬤ CONSCIOUSNESS FRAMEWORK LOADING</div>
-  <div class="boot-text">⬤ MONIR STANDING BY</div>
-</div>
-
-<!-- MAIN -->
-<div id="main">
-  <div class="header">
-    <div class="header-title">⚛ MONIR</div>
-    <div class="header-sub">Personal AI Assistant — Always Ready to Help</div>
-  </div>
-
-  <div id="chat-container">
-    <div id="messages">
-      <div class="msg msg-ai">
-Good afternoon, sir. I am MONIR, your personal AI assistant. I'm here to help with absolutely anything — whether you need advice on car problems, lifestyle changes, work decisions, or just want someone to talk to.
-
-What can I help you with today?
-      </div>
-    </div>
-
-    <div class="input-area">
-      <div class="quick-prompts" id="quick-prompts">
-        <div class="qp" onclick="sendQuick('Min bil lager rare lyder fra motoren')">🚗 BILPROBLEMER</div>
-        <div class="qp" onclick="sendQuick('Jeg vil endre livsstilen min')">💪 LIVSSTILSTIPS</div>
-        <div class="qp" onclick="sendQuick('Hva er beste praksis for [tema]?')">📚 BEST PRACTICES</div>
-        <div class="qp" onclick="sendQuick('Gi meg noen gode ideer')">💡 BRAINSTORM</div>
-      </div>
-
-      <div class="input-row">
-        <textarea id="input" placeholder="Ask MONIR anything..." rows="1" 
-          onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-        <button class="btn-send" onclick="sendMessage()" title="Send">▶</button>
-      </div>
-    </div>
+<div id="boot">
+  <div style="text-align:center">
+    <div class="tech-text">⚛ MONIR 2027 INITIALIZING</div>
+    <div class="tech-text">⚛ CONSCIOUSNESS LOADING</div>
+    <div class="tech-text">⚛ READY TO LIVE WITH YOU</div>
   </div>
 </div>
 
-<!-- SETTINGS BUTTON -->
-<button class="settings-btn" onclick="openSettings()" title="Settings">⚙</button>
+<!-- APP -->
+<div id="app">
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="avatar" id="avatar">👋</div>
+    <div class="name" id="user-name">Sebastian</div>
+    <div class="status" id="user-status">Enerji: 78% • Mood: Optimist</div>
 
-<!-- SETTINGS MODAL -->
-<div id="settings-modal" onclick="closeSettingsOnBg(event)">
-  <div class="modal-box">
-    <div class="modal-title">⚙ API CONFIGURATION</div>
-    <div class="modal-sub">Configure your Anthropic API key for full functionality</div>
-    <div class="form-group">
-      <label>ANTHROPIC API KEY</label>
-      <input type="password" id="s-anthropic" placeholder="sk-ant-..." autocomplete="off">
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-label">💪 Aktivitet</span>
+        <div class="stat-bar"><div class="stat-fill" style="width:65%"></div></div>
+      </div>
+      <div class="stat">
+        <span class="stat-label">😴 Søvn</span>
+        <div class="stat-bar"><div class="stat-fill" style="width:72%"></div></div>
+      </div>
+      <div class="stat">
+        <span class="stat-label">🧠 Fokus</span>
+        <div class="stat-bar"><div class="stat-fill" style="width:81%"></div></div>
+      </div>
+      <div class="stat">
+        <span class="stat-label">❤️ Helse</span>
+        <div class="stat-bar"><div class="stat-fill" style="width:88%"></div></div>
+      </div>
     </div>
-    <p style="font-size:.7rem;color:rgba(0,212,255,.5);margin-bottom:16px;line-height:1.5;font-family:'Courier Prime',monospace">
-      Get your API key from <strong>console.anthropic.com</strong>. It will be stored securely in your .env file.
-    </p>
-    <div class="modal-buttons">
-      <button class="btn btn-ghost" onclick="closeSettings()">CANCEL</button>
-      <button class="btn" onclick="saveSettings()">SAVE</button>
+
+    <nav>
+      <button class="nav-btn active" onclick="showPage('dashboard')">📊 DASHBOARD</button>
+      <button class="nav-btn" onclick="showPage('profile')">👤 PROFIL</button>
+      <button class="nav-btn" onclick="showPage('calendar')">📅 KALENDER</button>
+      <button class="nav-btn" onclick="showPage('lifestyle')">💪 LIVSSTIL</button>
+      <button class="nav-btn" onclick="showPage('chat')">💬 MONIR</button>
+    </nav>
+
+    <div style="font-size:.7rem;color:rgba(0,255,136,.4);text-align:center;margin-top:auto">
+      MONIR v2027 • Levende AI
+    </div>
+  </div>
+
+  <!-- STICK FIGURE CANVAS -->
+  <div id="canvas-container">
+    <svg id="stick-figure" viewBox="0 0 200 400">
+      <!-- Head -->
+      <circle cx="100" cy="60" r="20" stroke="url(#glow)" stroke-width="2" fill="none"/>
+      <circle cx="95" cy="55" r="2" fill="var(--c)"/>
+      <circle cx="105" cy="55" r="2" fill="var(--c)"/>
+
+      <!-- Body -->
+      <line x1="100" y1="80" x2="100" y2="140" stroke="var(--c)" stroke-width="3" id="body"/>
+
+      <!-- Arms -->
+      <line x1="100" y1="100" x2="70" y2="120" stroke="var(--c)" stroke-width="2" id="left-arm"/>
+      <line x1="100" y1="100" x2="130" y2="120" stroke="var(--c)" stroke-width="2" id="right-arm"/>
+
+      <!-- Legs -->
+      <line x1="100" y1="140" x2="85" y2="180" stroke="var(--c)" stroke-width="2" id="left-leg"/>
+      <line x1="100" y1="140" x2="115" y2="180" stroke="var(--c)" stroke-width="2" id="right-leg"/>
+
+      <!-- Glow effect -->
+      <defs>
+        <radialGradient id="glow">
+          <stop offset="0%" stop-color="var(--c)" stop-opacity="1"/>
+          <stop offset="100%" stop-color="var(--c)" stop-opacity="0.3"/>
+        </radialGradient>
+      </defs>
+    </svg>
+
+    <div style="text-align:center;margin-top:20px;font-size:.8rem;color:rgba(0,255,136,.6)">
+      <div id="figure-status">Morgen rutine</div>
+      <div style="font-size:.7rem;margin-top:4px" id="figure-emoji">🌅</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content">
+    <!-- DASHBOARD -->
+    <div id="page-dashboard" class="page active">
+      <div class="header">
+        <div class="title">📊 DASHBOARD</div>
+      </div>
+      <div>
+        <p style="color:rgba(0,255,136,.7);margin-bottom:16px">
+          Velkommen! Dag 47 av ditt nye livet. Du gjør det bra. 💚
+        </p>
+        <div class="event" style="border-left:3px solid var(--acc)">
+          <div class="event-title">🎯 I dag: Trening + 8 timer søvn</div>
+          <div class="event-time">Målsetting for optimal helse</div>
+        </div>
+        <div class="event">
+          <div class="event-title">💬 MONIR Tip</div>
+          <div class="event-time">"Du ser ut til å ha høy energi i dag. Perfekt dag for å teste noe nytt!"</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div id="page-profile" class="page">
+      <div class="header">
+        <div class="title">👤 DIN PROFIL</div>
+      </div>
+      <div class="profile-card">
+        <div class="profile-label">Navn</div>
+        <div class="profile-value" id="profile-name">Sebastian</div>
+        <div class="profile-label">Bio</div>
+        <textarea id="profile-bio" placeholder="Skriv om deg...">En praktisk, ambisiøs person</textarea>
+        <button class="btn-send" style="width:100%;margin-top:8px" onclick="updateProfile()">Lagre</button>
+      </div>
+      <div class="profile-card">
+        <div class="profile-label">Mål for året</div>
+        <textarea id="profile-goals" placeholder="Hva vil du oppnå?">Bedre helse, mer produktivitet, meningsfulle relasjoner</textarea>
+        <button class="btn-send" style="width:100%;margin-top:8px" onclick="updateProfile()">Lagre</button>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div id="page-calendar" class="page">
+      <div class="header">
+        <div class="title">📅 KALENDER</div>
+      </div>
+      <div class="calendar" id="calendar-grid"></div>
+      <div style="margin-top:20px">
+        <div class="profile-label">Kommende hendelser</div>
+        <div id="upcoming-events"></div>
+      </div>
+    </div>
+
+    <!-- LIFESTYLE -->
+    <div id="page-lifestyle" class="page">
+      <div class="header">
+        <div class="title">💪 LIVSSTIL & VANER</div>
+      </div>
+      <div class="profile-card">
+        <div class="profile-label">Log i dag</div>
+        <div class="input-row">
+          <input type="number" id="sleep" placeholder="Timer søvn" step="0.5" min="0" max="12"/>
+          <input type="number" id="exercise" placeholder="Trening (min)" min="0"/>
+        </div>
+        <div class="input-row">
+          <input type="number" id="water" placeholder="Vann (glas)" min="0"/>
+          <input type="number" id="mood" placeholder="Humør (1-10)" min="1" max="10"/>
+        </div>
+        <button class="btn-send" style="width:100%;margin-top:8px" onclick="logLifestyle()">Logg</button>
+      </div>
+      <div class="profile-card">
+        <div class="profile-label">Dine vaner</div>
+        <div id="habits-list"></div>
+      </div>
+    </div>
+
+    <!-- CHAT -->
+    <div id="page-chat" class="page">
+      <div class="header">
+        <div class="title">💬 MONIR — DIN AI</div>
+      </div>
+      <div id="messages"></div>
+      <div class="input-area">
+        <input type="text" id="chat-input" placeholder="Snakk med MONIR..." onkeydown="handleKey(event)"/>
+        <button class="btn-send" onclick="sendMessage()">▶</button>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-window.addEventListener('load',()=>{
-  setTimeout(()=>{
-    document.getElementById('boot-screen').classList.add('hidden');
-  },5000);
+// ════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('boot').classList.add('hidden');
+  }, 5000);
+
+  loadUser();
+  loadCalendar();
+  animateStickFigure();
+  setInterval(animateStickFigure, 3000);
 });
 
-let chatHistory=[];
-let isThinking=false;
+// ════════════════════════════════════════════════
+// API CALLS
+// ════════════════════════════════════════════════
 
-function openSettings(){document.getElementById('settings-modal').classList.add('open');}
-function closeSettings(){document.getElementById('settings-modal').classList.remove('open');}
-function closeSettingsOnBg(e){if(e.target===document.getElementById('settings-modal'))closeSettings();}
-
-function saveSettings(){
-  const key=document.getElementById('s-anthropic').value;
-  if(!key){alert('Please enter an API key');return;}
-  alert('Your API key will be used for this session.\n\nTo save permanently, update .env file:\nANTHROPIC_API_KEY='+key);
-  closeSettings();
+async function loadUser() {
+  const res = await fetch('/api/user');
+  const user = await res.json();
+  document.getElementById('user-name').textContent = user.name;
+  document.getElementById('profile-name').textContent = user.name;
+  document.getElementById('avatar').textContent = user.name[0];
 }
 
-function handleKey(e){
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}
+async function updateProfile() {
+  const name = document.getElementById('profile-name').textContent;
+  const bio = document.getElementById('profile-bio').value;
+  const goals = document.getElementById('profile-goals').value;
+  await fetch('/api/user/update', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({name, bio, goals})
+  });
 }
-function autoResize(ta){ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,120)+'px';}
-function sendQuick(msg){document.getElementById('input').value=msg;sendMessage();}
 
-async function sendMessage(){
-  if(isThinking)return;
-  const input=document.getElementById('input');
-  const msg=input.value.trim();
-  if(!msg)return;
-  input.value='';input.style.height='auto';
+async function logLifestyle() {
+  const date = new Date().toISOString().split('T')[0];
+  const sleep = parseFloat(document.getElementById('sleep').value) || null;
+  const exercise = parseInt(document.getElementById('exercise').value) || null;
+  const water = parseInt(document.getElementById('water').value) || null;
+  const mood = parseInt(document.getElementById('mood').value) || null;
 
-  appendMsg(msg,'user');
-  document.getElementById('quick-prompts').style.display='none';
+  await fetch('/api/lifestyle/log', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({date, sleep_hours: sleep, exercise_minutes: exercise, water_intake: water, mood_rating: mood})
+  });
+  alert('Logget! ✅');
+}
 
-  isThinking=true;
-  const typing=appendTyping();
+async function loadCalendar() {
+  const res = await fetch('/api/calendar?days=30');
+  const data = await res.json();
+  const grid = document.getElementById('calendar-grid');
+  const today = new Date().getDate();
 
-  try{
-    const res=await fetch('/api/chat',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({message:msg,history:chatHistory})
-    });
-
-    if(!res.ok){
-      const err=await res.json();
-      removeEl(typing);
-      appendMsg('⚠ ERROR: '+(err.error||'Unknown error'),'ai');
-      isThinking=false;
-      return;
-    }
-
-    const reader=res.body.getReader();
-    const dec=new TextDecoder();
-    let aiText='';
-    let aiEl=null;
-
-    while(true){
-      const {done,value}=await reader.read();
-      if(done)break;
-      const lines=dec.decode(value).split('\n');
-      for(const line of lines){
-        if(!line.startsWith('data:'))continue;
-        try{
-          const ev=JSON.parse(line.slice(5));
-          if(ev.t==='text'){
-            if(!aiEl){removeEl(typing);aiEl=appendMsg('','ai');}
-            aiText+=ev.v;
-            aiEl.textContent=aiText;
-            scrollChat();
-          }
-        }catch(_){}
-      }
-    }
-
-    if(aiText){
-      chatHistory.push({role:'user',content:msg});
-      chatHistory.push({role:'assistant',content:aiText});
-      if(chatHistory.length>20)chatHistory=chatHistory.slice(-20);
-    }
-  }catch(e){
-    removeEl(typing);
-    appendMsg('⚠ ERROR: '+e.message,'ai');
+  for (let i = 1; i <= 31; i++) {
+    const d = document.createElement('div');
+    d.className = 'cal-day' + (i === today ? ' today' : '');
+    d.textContent = i;
+    grid.appendChild(d);
   }
 
-  isThinking=false;
-  scrollChat();
+  const events = document.getElementById('upcoming-events');
+  events.innerHTML = data.events.slice(0, 3).map(e =>
+    `<div class="event"><div class="event-title">${e.title}</div><div class="event-time">${e.start}</div></div>`
+  ).join('');
 }
 
-function appendMsg(text,who){
-  const wrap=document.getElementById('messages');
-  const div=document.createElement('div');
-  div.className='msg msg-'+who;
-  div.textContent=text;
-  wrap.appendChild(div);
-  scrollChat();
-  return div;
+// ════════════════════════════════════════════════
+// STICK FIGURE ANIMATION
+// ════════════════════════════════════════════════
+
+function animateStickFigure() {
+  const hour = new Date().getHours();
+  const body = document.getElementById('body');
+  const leftArm = document.getElementById('left-arm');
+  const rightArm = document.getElementById('right-arm');
+  const leftLeg = document.getElementById('left-leg');
+  const rightLeg = document.getElementById('right-leg');
+  const status = document.getElementById('figure-status');
+  const emoji = document.getElementById('figure-emoji');
+
+  let state, st, em;
+
+  if (hour < 9) {
+    state = 'sleeping'; st = '😴 Sovner'; em = '🌙';
+    body.style.transform = 'rotate(-15deg)';
+    leftArm.style.transform = 'rotate(-30deg)';
+    rightArm.style.transform = 'rotate(30deg)';
+  } else if (hour < 12) {
+    state = 'morning'; st = '🌅 Morgenrutine'; em = '☀️';
+    leftArm.style.transform = `rotate(${Math.sin(Date.now()/500)*20}deg)`;
+    rightArm.style.transform = `rotate(${-Math.sin(Date.now()/500)*20}deg)`;
+  } else if (hour < 17) {
+    state = 'working'; st = '💼 I gang'; em = '🎯';
+    leftLeg.style.transform = `rotate(${Math.sin(Date.now()/400)*5}deg)`;
+    rightLeg.style.transform = `rotate(${-Math.sin(Date.now()/400)*5}deg)`;
+  } else if (hour < 20) {
+    state = 'exercise'; st = '💪 Trening'; em = '🔥';
+    leftArm.style.transform = `rotate(${Math.sin(Date.now()/300)*40}deg)`;
+    rightArm.style.transform = `rotate(${Math.sin(Date.now()/300)*40}deg)`;
+  } else {
+    state = 'relaxing'; st = '🌙 Kveld'; em = '✨';
+    body.style.transform = 'rotate(-5deg)';
+  }
+
+  status.textContent = st;
+  emoji.textContent = em;
 }
 
-function appendTyping(){
-  const wrap=document.getElementById('messages');
-  const div=document.createElement('div');
-  div.className='typing-indicator';
-  div.innerHTML='<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
-  wrap.appendChild(div);
-  scrollChat();
-  return div;
+// ════════════════════════════════════════════════
+// CHAT
+// ════════════════════════════════════════════════
+
+let chatHistory = [];
+
+function handleKey(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    sendMessage();
+  }
 }
 
-function removeEl(el){if(el&&el.parentNode)el.parentNode.removeChild(el);}
-function scrollChat(){const m=document.getElementById('messages');m.scrollTop=m.scrollHeight;}
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  input.value = '';
+  appendMsg(msg, 'user');
+
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({message: msg, history: chatHistory})
+  });
+
+  const reader = res.body.getReader();
+  const dec = new TextDecoder();
+  let aiText = '';
+  let aiEl = null;
+
+  while (true) {
+    const {done, value} = await reader.read();
+    if (done) break;
+    const lines = dec.decode(value).split('\n');
+    for (const line of lines) {
+      if (!line.startsWith('data:')) continue;
+      try {
+        const ev = JSON.parse(line.slice(5));
+        if (ev.t === 'text') {
+          if (!aiEl) aiEl = appendMsg('', 'ai');
+          aiText += ev.v;
+          aiEl.textContent = aiText;
+          document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+        }
+      } catch (_) {}
+    }
+  }
+
+  if (aiText) {
+    chatHistory.push({role: 'user', content: msg});
+    chatHistory.push({role: 'assistant', content: aiText});
+  }
+}
+
+function appendMsg(text, who) {
+  const m = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = `msg msg-${who}`;
+  d.textContent = text;
+  m.appendChild(d);
+  return d;
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(`page-${id}`).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
 </script>
 </body>
 </html>

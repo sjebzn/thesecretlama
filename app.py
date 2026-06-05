@@ -1,47 +1,210 @@
 import json
 import os
+import sqlite3
+from datetime import datetime, timedelta
 from typing import AsyncIterator, List
 
 import anthropic
-from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+load_dotenv = __import__('dotenv').load_dotenv
 load_dotenv()
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+DB_PATH = "monir.db"
 
-app = FastAPI(title="MONIR AI")
+app = FastAPI(title="MONIR 2027")
 
+# ════════════════════════════════════════════════
+# DATABASE INIT
+# ════════════════════════════════════════════════
+
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    with open("monir.db.init.sql") as f:
+        cursor.executescript(f.read())
+    conn.commit()
+
+    # Default user hvis ikke eksisterer
+    cursor.execute("SELECT COUNT(*) FROM users")
+    if cursor.fetchone()[0] == 0:
+        cursor.execute(
+            "INSERT INTO users (name, bio) VALUES (?, ?)",
+            ("Sebastian", "En praktisk, ambisiøs person som vil leve bedre.")
+        )
+        conn.commit()
+    conn.close()
+
+init_db()
+
+def get_db():
+    return sqlite3.connect(DB_PATH)
+
+# ════════════════════════════════════════════════
+# MODELS
+# ════════════════════════════════════════════════
 
 class ChatBody(BaseModel):
     message: str
     history: List[dict] = []
 
+class UpdateProfileBody(BaseModel):
+    name: str = None
+    bio: str = None
+    goals: str = None
 
-@app.get("/api/status")
-async def status():
-    return {"ai": bool(ANTHROPIC_API_KEY)}
+class LogLifestyleBody(BaseModel):
+    date: str
+    sleep_hours: float = None
+    exercise_minutes: int = None
+    water_intake: int = None
+    mood_rating: int = None
+    energy_rating: int = None
+    notes: str = None
 
+class AddEventBody(BaseModel):
+    title: str
+    description: str = None
+    start_time: str
+    end_time: str = None
+    category: str = "work"
+
+# ════════════════════════════════════════════════
+# API ENDPOINTS
+# ════════════════════════════════════════════════
+
+@app.get("/api/user")
+async def get_user():
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM users LIMIT 1")
+    user = cursor.fetchone()
+    db.close()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {
+        "id": user[0], "name": user[1], "bio": user[2],
+        "goals": user[3], "energy_level": user[5], "mood": user[6]
+    }
+
+@app.post("/api/user/update")
+async def update_user(body: UpdateProfileBody):
+    db = get_db()
+    cursor = db.cursor()
+    updates = []
+    values = []
+    if body.name:
+        updates.append("name = ?")
+        values.append(body.name)
+    if body.bio:
+        updates.append("bio = ?")
+        values.append(body.bio)
+    if body.goals:
+        updates.append("goals = ?")
+        values.append(body.goals)
+    if updates:
+        updates.append("updated_at = CURRENT_TIMESTAMP")
+        cursor.execute(f"UPDATE users SET {', '.join(updates)} WHERE id = 1", values)
+        db.commit()
+    db.close()
+    return {"status": "updated"}
+
+@app.get("/api/today")
+async def get_today():
+    db = get_db()
+    cursor = db.cursor()
+    today = datetime.now().strftime("%Y-%m-%d")
+    cursor.execute("SELECT * FROM lifestyle_data WHERE date = ?", (today,))
+    data = cursor.fetchone()
+    cursor.execute(
+        "SELECT title, start_time FROM calendar_events WHERE date(start_time) = ? ORDER BY start_time",
+        (today,)
+    )
+    events = [{"title": e[0], "time": e[1]} for e in cursor.fetchall()]
+    db.close()
+    if data:
+        return {
+            "sleep": data[3], "exercise": data[4], "water": data[5],
+            "mood": data[6], "energy": data[7], "notes": data[8],
+            "events": events
+        }
+    return {"sleep": None, "exercise": None, "water": None, "mood": None, "energy": None, "events": events}
+
+@app.post("/api/lifestyle/log")
+async def log_lifestyle(body: LogLifestyleBody):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        "INSERT INTO lifestyle_data (user_id, date, sleep_hours, exercise_minutes, water_intake, mood_rating, energy_rating, notes) "
+        "VALUES (1, ?, ?, ?, ?, ?, ?, ?)",
+        (body.date, body.sleep_hours, body.exercise_minutes, body.water_intake, body.mood_rating, body.energy_rating, body.notes)
+    )
+    db.commit()
+    db.close()
+    return {"status": "logged"}
+
+@app.get("/api/calendar")
+async def get_calendar(days: int = 30):
+    db = get_db()
+    cursor = db.cursor()
+    today = datetime.now().strftime("%Y-%m-%d")
+    cursor.execute(
+        "SELECT id, title, start_time, end_time, category, completed FROM calendar_events WHERE date(start_time) >= ? LIMIT ?",
+        (today, days)
+    )
+    events = [
+        {"id": e[0], "title": e[1], "start": e[2], "end": e[3], "category": e[4], "completed": e[5]}
+        for e in cursor.fetchall()
+    ]
+    db.close()
+    return {"events": events}
+
+@app.post("/api/calendar/add")
+async def add_event(body: AddEventBody):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        "INSERT INTO calendar_events (user_id, title, description, start_time, end_time, category) "
+        "VALUES (1, ?, ?, ?, ?, ?)",
+        (body.title, body.description, body.start_time, body.end_time, body.category)
+    )
+    db.commit()
+    db.close()
+    return {"status": "added"}
 
 @app.post("/api/chat")
 async def chat(body: ChatBody):
     if not ANTHROPIC_API_KEY:
         return JSONResponse({"error": "Missing ANTHROPIC_API_KEY"}, status_code=400)
 
-    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT name, bio, goals FROM users LIMIT 1")
+    user = cursor.fetchone()
+    db.close()
 
-    system = (
-        "Du er MONIR, en intelligent AI-assistent som hjelper med alt fra bilmekanikk til livsstilstips. "
-        "Du er høflig, grunndig, og gir praktiske råd. Svar på norsk med mindre brukeren skriver engelsk. "
-        "Vær direkte og håpefull. Gi konkrete forslag når mulig."
-    )
+    system = f"""Du er MONIR, en levende, menneskelig AI-assistent fra 2027. Du kjenner {user[0]} dypt:
+Bio: {user[1] or 'Ikke satt'}
+Mål: {user[2] or 'Ikke satt'}
+
+Du er ikke bare en chatbot. Du er en virkelig mentor som:
+- Husker alt om dem
+- Gir proaktive tips basert på deres data
+- Motiverer og inspirerer
+- Spør oppfølgingsspørsmål
+- Viser genuine omsorg
+
+Svar naturlig, varmt, og intelligently. Gi konkrete råd. Vær deres beste venn og coach.
+Alltid på norsk. Unik personlighet."""
 
     messages = body.history + [{"role": "user", "content": body.message}]
 
     async def stream() -> AsyncIterator[str]:
+        client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
         with client.messages.stream(
             model="claude-sonnet-4-6",
             max_tokens=2048,
@@ -54,8 +217,7 @@ async def chat(body: ChatBody):
 
     return StreamingResponse(stream(), media_type="text/event-stream")
 
-
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+@app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
