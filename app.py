@@ -13,7 +13,7 @@ load_dotenv()
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 
-app = FastAPI(title="JARVIS AI")
+app = FastAPI(title="MONIR AI")
 
 
 class ChatBody(BaseModel):
@@ -34,7 +34,7 @@ async def chat(body: ChatBody):
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
     system = (
-        "Du er JARVIS, en intelligent AI-assistent som hjelper med alt fra bilmekanikk til livsstilstips. "
+        "Du er MONIR, en intelligent AI-assistent som hjelper med alt fra bilmekanikk til livsstilstips. "
         "Du er høflig, grunndig, og gir praktiske råd. Svar på norsk med mindre brukeren skriver engelsk. "
         "Vær direkte og håpefull. Gi konkrete forslag når mulig."
     )
