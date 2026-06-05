@@ -229,6 +229,20 @@ input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gr
 @keyframes wave{0%,100%{height:4px}50%{height:22px}}
 .wave-label{font-size:9px;letter-spacing:3px;color:rgba(255,0,102,0.7);margin-left:10px}
 
+/* MEMORY CHIP */
+.mem-chip{cursor:pointer;font-size:8px;letter-spacing:2px;color:rgba(0,212,255,0.45);border:1px solid rgba(0,212,255,0.18);padding:2px 8px;transition:all 0.2s}
+.mem-chip:hover{color:#00d4ff;border-color:#00d4ff;background:rgba(0,212,255,0.05);box-shadow:0 0 10px rgba(0,212,255,0.1)}
+
+/* HUSK BUTTON */
+.husk-btn{display:inline-block;cursor:pointer;font-size:10px;color:rgba(0,212,255,0.2);margin-left:8px;transition:color 0.2s;vertical-align:middle;user-select:none}
+.husk-btn:hover{color:#00d4ff}
+
+/* ONBOARDING BANNER */
+#onb-banner{display:none;background:rgba(255,136,0,0.06);border-bottom:1px solid rgba(255,136,0,0.2);padding:5px 12px;font-size:8px;letter-spacing:1px;color:rgba(255,136,0,0.65);justify-content:space-between;align-items:center}
+#onb-banner.active{display:flex}
+.onb-exit{cursor:pointer;color:rgba(255,0,102,0.55);font-size:8px;letter-spacing:1px;padding:3px 8px;border:1px solid rgba(255,0,102,0.25);transition:all 0.2s}
+.onb-exit:hover{color:#ff0066;border-color:#ff0066;background:rgba(255,0,102,0.07)}
+
 /* IRON MAN HUD RINGS */
 .hud-ring{position:absolute;border-radius:50%;pointer-events:none}
 .arc-reactor{
@@ -269,6 +283,7 @@ input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gr
     <span class="pill on">ONLINE</span>
     <span style="color:rgba(0,255,136,0.4)">SEBASTIAN.SALIH</span>
     <span id="hdate" style="color:rgba(0,212,255,0.3)"></span>
+    <span id="mem-count" class="mem-chip" onclick="openNotes()" title="MONIRs minne — klikk for å se lagrede fakta">💾 0</span>
   </div>
   <div class="hclk" id="clk">--:--:--</div>
 </header>
@@ -387,6 +402,8 @@ input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gr
     <button class="qa" onclick="openLog('exercise')"><span class="qa-icon">💪</span>TRENING</button>
     <button class="qa" onclick="openLog('mood')"><span class="qa-icon">🧠</span>HUMØR</button>
     <button class="qa primary" onclick="openAddEvent()"><span class="qa-icon">📅</span>NY EVENT</button>
+    <button class="qa" onclick="openManualNote()" style="border-color:rgba(0,212,255,0.3);color:rgba(0,212,255,0.7);background:rgba(0,212,255,0.04)"><span class="qa-icon">💾</span>NOTER</button>
+    <button class="qa" onclick="startOnboarding()" style="border-color:rgba(255,136,0,0.35);color:rgba(255,136,0,0.75);background:rgba(255,136,0,0.04)"><span class="qa-icon">🧬</span>KARTLEGG</button>
   </div>
 </div>
 
@@ -422,8 +439,12 @@ input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gr
       <span style="font-size:7px;letter-spacing:3px;color:rgba(0,255,136,0.3)">MONIR.TERMINAL</span>
       <span id="chat-status" style="font-size:7px;letter-spacing:2px;color:rgba(0,255,136,0.3)">READY</span>
     </div>
+    <div id="onb-banner">
+      <span>🧬 DYBDEKARTLEGGING AKTIV — MONIR stiller spørsmål for å bli kjent med deg</span>
+      <span class="onb-exit" onclick="stopOnboarding()">AVSLUTT ✕</span>
+    </div>
     <div id="cmsgs">
-      <div class="ma">Hei Sebastian. Jeg er MONIR — online og klar. Klikk på datasellene for å logge, knappene for hurtighandlinger, eller spør meg om hva som helst.</div>
+      <div class="ma">Hei Sebastian. Jeg er MONIR — online og klar. Trykk <span style="color:#ffaa00">🧬 KARTLEGG</span> for at jeg skal bli kjent med deg, eller spør meg om hva som helst.</div>
     </div>
     <div id="prompts">
       <div class="prompt-chip" onclick="quickSend('Hva bør jeg fokusere på i dag?')">FOKUS I DAG</div>
@@ -519,37 +540,122 @@ async function loadData(){
 }
 loadData();
 
+// ══ MEMORY / NOTES ══
+async function loadNotes(){
+  try{
+    const r=await fetch('/api/notes');if(!r.ok)return;
+    const d=await r.json();
+    document.getElementById('mem-count').textContent='💾 '+d.notes.length;
+  }catch(e){}
+}
+loadNotes();
+
+async function saveAsNote(text,category){
+  if(!text||text.length<5)return;
+  try{
+    await fetch('/api/notes/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({note:text.slice(0,600),category:category||'chat'})});
+    toast('💾 LAGRET I MONIR MINNET','#00d4ff');
+    loadNotes();
+  }catch(e){}
+}
+
+async function deleteNote(id){
+  try{
+    await fetch('/api/notes/'+id,{method:'DELETE'});
+    toast('Slettet fra minnet','#ff4466');
+    openNotes();
+  }catch(e){}
+}
+
+async function openNotes(){
+  try{
+    const r=await fetch('/api/notes');const d=await r.json();
+    const cols={general:'#00ff88',personal:'#aa00ff',health:'#ff0066',business:'#ff4466',tech:'#00d4ff',chat:'rgba(255,255,255,0.25)'};
+    const body=d.notes.length?d.notes.map(n=>`
+      <div style="border-bottom:1px solid rgba(0,255,136,0.07);padding:8px 0;display:flex;gap:8px;align-items:flex-start">
+        <div style="width:3px;background:${cols[n.category]||'#00ff88'};flex-shrink:0;align-self:stretch;border-radius:1px;min-height:28px"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:7px;color:rgba(0,212,255,0.35);letter-spacing:1px;margin-bottom:3px">${(n.category||'general').toUpperCase()} // ${(n.at||'').split('T')[0]}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.7);line-height:1.5;word-break:break-word">${n.note}</div>
+        </div>
+        <span onclick="deleteNote(${n.id})" style="cursor:pointer;color:rgba(255,0,102,0.3);font-size:10px;flex-shrink:0;padding:2px 4px" onmouseover="this.style.color='#ff0066'" onmouseout="this.style.color='rgba(255,0,102,0.3)'">✕</span>
+      </div>`).join('')
+    :`<div style="color:rgba(0,255,136,0.2);font-size:9px;letter-spacing:1px;text-align:center;padding:24px 0">INGEN FAKTA LAGRET ENNÅ<br><br><span style="font-size:8px;color:rgba(255,255,255,0.15)">Klikk 💾 på MONIR-svar for å lagre, eller bruk NOTER-knappen</span></div>`;
+    document.getElementById('modal-title').textContent='// MONIR MINNE — '+d.notes.length+' FAKTA';
+    document.getElementById('modal-body').innerHTML=`<div style="max-height:260px;overflow-y:auto;padding-right:4px">${body}</div>`;
+    modalCurrent.onSave=()=>{};
+    document.getElementById('modal-save').textContent='LUKK';
+    document.getElementById('modal').classList.add('open');
+  }catch(e){toast('Feil ved lasting','#ff4466')}
+}
+
+function openManualNote(){
+  const body=`
+    <label class="modal-label">KATEGORI</label>
+    <select class="modal-input" id="note-cat" style="background:rgba(0,255,136,0.05)">
+      <option value="personal" style="background:#020a14">PERSONLIG</option>
+      <option value="health" style="background:#020a14">HELSE</option>
+      <option value="business" style="background:#020a14">BUSINESS</option>
+      <option value="tech" style="background:#020a14">TEKNOLOGI</option>
+      <option value="general" style="background:#020a14">GENERELT</option>
+    </select>
+    <label class="modal-label" style="margin-top:10px">FAKTA / NOTE</label>
+    <textarea class="modal-input" id="note-text" rows="4" placeholder="Eks: Jeg trener best om morgenen. Min BMW er en E60 530i 2006. Jeg er intolerant mot melk..."></textarea>`;
+  openModal('// LAGRE I MONIRS MINNE',body,async()=>{
+    const cat=document.getElementById('note-cat').value;
+    const txt=document.getElementById('note-text').value.trim();
+    if(!txt){toast('Skriv inn noe å lagre','#ff4466');return}
+    await saveAsNote(txt,cat);
+  });
+}
+
+// ══ ONBOARDING ══
+let chatMode='normal';
+
+function startOnboarding(){
+  chatMode='onboarding';
+  document.getElementById('onb-banner').classList.add('active');
+  document.getElementById('chat-status').textContent='KARTLEGGER...';
+  toast('🧬 Dybdekartlegging startet!','#ffaa00');
+  document.getElementById('cin').value='Start kartleggingen. Still ditt første spørsmål nå.';
+  send();
+}
+
+function stopOnboarding(){
+  chatMode='normal';
+  document.getElementById('onb-banner').classList.remove('active');
+  document.getElementById('chat-status').textContent='READY';
+  toast('Tilbake til normal modus','#00ff88');
+}
+
 // ══ MODAL SYSTEM ══
 let modalCurrent={};
-function openModal(title,body,onSave){document.getElementById('modal-title').textContent=title;document.getElementById('modal-body').innerHTML=body;modalCurrent.onSave=onSave;document.getElementById('modal').classList.add('open')}
+function openModal(title,body,onSave){document.getElementById('modal-title').textContent=title;document.getElementById('modal-save').textContent='LAGRE';document.getElementById('modal-body').innerHTML=body;modalCurrent.onSave=onSave;document.getElementById('modal').classList.add('open')}
 function closeModal(){document.getElementById('modal').classList.remove('open')}
 document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal()})
 function saveModal(){if(modalCurrent.onSave)modalCurrent.onSave();closeModal()}
 
 function openLog(type){
   const configs={
-    sleep:{title:'LOG SØVN',min:0,max:12,step:0.5,unit:'TIMER',val:todayData.sleep||6,key:'sleep_hours',display:'dv-sl',toastKey:'sleep'},
-    exercise:{title:'LOG TRENING',min:0,max:180,step:5,unit:'MINUTTER',val:todayData.exercise||45,key:'exercise_minutes',display:'dv-ex',toastKey:'exercise'},
-    mood:{title:'HUMØR / STEMNING',min:1,max:10,step:1,unit:'/10',val:todayData.mood||7,key:'mood_rating',display:'dv-mo',toastKey:'mood'},
-    water:{title:'VANNINNTAK',min:0,max:15,step:1,unit:'GLASS',val:todayData.water||6,key:'water_intake',display:'dv-wa',toastKey:'water'},
+    sleep:{title:'LOG SØVN',min:0,max:12,step:0.5,unit:'TIMER',val:todayData.sleep||6,key:'sleep_hours'},
+    exercise:{title:'LOG TRENING',min:0,max:180,step:5,unit:'MINUTTER',val:todayData.exercise||45,key:'exercise_minutes'},
+    mood:{title:'HUMØR / STEMNING',min:1,max:10,step:1,unit:'/10',val:todayData.mood||7,key:'mood_rating'},
+    water:{title:'VANNINNTAK',min:0,max:15,step:1,unit:'GLASS',val:todayData.water||6,key:'water_intake'},
   };
   const c=configs[type];if(!c)return;
-  let cur=c.val;
   const body=`
-    <div class="modal-big-val" id="log-display">${cur} <span>${c.unit}</span></div>
-    <input type="range" min="${c.min}" max="${c.max}" step="${c.step}" value="${cur}" id="log-slider" oninput="updateSlider(this,${c.step},'${c.unit}')">
+    <div class="modal-big-val" id="log-display">${c.val} <span>${c.unit}</span></div>
+    <input type="range" min="${c.min}" max="${c.max}" step="${c.step}" value="${c.val}" id="log-slider" oninput="updateSlider(this,${c.step},'${c.unit}')">
     <div class="range-labels"><span>${c.min}</span><span>${c.max} ${c.unit}</span></div>`;
   openModal('// '+c.title,body,async()=>{
     const v=parseFloat(document.getElementById('log-slider').value);
     const today=new Date().toISOString().split('T')[0];
-    const body2={date:today,[c.key]:v};
-    try{await fetch('/api/lifestyle/log',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body2)})}catch(e){}
+    try{await fetch('/api/lifestyle/log',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:today,[c.key]:v})})}catch(e){}
     if(type==='sleep')todayData.sleep=v;
     else if(type==='exercise')todayData.exercise=v;
     else if(type==='mood')todayData.mood=v;
     else if(type==='water')todayData.water=v;
-    renderToday();
-    toast('✓ '+c.title+': '+v+' '+c.unit);
+    renderToday();toast('✓ '+c.title+': '+v+' '+c.unit);
   });
   setTimeout(()=>{const sl=document.getElementById('log-slider');if(sl)sl.oninput({target:sl})},50);
 }
@@ -565,8 +671,7 @@ function openGoalEdit(id){
     <div style="font-size:9px;color:rgba(0,255,136,0.4);letter-spacing:1px;margin-top:8px">${g.t}</div>`;
   openModal('// OPPDATER MÅL',body,()=>{
     const v=parseInt(document.getElementById('goal-slider').value);
-    g.p=v;renderGoals();
-    toast('✓ MÅL OPPDATERT: '+v+'%','#00d4ff');
+    g.p=v;renderGoals();toast('✓ MÅL OPPDATERT: '+v+'%','#00d4ff');
   });
   setTimeout(()=>{const sl=document.getElementById('goal-slider');if(sl)sl.oninput({target:sl})},50);
 }
@@ -590,8 +695,7 @@ function openAddEvent(){
     const cat=document.getElementById('ev-cat').value;
     if(!title||!start){toast('Fyll inn tittel og dato','#ff4466');return}
     try{await fetch('/api/calendar/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,start_time:start,category:cat})})}catch(e){}
-    toast('✓ EVENT LAGT TIL: '+title,'#ff0066');
-    setTimeout(loadData,500);
+    toast('✓ EVENT LAGT TIL: '+title,'#ff0066');setTimeout(loadData,500);
   });
 }
 
@@ -599,49 +703,43 @@ function openAddEvent(){
 let hist=[];let sending=false;
 document.getElementById('cin').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
 
-function addMsg(role,text){const el=document.createElement('div');el.className=role==='user'?'mu':role==='err'?'merr':'ma';el.textContent=text;const m=document.getElementById('cmsgs');m.appendChild(el);m.scrollTop=m.scrollHeight;return el}
+function addMsg(role,text){
+  const el=document.createElement('div');
+  el.className=role==='user'?'mu':role==='err'?'merr':'ma';
+  el.textContent=text;
+  const m=document.getElementById('cmsgs');
+  m.appendChild(el);m.scrollTop=m.scrollHeight;
+  return el;
+}
 
 function quickSend(msg){document.getElementById('cin').value=msg;send()}
 
 // ══ VOICE INPUT (JARVIS-STYLE) ══
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recog = null, voiceActive = false;
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let recog=null,voiceActive=false;
+if(SR){
+  recog=new SR();recog.lang='nb-NO';recog.continuous=false;recog.interimResults=false;
+  recog.onresult=(e)=>{const txt=Array.from(e.results).map(r=>r[0].transcript).join(' ');document.getElementById('cin').value=txt;stopVoice();send()};
+  recog.onerror=(e)=>{stopVoice();toast('Mikrofon feil: '+e.error,'#ff4466')};
+  recog.onend=()=>stopVoice();
+}else{document.getElementById('mic-btn').title='Stemmeinput støttes ikke i denne nettleseren'}
 
-if (SR) {
-  recog = new SR();
-  recog.lang = 'nb-NO';
-  recog.continuous = false;
-  recog.interimResults = false;
-  recog.onresult = (e) => {
-    const txt = Array.from(e.results).map(r=>r[0].transcript).join(' ');
-    document.getElementById('cin').value = txt;
-    stopVoice();
-    send();
-  };
-  recog.onerror = (e) => { stopVoice(); toast('Mikrofon feil: '+e.error,'#ff4466'); };
-  recog.onend = () => stopVoice();
-} else {
-  document.getElementById('mic-btn').title = 'Stemmeinput støttes ikke i denne nettleseren';
-}
-
-function toggleVoice() {
-  if (!SR) { toast('Bruk Chrome/Safari for stemmeinput','#ff4466'); return; }
-  if (voiceActive) { stopVoice(); return; }
-  voiceActive = true;
-  recog.start();
+function toggleVoice(){
+  if(!SR){toast('Bruk Chrome/Safari for stemmeinput','#ff4466');return}
+  if(voiceActive){stopVoice();return}
+  voiceActive=true;recog.start();
   document.getElementById('mic-btn').classList.add('listening');
-  document.getElementById('mic-btn').textContent = '⏹';
+  document.getElementById('mic-btn').textContent='⏹';
   document.getElementById('waveform').classList.add('active');
-  document.getElementById('chat-status').textContent = 'LYTTER...';
+  document.getElementById('chat-status').textContent='LYTTER...';
 }
 
-function stopVoice() {
-  voiceActive = false;
-  if (recog) try { recog.stop(); } catch(e) {}
+function stopVoice(){
+  voiceActive=false;if(recog)try{recog.stop()}catch(e){}
   document.getElementById('mic-btn').classList.remove('listening');
-  document.getElementById('mic-btn').textContent = '🎤';
+  document.getElementById('mic-btn').textContent='🎤';
   document.getElementById('waveform').classList.remove('active');
-  document.getElementById('chat-status').textContent = 'READY';
+  if(chatMode!=='onboarding')document.getElementById('chat-status').textContent='READY';
 }
 
 async function send(){
@@ -649,19 +747,32 @@ async function send(){
   const inp=document.getElementById('cin'),msg=inp.value.trim();if(!msg)return;
   inp.value='';sending=true;
   document.getElementById('cbtn').disabled=true;
-  document.getElementById('chat-status').textContent='TRANSMITTING...';
+  document.getElementById('chat-status').textContent=chatMode==='onboarding'?'KARTLEGGER...':'TRANSMITTING...';
   addMsg('user',msg);
   const aiEl=addMsg('ai','');aiEl.classList.add('typing');
   let full='';
   try{
-    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,history:hist})});
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,history:hist,mode:chatMode})});
     aiEl.classList.remove('typing');
     if(!res.ok){const err=await res.json().catch(()=>({error:'HTTP '+res.status}));aiEl.className='merr';aiEl.textContent=err.error+(res.status===400&&(err.error||'').includes('ANTHROPIC')?' — Sjekk .env filen':'');document.getElementById('chat-status').textContent='ERROR';return}
     const reader=res.body.getReader(),dec=new TextDecoder();
     while(true){const{done,value}=await reader.read();if(done)break;for(const line of dec.decode(value).split('\n')){if(!line.startsWith('data: '))continue;try{const d=JSON.parse(line.slice(6));if(d.t==='text'){full+=d.v;aiEl.textContent=full;document.getElementById('cmsgs').scrollTop=9999}}catch{}}}
-    hist.push({role:'user',content:msg},{role:'assistant',content:full});if(hist.length>20)hist=hist.slice(-20);
-    document.getElementById('chat-status').textContent='READY';
-  }catch(e){aiEl.classList.remove('typing');aiEl.className='merr';aiEl.textContent='TILKOBLING FEILET — er python3 app.py kjørende?';document.getElementById('chat-status').textContent='OFFLINE'}
+    // Add memory-save button to every AI response
+    if(full.length>15){
+      const husk=document.createElement('span');
+      husk.className='husk-btn';husk.textContent='💾';husk.title='Lagre i MONIR-minnet';
+      const captured=full;const cat=chatMode==='onboarding'?'personal':'chat';
+      husk.onclick=()=>saveAsNote(captured,cat);
+      aiEl.appendChild(husk);
+    }
+    hist.push({role:'user',content:msg},{role:'assistant',content:full});
+    if(hist.length>20)hist=hist.slice(-20);
+    document.getElementById('chat-status').textContent=chatMode==='onboarding'?'VENTER PÅ SVAR...':'READY';
+  }catch(e){
+    aiEl.classList.remove('typing');aiEl.className='merr';
+    aiEl.textContent='TILKOBLING FEILET — er python3 app.py kjørende?';
+    document.getElementById('chat-status').textContent='OFFLINE';
+  }
   finally{sending=false;document.getElementById('cbtn').disabled=false}
 }
 </script>

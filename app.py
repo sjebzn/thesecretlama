@@ -1,7 +1,7 @@
 import json
 import os
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import AsyncIterator, List
 
 import anthropic
@@ -50,6 +50,7 @@ def get_db():
 class ChatBody(BaseModel):
     message: str
     history: List[dict] = []
+    mode: str = "normal"
 
 class UpdateProfileBody(BaseModel):
     name: str = None
@@ -71,6 +72,10 @@ class AddEventBody(BaseModel):
     start_time: str
     end_time: str = None
     category: str = "work"
+
+class AddNoteBody(BaseModel):
+    note: str
+    category: str = "general"
 
 # ════════════════════════════════════════════════
 # API ENDPOINTS
@@ -175,6 +180,38 @@ async def add_event(body: AddEventBody):
     db.close()
     return {"status": "added"}
 
+@app.get("/api/notes")
+async def get_notes():
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        "SELECT id, category, note, created_at FROM memory_notes WHERE user_id = 1 ORDER BY created_at DESC LIMIT 50"
+    )
+    notes = [{"id": n[0], "category": n[1], "note": n[2], "at": n[3]} for n in cursor.fetchall()]
+    db.close()
+    return {"notes": notes}
+
+@app.post("/api/notes/add")
+async def add_note(body: AddNoteBody):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        "INSERT INTO memory_notes (user_id, category, note) VALUES (1, ?, ?)",
+        (body.category, body.note)
+    )
+    db.commit()
+    db.close()
+    return {"status": "saved"}
+
+@app.delete("/api/notes/{note_id}")
+async def delete_note(note_id: int):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM memory_notes WHERE id = ? AND user_id = 1", (note_id,))
+    db.commit()
+    db.close()
+    return {"status": "deleted"}
+
 @app.post("/api/chat")
 async def chat(body: ChatBody):
     if not ANTHROPIC_API_KEY:
@@ -199,37 +236,56 @@ async def chat(body: ChatBody):
     cursor.execute("SELECT title, start_time, category FROM calendar_events WHERE date(start_time) >= date('now') LIMIT 3")
     upcoming = cursor.fetchall()
 
+    cursor.execute("SELECT category, note FROM memory_notes WHERE user_id = 1 ORDER BY created_at DESC LIMIT 20")
+    saved_notes = cursor.fetchall()
+
     db.close()
 
-    goals_text = "\n".join([f"• {g[0]} ({int(g[1])}% progress)" for g in goals]) if goals else "Ingen mål"
+    goals_text = "\n".join([f"• {g[0]} ({int(g[1])}%)" for g in goals]) if goals else "Ingen mål"
     habits_text = "\n".join([f"• {h[0]} ({h[1]} dager)" for h in habits]) if habits else "Ingen vaner"
     upcoming_text = "\n".join([f"• {e[0]}" for e in upcoming]) if upcoming else "Ingen events"
+    notes_text = "\n".join([f"• [{n[0].upper()}] {n[1]}" for n in saved_notes]) if saved_notes else "Ingen lagrede fakta ennå"
 
     if today_data:
         today_str = f"Søvn: {today_data[0]}h, Trening: {today_data[1]}min, Humør: {today_data[2]}/10"
     else:
-        today_str = "Ingen data"
+        today_str = "Ingen data i dag"
 
-    system = "Du er MONIR, Sebastians personlige AI-assistent fra 2027. Du kjenner ham dypt.\n\n"
-    system += f"SEBASTIAN:\n{user[1]}\n\n"
-    system += f"HANS MÅL:\n{goals_text}\n\n"
-    system += f"HANS VANER:\n{habits_text}\n\n"
-    system += f"I DAG: {today_str}\n\n"
-    system += f"KOMMENDE: {upcoming_text}\n\n"
-    system += "DU: Gir proaktive råd, motiverer, husker alt, lytter, hjemper. Fokus: BMW, OBDAI, Autovers, helse, events.\n"
-    system += "Alltid norsk. Vær ekte og konkret."
+    if body.mode == "onboarding":
+        system = (
+            "Du er MONIR i DYBDEKARTLEGGINGS-MODUS. Din oppgave er å bli kjent med Sebastian "
+            "ved å stille ham personlige, innsiktsfulle spørsmål ÉN om gangen.\n\n"
+            f"Det du allerede vet:\n{user[1]}\n\n"
+            "Temaer å utforske: livsvisjon, frykt, verdier, relasjoner, motivasjon, "
+            "BMW-passion, forretningsdrømmer, helse-mål, daglige rutiner, styrker/svakheter, "
+            "hva som gjør ham glad eller frustrert, 5-årsbildet, hva han trenger hjelp med.\n\n"
+            "REGLER: Still ETT spørsmål om gangen. Anerkjenn svaret genuint og kort (1 setning). "
+            "Still deretter neste spørsmål. Du er her for å LYTTE, ikke snakke mye. "
+            "Maks 2 setninger per svar fra deg — resten er spørsmål.\n"
+            "Alltid norsk. Vær ekte, nysgjerrig og empatisk."
+        )
+    else:
+        system = "Du er MONIR, Sebastians personlige AI-assistent fra 2027. Du kjenner ham dypt.\n\n"
+        system += f"SEBASTIAN:\n{user[1]}\n\n"
+        system += f"MÅL:\n{goals_text}\n\n"
+        system += f"VANER:\n{habits_text}\n\n"
+        system += f"I DAG: {today_str}\n\n"
+        system += f"KOMMENDE: {upcoming_text}\n\n"
+        system += f"MINNE (fakta du har lært om Sebastian):\n{notes_text}\n\n"
+        system += "Gi proaktive råd, motiver, husk alt, hjelp. Fokus: BMW, OBDAI, Autovers, helse, events.\n"
+        system += "Alltid norsk. Vær ekte og konkret."
 
     messages = body.history + [{"role": "user", "content": body.message}]
 
     async def stream() -> AsyncIterator[str]:
-        client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-        with client.messages.stream(
+        client = anthropic.AsyncAnthropic(api_key=ANTHROPIC_API_KEY)
+        async with client.messages.stream(
             model="claude-sonnet-4-6",
             max_tokens=2048,
             system=system,
             messages=messages,
         ) as s:
-            for text in s.text_stream:
+            async for text in s.text_stream:
                 yield f"data: {json.dumps({'t': 'text', 'v': text})}\n\n"
         yield f"data: {json.dumps({'t': 'done'})}\n\n"
 
