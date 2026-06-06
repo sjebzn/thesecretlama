@@ -2,1022 +2,745 @@
 <html lang="no">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<title>MONIR</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MONIR // LIFE OS</title>
 <style>
-:root{--g:#00ff88;--b:#00d4ff;--p:#aa44ff;--r:#ff0066;--o:#ffaa00;--gold:#ffcc44;--bg:#010c1a;--panel:rgba(0,14,30,0.9)}
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--g);font-family:'Share Tech Mono',monospace}
-#bg{position:fixed;inset:0;z-index:0}
-.hex{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg width='56' height='48' viewBox='0 0 56 48' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M28 2l26 15v14L28 46 2 31V17L28 2z' fill='none' stroke='rgba(0,255,136,0.03)' stroke-width='1'/%3E%3C/svg%3E")}
-.scanlines{position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.05) 2px,rgba(0,0,0,0.05) 4px);pointer-events:none;z-index:999}
-.vignette{position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.7) 100%);pointer-events:none;z-index:1}
+:root{--bg:#05080f;--panel:#0a0f1a;--border:#1a2535;--gold:#d4a017;--cyan:#00d4ff;--green:#00ff7f;--red:#ff4455;--text:#c8d8e8;--dim:#3a4a5a;--f:'Courier New',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f);font-size:13px}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);pointer-events:none;z-index:9999}
+button{background:transparent;border:1px solid var(--border);color:var(--text);cursor:pointer;font-family:var(--f);font-size:12px;padding:6px 12px;transition:all .15s}
+button:hover{border-color:var(--gold);color:var(--gold)}
+input,select,textarea{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);font-family:var(--f);font-size:12px;padding:7px 10px;outline:none;width:100%}
+input:focus,select:focus{border-color:var(--cyan)}
+input[type=range]{padding:0;cursor:pointer;accent-color:var(--cyan)}
+input[type=checkbox]{accent-color:var(--gold);cursor:pointer;width:auto;min-width:auto}
+select option{background:var(--panel)}
+.hidden{display:none!important}
 
-/* ── BOOT ── */
-#boot{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;transition:opacity 1s}
-#boot.done{opacity:0;pointer-events:none}
-.bl{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:5px;color:var(--g);opacity:0;animation:blin .5s ease forwards}
-.bl:nth-child(2){animation-delay:.5s}.bl:nth-child(3){animation-delay:1s}.bl:nth-child(4){animation-delay:1.5s}
-.bb{width:300px;height:1px;background:rgba(0,255,136,0.08);margin-top:14px;overflow:hidden;opacity:0;animation:blin .3s ease 1.8s forwards}
-.bbf{height:100%;width:0;background:var(--g);animation:bbl 1.5s ease 2s forwards}
-@keyframes bbl{to{width:100%}}@keyframes blin{to{opacity:1;transform:none}}
+/* BOOT */
+#boot{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;z-index:100}
+#boot-text{color:var(--green);font-size:13px;line-height:1.9;white-space:pre;min-height:120px}
+#boot-bar{width:280px;height:2px;background:var(--dim)}
+#boot-fill{height:100%;background:var(--green);width:0;transition:width .08s}
 
-/* ── LAYOUT ── */
-#app{position:fixed;inset:0;z-index:2;display:grid;grid-template-rows:40px 1fr 360px;grid-template-columns:240px 1fr 255px;gap:5px;padding:7px}
+/* ONBOARDING */
+#ob-overlay{position:fixed;inset:0;background:rgba(5,8,15,.96);z-index:50;display:flex;align-items:center;justify-content:center;overflow-y:auto;padding:20px}
+#ob-box{width:min(580px,96vw);border:1px solid var(--gold);background:var(--panel);padding:28px 32px}
+#ob-title{color:var(--gold);font-size:16px;letter-spacing:4px;margin-bottom:2px}
+#ob-sub{color:var(--dim);font-size:10px;letter-spacing:2px;margin-bottom:18px}
+#ob-pips{display:flex;gap:4px;margin-bottom:18px}
+.pip{height:3px;flex:1;background:var(--dim);transition:background .3s}
+.pip.done{background:var(--gold)}
+.pip.active{background:var(--cyan)}
+#ob-body{min-height:200px}
+.obl{color:var(--dim);font-size:10px;letter-spacing:2px;margin-bottom:5px;display:block;margin-top:12px}
+.ob-row{display:flex;gap:10px}
+.ob-row>div{flex:1}
+.sr{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.sr label{width:110px;font-size:10px;color:var(--dim);letter-spacing:1px;flex-shrink:0}
+.sr input[type=range]{flex:1}
+.sr span{width:28px;text-align:right;color:var(--cyan);font-size:12px}
+.ob-list{list-style:none}
+.ob-list li{display:flex;gap:6px;margin-bottom:6px;align-items:center}
+.ob-list li input[type=text]{flex:1}
+.ob-list li .lnum{width:55px;flex-shrink:0}
+.ob-list li .lemu{width:40px;flex-shrink:0}
+.ob-list li .lxp{width:55px;flex-shrink:0}
+.ob-list li button.rm{padding:2px 7px;color:var(--red);border-color:var(--red);font-size:11px;flex-shrink:0}
+.ob-add{color:var(--green);border-color:var(--green);font-size:11px;padding:4px 10px;margin-top:4px}
+#ob-footer{display:flex;justify-content:space-between;align-items:center;margin-top:20px}
+#ob-info{color:var(--dim);font-size:10px}
+#ob-next{background:var(--gold);color:var(--bg);border:none;padding:10px 28px;font-size:12px;letter-spacing:3px;font-family:var(--f);cursor:pointer}
+#ob-next:hover{background:#e8b820}
+#ob-prev{color:var(--dim);border-color:var(--dim);padding:8px 14px}
+#ob-prev:hover{color:var(--text);border-color:var(--text)}
 
-/* ── HEADER ── */
-header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid rgba(0,255,136,0.1);background:rgba(0,5,14,0.5)}
-.ht{font-family:'Orbitron',sans-serif;font-size:17px;font-weight:900;letter-spacing:7px;animation:glitch 14s infinite}
-@keyframes glitch{0%,91%,100%{color:var(--g);text-shadow:0 0 18px rgba(0,255,136,0.35)}92%{color:#ff0066;transform:translateX(-3px)}93%{color:var(--g);transform:none}94%{clip-path:inset(30% 0 40% 0);transform:translateX(4px);color:var(--b)}95%{clip-path:none;transform:none}}
-.hm{display:flex;align-items:center;gap:10px}
-.hdot{width:6px;height:6px;border-radius:50%;background:var(--g);box-shadow:0 0 8px var(--g);animation:hdp 2s ease-in-out infinite}
-@keyframes hdp{0%,100%{opacity:1}50%{opacity:.2}}
-.htag{font-size:7.5px;letter-spacing:2px;color:rgba(0,255,136,0.35);border:1px solid rgba(0,255,136,0.14);padding:2px 7px}
-.htag.hi{color:var(--g);border-color:rgba(0,255,136,0.35)}
-.htag.gold{color:rgba(255,204,68,0.6);border-color:rgba(255,204,68,0.22)}
-.htag.gold.hi{color:var(--gold);border-color:rgba(255,204,68,0.45)}
-.hclk{font-family:'Orbitron',sans-serif;font-size:14px;color:var(--b);letter-spacing:3px;text-shadow:0 0 12px rgba(0,212,255,0.4)}
+/* APP */
+#app{display:flex;flex-direction:column;height:100vh}
+#hdr{display:flex;align-items:center;gap:12px;padding:7px 14px;background:var(--panel);border-bottom:1px solid var(--border);flex-shrink:0;min-height:46px}
+#hdr-name{color:var(--gold);font-size:14px;letter-spacing:3px;white-space:nowrap}
+.sep{color:var(--dim)}
+#hdr-lvl{background:var(--gold);color:var(--bg);font-size:10px;padding:2px 8px;letter-spacing:2px;white-space:nowrap;font-weight:bold}
+#xp-wrap{flex:1;min-width:80px}
+#xp-bg{height:5px;background:var(--dim)}
+#xp-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));width:0;transition:width .6s}
+#xp-txt{color:var(--dim);font-size:9px;margin-top:2px;letter-spacing:1px}
+#hdr-city{color:var(--dim);font-size:10px;white-space:nowrap}
+#hdr-time{color:var(--cyan);font-size:11px;white-space:nowrap;min-width:48px;text-align:right}
+#main{display:flex;flex:1;overflow:hidden}
 
-/* ── PANELS ── */
-.panel{background:var(--panel);border:1px solid rgba(0,255,136,0.11);position:relative;overflow:hidden;padding:9px 10px;backdrop-filter:blur(18px)}
-.panel::before,.panel::after{content:'';position:absolute;width:9px;height:9px;border-color:rgba(0,255,136,0.3);border-style:solid}
-.panel::before{top:-1px;left:-1px;border-width:1px 0 0 1px}
-.panel::after{bottom:-1px;right:-1px;border-width:0 1px 1px 0}
-.ptop{position:absolute;top:0;left:15%;right:15%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,136,0.35),transparent)}
-.pt{font-family:'Orbitron',sans-serif;font-size:6.5px;letter-spacing:3px;color:rgba(0,255,136,0.22);margin-bottom:7px;margin-top:1px}
+/* LEFT */
+#left{width:210px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;padding:10px}
+.ptitle{color:var(--gold);font-size:9px;letter-spacing:3px;margin-bottom:8px;padding-bottom:3px;border-bottom:1px solid var(--border)}
+.statrow{display:flex;align-items:center;gap:6px;margin-bottom:7px}
+.slabel{width:78px;font-size:9px;color:var(--dim);letter-spacing:1px;flex-shrink:0}
+.sbg{flex:1;height:3px;background:var(--dim)}
+.sfill{height:100%;transition:width .5s}
+.sval{width:26px;text-align:right;font-size:9px}
+.reprow{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.rlabel{width:82px;font-size:9px;color:var(--dim);letter-spacing:1px}
+.stars{color:var(--gold);font-size:10px;letter-spacing:2px}
 
-/* ── LEFT ── */
-#col-l{grid-column:1;grid-row:2;display:flex;flex-direction:column;gap:5px}
-.uav{width:50px;height:50px;border-radius:50%;border:2px solid var(--g);background:radial-gradient(circle,rgba(0,255,136,0.16),rgba(0,8,22,0.95));display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:20px;font-weight:700;margin:0 auto 5px;animation:avp 3.5s ease-in-out infinite}
-@keyframes avp{0%,100%{box-shadow:0 0 0 2px rgba(0,255,136,0.07),0 0 14px rgba(0,255,136,0.22)}50%{box-shadow:0 0 0 5px rgba(0,255,136,0.12),0 0 30px rgba(0,255,136,0.4),0 0 55px rgba(0,212,255,0.08)}}
-.un{font-family:'Orbitron',sans-serif;font-size:9.5px;font-weight:700;text-align:center;letter-spacing:3px;margin-bottom:2px}
-.ut{font-size:6px;color:rgba(0,212,255,0.4);text-align:center;letter-spacing:1px;line-height:1.8;margin-bottom:8px}
-.gauges{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:5px}
-.gw{text-align:center}
-.gl{font-size:6px;letter-spacing:1px;color:rgba(255,255,255,0.25);margin-top:2px}
-/* Habits */
-.hi{display:flex;align-items:center;gap:5px;padding:4px 1px;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:background .15s}
-.hi:last-child{border-bottom:none}
-.hi:hover{background:rgba(0,255,136,0.04)}
-.hb{width:3px;height:22px;border-radius:1px;flex-shrink:0}
-.hn{font-size:8px;color:rgba(255,255,255,0.65);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hf{font-size:6px;color:rgba(255,255,255,0.2);letter-spacing:1px}
-.hs{font-size:7px;color:var(--o);white-space:nowrap;margin-right:2px}
-.hck{width:14px;height:14px;border:1px solid rgba(255,255,255,0.16);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0;transition:all .2s}
-.hck.on{border-color:var(--g);background:rgba(0,255,136,0.12);color:var(--g)}
-.sf{font-size:6.5px;color:rgba(0,255,136,0.25);text-align:center;margin-top:auto;padding-top:6px;border-top:1px solid rgba(0,255,136,0.07);line-height:1.8;letter-spacing:1px}
+/* CENTER */
+#center{flex:1;display:flex;flex-direction:column;align-items:center;overflow:hidden;padding:10px 6px;min-width:180px}
+#fig-wrap{flex:1;display:flex;align-items:center;justify-content:center;position:relative;width:100%;max-height:200px}
+#fig-label{position:absolute;bottom:0;left:50%;transform:translateX(-50%);color:var(--dim);font-size:9px;letter-spacing:2px}
+#stick-fig{filter:drop-shadow(0 0 6px var(--green))}
+#pri-box{width:100%;border:1px solid var(--border);padding:10px;background:var(--panel);margin-top:6px;flex-shrink:0}
+#pri-out{min-height:70px;max-height:130px;overflow-y:auto;color:var(--text);font-size:11px;line-height:1.65;white-space:pre-wrap}
+#pri-foot{display:flex;gap:6px;justify-content:flex-end;margin-top:8px}
+#btn-pri{border-color:var(--cyan);color:var(--cyan);font-size:10px;padding:5px 14px;letter-spacing:1px}
+#btn-pri:hover{background:var(--cyan);color:var(--bg)}
 
-/* ── CENTER ── */
-#col-c{grid-column:2;grid-row:2;display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden}
+/* RIGHT */
+#right{width:275px;flex-shrink:0;border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+#tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.tbtn{flex:1;padding:9px 2px;font-size:9px;letter-spacing:2px;border:none;border-bottom:2px solid transparent;color:var(--dim)}
+.tbtn.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tbtn:hover{color:var(--text)}
+#tab-c{flex:1;overflow-y:auto;padding:10px}
+.mqtitle{color:var(--gold);font-size:12px;margin-bottom:4px}
+.mqbar{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.mqpct{font-size:10px;color:var(--cyan)}
+.mile{display:flex;align-items:center;gap:6px;margin-bottom:5px;cursor:pointer;padding:3px 0}
+.mile label{font-size:11px;cursor:pointer;flex:1}
+.mile.done label{color:var(--dim);text-decoration:line-through}
+.sec-t{color:var(--dim);font-size:9px;letter-spacing:2px;margin:10px 0 6px;padding-top:8px;border-top:1px solid var(--border)}
+.hrow{display:flex;align-items:center;gap:7px;padding:5px 6px;border:1px solid var(--border);margin-bottom:4px;cursor:pointer}
+.hrow:hover{border-color:var(--green)}
+.hcheck{width:14px;height:14px;border:1px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;color:var(--bg)}
+.hrow.done .hcheck{background:var(--green)}
+.hrow.done{opacity:.5}
+.hname{flex:1;font-size:11px}
+.hxp{color:var(--gold);font-size:9px}
+.bcard{border:1px solid var(--border);padding:7px;margin-bottom:5px}
+.bname{color:var(--cyan);font-size:11px;margin-bottom:2px}
+.bmeta{font-size:9px;color:var(--dim)}
+.bact{color:var(--gold);font-size:9px;margin-top:3px;font-style:italic}
+.agrid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.acard{border:1px solid var(--border);padding:7px;text-align:center}
+.acard.owned{border-color:var(--green)}.acard.locked{opacity:.35}.acard.in-dev{border-color:var(--gold)}
+.aemoji{font-size:18px}.aname{font-size:9px;margin-top:3px;color:var(--dim)}.astatus{font-size:8px;margin-top:1px;letter-spacing:1px}
+.acard.owned .astatus{color:var(--green)}.acard.locked .astatus{color:var(--dim)}.acard.in-dev .astatus{color:var(--gold)}
 
-/* HUD rings */
-.ring{position:absolute;border-radius:50%;animation:spin linear infinite;border:1px solid}
-@keyframes spin{from{rotate:0deg}to{rotate:360deg}}
-
-/* Quick actions */
-#qa{display:flex;gap:5px;padding:4px 6px 2px;width:100%;flex-shrink:0;justify-content:center}
-.qa{background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.16);padding:8px 12px;cursor:pointer;transition:all .2s;font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:1px;color:rgba(0,255,136,0.6);display:flex;align-items:center;gap:5px;flex:1;justify-content:center}
-.qa:hover{background:rgba(0,255,136,0.1);border-color:rgba(0,255,136,0.4);color:var(--g);box-shadow:0 0 12px rgba(0,255,136,0.1)}
-.qa.gold{border-color:rgba(255,204,68,0.2);color:rgba(255,204,68,0.6);background:rgba(255,204,68,0.03)}
-.qa.gold:hover{background:rgba(255,204,68,0.1);border-color:rgba(255,204,68,0.45);color:var(--gold)}
-.qa.amb{border-color:rgba(255,136,0,0.2);color:rgba(255,136,0,0.6);background:rgba(255,136,0,0.03)}
-.qa.amb:hover{background:rgba(255,136,0,0.1);border-color:rgba(255,136,0,0.45);color:var(--o)}
-
-/* ── RIGHT ── */
-#col-r{grid-column:3;grid-row:2;display:flex;flex-direction:column;gap:5px}
-.gi{padding:3px 1px;margin-bottom:6px;cursor:pointer;transition:background .15s}
-.gi:hover{background:rgba(0,255,136,0.03)}
-.gi-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
-.gn{font-size:8px;color:rgba(255,255,255,0.58);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:5px}
-.gp{font-size:9px;font-family:'Orbitron',sans-serif;font-weight:700}
-.gbar{height:2px;background:rgba(255,255,255,0.05);overflow:hidden}
-.gfill{height:100%;transition:width 2s ease;box-shadow:0 0 5px currentColor}
-@keyframes sh{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
-.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
-.dc{background:rgba(0,255,136,0.02);border:1px solid rgba(0,255,136,0.08);padding:8px 5px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
-.dc::before{content:'';position:absolute;top:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,136,0.2),transparent)}
-.dc:hover{background:rgba(0,255,136,0.06);border-color:rgba(0,255,136,0.25)}
-.dv{font-family:'Orbitron',sans-serif;font-size:19px;font-weight:700;line-height:1}
-.dl{font-size:6px;letter-spacing:1px;color:rgba(255,255,255,0.18);margin-top:3px}
-/* Memory preview */
-.mprev{font-size:7.5px;line-height:1.7;color:rgba(0,255,136,0.42)}
-.mpi{padding:3px 0 3px 7px;border-left:2px solid rgba(0,255,136,0.18);margin-bottom:3px}
-.mpi-cat{font-size:6px;color:rgba(0,212,255,0.32);letter-spacing:.08em}
-
-/* ── CHAT ── */
-#chat{grid-column:1/-1;grid-row:3;display:flex;gap:5px}
-#chat-main{flex:1;display:flex;flex-direction:column;background:rgba(0,3,10,0.9);border:1px solid rgba(0,255,136,0.12);border-top:2px solid rgba(0,255,136,0.25)}
-.ch-hdr{padding:5px 12px;border-bottom:1px solid rgba(0,255,136,0.08);display:flex;justify-content:space-between;align-items:center;gap:6px;flex-shrink:0}
-.mbtn{padding:4px 10px;border:1px solid rgba(0,255,136,0.2);background:rgba(0,255,136,0.04);color:rgba(0,255,136,0.5);font-family:'Share Tech Mono',monospace;font-size:7.5px;letter-spacing:1px;cursor:pointer;transition:all .2s;white-space:nowrap}
-.mbtn:hover,.mbtn.on{background:rgba(0,255,136,0.1);border-color:rgba(0,255,136,0.45);color:var(--g)}
-.mbtn.lg{border-color:rgba(255,204,68,0.2);color:rgba(255,204,68,0.5);background:rgba(255,204,68,0.03)}
-.mbtn.lg:hover,.mbtn.lg.on{background:rgba(255,204,68,0.1);border-color:rgba(255,204,68,0.5);color:var(--gold)}
-.mbtn.mic{border-color:rgba(0,212,255,0.2);color:rgba(0,212,255,0.5);background:rgba(0,212,255,0.03)}
-.mbtn.mic:hover{background:rgba(0,212,255,0.1);border-color:rgba(0,212,255,0.5);color:var(--b)}
-.mbtn.mic.listening{background:rgba(255,0,102,0.1);border-color:#ff0066;color:#ff0066;animation:mrec .9s ease-in-out infinite}
-@keyframes mrec{0%,100%{box-shadow:0 0 4px rgba(255,0,102,0.3)}50%{box-shadow:0 0 16px rgba(255,0,102,0.7)}}
-
-/* banners */
-.ban{display:none;padding:4px 12px;font-size:7px;letter-spacing:1px;justify-content:space-between;align-items:center;flex-shrink:0}
-.ban.on{display:flex}
-#onb-ban{background:rgba(255,136,0,0.05);border-bottom:1px solid rgba(255,136,0,0.16);color:rgba(255,136,0,0.65)}
-#leg-ban{background:rgba(255,204,68,0.04);border-bottom:1px solid rgba(255,204,68,0.16);color:rgba(255,204,68,0.7)}
-.bx{cursor:pointer;font-size:7px;padding:2px 8px;border:1px solid rgba(255,0,102,0.22);color:rgba(255,0,102,0.45);letter-spacing:1px;transition:all .2s}
-.bx:hover{border-color:#ff0066;color:#ff0066}
-
-/* sources */
-#src-row{display:none;padding:3px 12px;gap:5px;flex-wrap:wrap;align-items:center;border-bottom:1px solid rgba(255,204,68,0.08);flex-shrink:0}
-#src-row.on{display:flex}
-.sc{font-size:6.5px;letter-spacing:1px;color:rgba(255,204,68,0.35)}
-.sch{padding:1px 7px;border:1px solid rgba(255,204,68,0.25);font-size:6.5px;color:rgba(255,204,68,0.5);letter-spacing:1px}
-
-/* ── MESSAGES — BIG AND READABLE ── */
-#cmsgs{flex:1;overflow-y:auto;padding:10px 16px;font-size:14px;line-height:2}
-#cmsgs::-webkit-scrollbar{width:2px}
-#cmsgs::-webkit-scrollbar-thumb{background:rgba(0,255,136,0.2)}
-.mu{margin-bottom:12px;padding:6px 12px;border-left:2px solid rgba(0,212,255,0.4);background:rgba(0,212,255,0.04);white-space:pre-wrap;word-break:break-word}
-.mu-lbl{font-size:6.5px;letter-spacing:3px;color:rgba(0,212,255,0.4);display:block;margin-bottom:3px}
-.mu-txt{color:#cce8ff;font-size:14px;line-height:1.85}
-.ma{margin-bottom:12px;padding:6px 12px;border-left:2px solid rgba(0,255,136,0.4);background:rgba(0,255,136,0.04);white-space:pre-wrap;word-break:break-word}
-.ma-lbl{font-size:6.5px;letter-spacing:3px;color:rgba(0,255,136,0.4);display:block;margin-bottom:3px}
-.ma-txt{color:#e0ffed;font-size:14px;line-height:1.85}
-.ml{margin-bottom:12px;padding:6px 12px;border-left:2px solid rgba(255,204,68,0.45);background:rgba(255,204,68,0.04);white-space:pre-wrap;word-break:break-word}
-.ml-lbl{font-size:6.5px;letter-spacing:3px;color:rgba(255,170,0,0.45);display:block;margin-bottom:3px}
-.ml-txt{color:#fff5cc;font-size:14px;line-height:1.85}
-.msep{font-size:7px;color:rgba(0,255,136,0.18);text-align:center;padding:6px;margin-bottom:8px;border-bottom:1px solid rgba(0,255,136,0.07);letter-spacing:.1em}
-
-/* chips */
-#chips{display:flex;gap:5px;flex-wrap:wrap;padding:5px 12px;border-top:1px solid rgba(0,255,136,0.06);flex-shrink:0}
-.chip{padding:3px 9px;border:1px solid rgba(0,255,136,0.15);font-size:7px;letter-spacing:1px;color:rgba(0,255,136,0.45);cursor:pointer;transition:all .2s;white-space:nowrap}
-.chip:hover{border-color:rgba(0,255,136,0.38);color:var(--g);background:rgba(0,255,136,0.05)}
-.chip.lc{border-color:rgba(255,204,68,0.17);color:rgba(255,204,68,0.42)}
-.chip.lc:hover{border-color:rgba(255,204,68,0.42);color:var(--gold);background:rgba(255,204,68,0.05)}
-
-/* input side */
-#cside{display:flex;flex-direction:column;gap:5px;width:260px}
-.ci{flex:1;background:rgba(0,10,24,0.92);border:1px solid rgba(0,255,136,0.17);position:relative}
-.ci::before{content:'›';position:absolute;top:10px;left:10px;font-size:12px;color:rgba(0,255,136,0.2);pointer-events:none}
-#cin{width:100%;height:100%;background:transparent;border:none;padding:10px 10px 10px 24px;color:var(--g);font-family:'Share Tech Mono',monospace;font-size:12px;outline:none;resize:none}
-#cin::placeholder{color:rgba(0,255,136,0.1)}
-#cin:focus{border-color:rgba(0,255,136,0.35)}
-#cin.lg{color:rgba(255,200,80,0.9)}
-#cin.lg::placeholder{color:rgba(255,170,0,0.1)}
-#cbtn{background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.22);color:var(--g);font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:3px;padding:12px;cursor:pointer;transition:all .2s}
-#cbtn:hover{background:rgba(0,255,136,0.14);box-shadow:0 0 14px rgba(0,255,136,0.12)}
-#cbtn.ls{background:rgba(255,204,68,0.06);border-color:rgba(255,204,68,0.25);color:var(--gold)}
-#cbtn.ls:hover{background:rgba(255,204,68,0.14)}
-#cbtn:disabled{opacity:.3;cursor:not-allowed}
-
-/* TOAST */
-#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none}
-.ti{background:rgba(0,12,28,0.97);border:1px solid rgba(0,255,136,0.4);padding:7px 16px;font-size:9px;letter-spacing:2px;color:var(--g);animation:tin .25s ease,tout .25s ease 2.5s forwards;white-space:nowrap}
-@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@keyframes tout{from{opacity:1}to{opacity:0}}
-
-/* WAVEFORM */
-#wv{position:fixed;bottom:370px;left:50%;transform:translateX(-50%);display:none;align-items:center;gap:3px;z-index:50;background:rgba(0,6,18,0.95);border:1px solid rgba(255,0,102,0.4);padding:8px 14px}
-#wv.on{display:flex}
-#wv span{display:inline-block;width:3px;background:#ff0066;border-radius:2px;animation:wva .6s ease-in-out infinite}
-#wv span:nth-child(2){animation-delay:.1s}#wv span:nth-child(3){animation-delay:.2s}
-#wv span:nth-child(4){animation-delay:.3s}#wv span:nth-child(5){animation-delay:.4s}
-@keyframes wva{0%,100%{height:4px}50%{height:18px}}
-.wvl{font-size:8px;letter-spacing:3px;color:rgba(255,0,102,0.65);margin-left:7px}
+/* CHAT */
+#chat-s{border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;height:195px}
+#msgs{flex:1;overflow-y:auto;padding:6px 12px;display:flex;flex-direction:column;gap:3px}
+.msg{font-size:11px;line-height:1.55;padding:2px 0;max-width:92%}
+.msg.user{color:var(--cyan);align-self:flex-end;text-align:right}
+.msg.user::before{content:'YOU: ';font-size:9px;color:var(--dim)}
+.msg.ai{color:var(--text)}
+.msg.ai::before{content:'MONIR // ';color:var(--gold);font-size:9px}
+.msg.sys{color:var(--dim);font-size:9px;align-self:center;font-style:italic}
+#chat-bar{display:flex;gap:5px;padding:6px 10px;background:var(--panel);border-top:1px solid var(--border);align-items:center;flex-shrink:0}
+#chat-in{flex:1;height:34px;background:rgba(255,255,255,.03)}
+.cbtn{height:34px;padding:0 10px;font-size:10px;white-space:nowrap;letter-spacing:1px}
+#btn-kart{border-color:var(--gold);color:var(--gold)}
+#btn-kart:hover{background:var(--gold);color:var(--bg)}
+#btn-send{border-color:var(--cyan);color:var(--cyan)}
+#btn-send:hover{background:var(--cyan);color:var(--bg)}
+#btn-voice.on{border-color:var(--red);color:var(--red);animation:pulse 1s infinite}
+#btn-leg{border-color:var(--dim);color:var(--dim);font-size:9px}
+#btn-leg:hover{border-color:var(--text);color:var(--text)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.xpfloat{position:fixed;pointer-events:none;color:var(--gold);font-size:13px;font-weight:bold;animation:fup 1.4s forwards;z-index:500}
+@keyframes fup{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-55px)}}
+#lvlup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--gold);color:var(--bg);font-size:22px;letter-spacing:6px;padding:18px 36px;z-index:600;animation:pop .35s ease;pointer-events:none}
+@keyframes pop{0%{transform:translate(-50%,-50%) scale(.4)}100%{transform:translate(-50%,-50%) scale(1)}}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--border)}
 </style>
 </head>
 <body>
-<canvas id="bg"></canvas>
-<div class="hex"></div>
-<div class="vignette"></div>
-<div class="scanlines"></div>
 
+<!-- BOOT -->
 <div id="boot">
-  <div class="bl">⬡ MONIR NEURAL INTERFACE</div>
-  <div class="bl">⬡ LASTER MINNE OG KONTEKST</div>
-  <div class="bl">⬡ LEGALSTREETSMARTER ENGINE AKTIV</div>
-  <div class="bl">⬡ KLAR — 6. JUNI 2026</div>
-  <div class="bb"><div class="bbf"></div></div>
+  <div id="boot-text"></div>
+  <div id="boot-bar"><div id="boot-fill"></div></div>
 </div>
 
-<div id="toast"></div>
-<div id="wv"><span></span><span></span><span></span><span></span><span></span><span class="wvl">MONIR LYTTER...</span></div>
-
-<div id="app">
-<header>
-  <div class="ht">MONIR</div>
-  <div class="hm">
-    <div class="hdot"></div>
-    <div class="htag hi">ONLINE</div>
-    <div class="htag">SEBASTIAN SALIH</div>
-    <div class="htag">LØR 6 JUNI</div>
-    <div class="htag gold" id="ht-legal" style="display:none">⚖️ LEGAL MODE</div>
-  </div>
-  <div class="hclk" id="clk">--:--:--</div>
-</header>
-
-<!-- LEFT -->
-<div id="col-l">
-  <div class="panel" style="flex-shrink:0">
-    <div class="ptop"></div><div class="pt">// profil</div>
-    <div class="uav">S</div>
-    <div class="un">SEBASTIAN SALIH</div>
-    <div class="ut">BMW • OBDAI • AUTOVERS<br>GRÜNDER • AI-UTVIKLER • 2026</div>
-    <div class="gauges">
-      <div class="gw">
-        <svg width="48" height="48" viewBox="0 0 48 48">
-          <circle cx="24" cy="24" r="19" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3" transform="rotate(-90 24 24)" stroke-dasharray="119"/>
-          <circle cx="24" cy="24" r="19" fill="none" stroke="var(--g)" stroke-width="3" stroke-linecap="round" transform="rotate(-90 24 24)" stroke-dasharray="77 119"/>
-          <text x="24" y="28" text-anchor="middle" fill="var(--g)" font-size="9" font-family="Orbitron,sans-serif" font-weight="700">65%</text>
-        </svg>
-        <div class="gl">AKTIVITET</div>
-      </div>
-      <div class="gw">
-        <svg width="48" height="48" viewBox="0 0 48 48">
-          <circle cx="24" cy="24" r="19" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3" transform="rotate(-90 24 24)" stroke-dasharray="119"/>
-          <circle id="g-slp" cx="24" cy="24" r="19" fill="none" stroke="var(--b)" stroke-width="3" stroke-linecap="round" transform="rotate(-90 24 24)" stroke-dasharray="85 119"/>
-          <text x="24" y="28" text-anchor="middle" fill="var(--b)" font-size="9" font-family="Orbitron,sans-serif" font-weight="700" id="g-slp-t">–</text>
-        </svg>
-        <div class="gl">SØVN</div>
-      </div>
-      <div class="gw">
-        <svg width="48" height="48" viewBox="0 0 48 48">
-          <circle cx="24" cy="24" r="19" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3" transform="rotate(-90 24 24)" stroke-dasharray="119"/>
-          <circle cx="24" cy="24" r="19" fill="none" stroke="var(--p)" stroke-width="3" stroke-linecap="round" transform="rotate(-90 24 24)" stroke-dasharray="96 119"/>
-          <text x="24" y="28" text-anchor="middle" fill="var(--p)" font-size="9" font-family="Orbitron,sans-serif" font-weight="700">81%</text>
-        </svg>
-        <div class="gl">FOKUS</div>
-      </div>
-      <div class="gw">
-        <svg width="48" height="48" viewBox="0 0 48 48">
-          <circle cx="24" cy="24" r="19" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3" transform="rotate(-90 24 24)" stroke-dasharray="119"/>
-          <circle id="g-mo" cx="24" cy="24" r="19" fill="none" stroke="var(--o)" stroke-width="3" stroke-linecap="round" transform="rotate(-90 24 24)" stroke-dasharray="105 119"/>
-          <text x="24" y="28" text-anchor="middle" fill="var(--o)" font-size="9" font-family="Orbitron,sans-serif" font-weight="700" id="g-mo-t">–</text>
-        </svg>
-        <div class="gl">HELSE</div>
-      </div>
+<!-- ONBOARDING OVERLAY -->
+<div id="ob-overlay" class="hidden">
+  <div id="ob-box">
+    <div id="ob-title">MONIR KARTLEGGING</div>
+    <div id="ob-sub">LIFE OS v3 // INITIALISERING</div>
+    <div id="ob-pips"></div>
+    <div id="ob-body"></div>
+    <div id="ob-footer">
+      <button id="ob-prev">‹ TILBAKE</button>
+      <span id="ob-info"></span>
+      <button id="ob-next">NESTE ›</button>
     </div>
   </div>
-  <div class="panel" style="flex:1;overflow-y:auto">
-    <div class="ptop"></div><div class="pt">// vaner — klikk for å markere</div>
-    <div id="habits"></div>
-  </div>
-  <div class="sf" id="sf">MONIR • 6. juni 2026 • --:--</div>
 </div>
 
-<!-- CENTER — full-size SVG HUD with connected figure -->
-<div id="col-c">
-  <!-- background rings (CSS) -->
-  <div class="ring" style="width:200px;height:200px;top:50%;left:50%;margin:-100px 0 0 -100px;animation-duration:16s;border-color:rgba(0,255,136,0.07)"></div>
-  <div class="ring" style="width:290px;height:290px;top:50%;left:50%;margin:-145px 0 0 -145px;animation-duration:30s;animation-direction:reverse;border-color:rgba(0,212,255,0.05)"></div>
-  <div class="ring" style="width:380px;height:380px;top:50%;left:50%;margin:-190px 0 0 -190px;animation-duration:50s;border-color:rgba(255,136,0,0.04)"></div>
-
-  <!-- Main SVG — stick figure + connected HUD labels -->
-  <svg id="hud-svg" viewBox="0 0 600 440" style="flex:1;width:100%;height:100%;position:relative;z-index:5">
-
-    <!-- HUD corner brackets -->
-    <path d="M10 50 L10 10 L50 10" fill="none" stroke="rgba(255,136,0,0.25)" stroke-width="1.5"/>
-    <path d="M550 10 L590 10 L590 50" fill="none" stroke="rgba(255,136,0,0.25)" stroke-width="1.5"/>
-    <path d="M10 390 L10 430 L50 430" fill="none" stroke="rgba(255,136,0,0.25)" stroke-width="1.5"/>
-    <path d="M590 390 L590 430 L550 430" fill="none" stroke="rgba(255,136,0,0.25)" stroke-width="1.5"/>
-
-    <!-- Scan label top -->
-    <text x="300" y="18" text-anchor="middle" fill="rgba(255,136,0,0.3)" font-size="8" font-family="Orbitron,sans-serif" letter-spacing="3">SCAN</text>
-    <text x="595" y="220" fill="rgba(0,212,255,0.22)" font-size="7" font-family="Orbitron,sans-serif">360°</text>
-    <text id="state-lbl" x="300" y="432" text-anchor="middle" fill="rgba(0,255,136,0.2)" font-size="8" font-family="Orbitron,sans-serif" letter-spacing="5">STANDBY</text>
-
-    <!-- ─── Connected HUD data labels ─── -->
-    <!-- Left side: lines go from figure to labels -->
-    <!-- HUMØR → head area (300, 80) -->
-    <line id="cl-mo" x1="286" y1="78" x2="175" y2="68" stroke="rgba(0,212,255,0.22)" stroke-width="1" stroke-dasharray="4 4"/>
-    <rect x="60" y="55" width="114" height="28" fill="rgba(0,20,40,0.7)" stroke="rgba(0,212,255,0.2)" stroke-width="1"/>
-    <text x="68" y="66" fill="rgba(0,212,255,0.45)" font-size="6.5" font-family="Orbitron,sans-serif" letter-spacing="1">HUMØR</text>
-    <text id="ld-mo" x="68" y="78" fill="#c8eeff" font-size="11" font-family="Orbitron,sans-serif" font-weight="700">9/10</text>
-
-    <!-- HRV → chest (300, 155) -->
-    <line x1="286" y1="148" x2="175" y2="130" stroke="rgba(0,212,255,0.18)" stroke-width="1" stroke-dasharray="4 4"/>
-    <rect x="60" y="118" width="114" height="28" fill="rgba(0,20,40,0.7)" stroke="rgba(0,212,255,0.18)" stroke-width="1"/>
-    <text x="68" y="129" fill="rgba(0,212,255,0.4)" font-size="6.5" font-family="Orbitron,sans-serif" letter-spacing="1">HRV</text>
-    <text x="68" y="141" fill="#c8eeff" font-size="11" font-family="Orbitron,sans-serif" font-weight="700">68 ms</text>
-
-    <!-- SØVN → lower left (left leg area, 270, 270) -->
-    <line x1="275" y1="258" x2="175" y2="238" stroke="rgba(0,255,136,0.18)" stroke-width="1" stroke-dasharray="4 4"/>
-    <rect x="60" y="226" width="114" height="28" fill="rgba(0,20,40,0.7)" stroke="rgba(0,255,136,0.18)" stroke-width="1"/>
-    <text x="68" y="237" fill="rgba(0,255,136,0.38)" font-size="6.5" font-family="Orbitron,sans-serif" letter-spacing="1">SØVN</text>
-    <text id="ld-sl" x="68" y="249" fill="#dfffee" font-size="11" font-family="Orbitron,sans-serif" font-weight="700">– t</text>
-
-    <!-- Right side labels -->
-    <!-- FOKUS → head-right (314, 78) -->
-    <line id="cl-fo" x1="314" y1="78" x2="425" y2="68" stroke="rgba(0,212,255,0.22)" stroke-width="1" stroke-dasharray="4 4"/>
-    <rect x="426" y="55" width="114" height="28" fill="rgba(0,20,40,0.7)" stroke="rgba(0,212,255,0.2)" stroke-width="1"/>
-    <text x="434" y="66" fill="rgba(0,212,255,0.45)" font-size="6.5" font-family="Orbitron,sans-serif" letter-spacing="1">FOKUS</text>
-    <text id="ld-fo" x="434" y="78" fill="#c8eeff" font-size="11" font-family="Orbitron,sans-serif" font-weight="700">HIGH</text>
-
-    <!-- TRENING → right arm area -->
-    <line id="cl-ex" x1="335" y1="165" x2="425" y2="148" stroke="rgba(255,136,0,0.22)" stroke-width="1" stroke-dasharray="4 4"/>
-    <rect x="426" y="136" width="114" height="28" fill="rgba(0,20,40,0.7)" stroke="rgba(255,136,0,0.2)" stroke-width="1"/>
-    <text x="434" y="147" fill="rgba(255,136,0,0.45)" font-size="6.5" font-family="Orbitron,sans-serif" letter-spacing="1">TRENING</text>
-    <text id="ld-ex" x="434" y="159" fill="#ffe8c0" font-size="11" font-family="Orbitron,sans-serif" font-weight="700">– min</text>
-
-    <!-- STRESS → right lower -->
-    <line x1="330" y1="248" x2="425" y2="238" stroke="rgba(255,0,102,0.2)" stroke-width="1" stroke-dasharray="4 4"/>
-    <rect x="426" y="226" width="114" height="28" fill="rgba(0,20,40,0.7)" stroke="rgba(255,0,102,0.18)" stroke-width="1"/>
-    <text x="434" y="237" fill="rgba(255,0,102,0.4)" font-size="6.5" font-family="Orbitron,sans-serif" letter-spacing="1">STRESS</text>
-    <text x="434" y="249" fill="#ffc8d0" font-size="11" font-family="Orbitron,sans-serif" font-weight="700">LOW</text>
-
-    <!-- ─── STICK FIGURE — centered at 300,190 ─── -->
-    <g id="figure" filter="drop-shadow(0 0 14px rgba(0,255,136,0.7))">
-      <!-- Head -->
-      <circle cx="300" cy="90" r="32" fill="none" stroke="rgba(0,255,136,0.06)" stroke-width="8"/>
-      <circle cx="300" cy="90" r="24" fill="rgba(0,255,136,0.03)" stroke="var(--g)" stroke-width="2.5"/>
-      <!-- Eyes -->
-      <circle id="ey-l" cx="292" cy="86" r="2.8" fill="rgba(0,255,136,0.18)" stroke="var(--g)" stroke-width="1.5">
-        <animate attributeName="r" values="2.8;2.8;2.8;0.5;2.8" dur="4s" repeatCount="indefinite"/>
-      </circle>
-      <circle id="ey-r" cx="308" cy="86" r="2.8" fill="rgba(0,255,136,0.18)" stroke="var(--g)" stroke-width="1.5">
-        <animate attributeName="r" values="2.8;2.8;2.8;0.5;2.8" dur="4s" repeatCount="indefinite"/>
-      </circle>
-      <circle cx="292" cy="86" r="1.1" fill="var(--g)"/>
-      <circle cx="308" cy="86" r="1.1" fill="var(--g)"/>
-      <!-- Mouth -->
-      <path id="mouth" d="M294 97 Q300 103 306 97" fill="none" stroke="rgba(0,255,136,0.4)" stroke-width="1.8" stroke-linecap="round"/>
-      <!-- Neck -->
-      <line x1="300" y1="114" x2="300" y2="124" stroke="var(--g)" stroke-width="2.5"/>
-      <!-- Body -->
-      <line x1="300" y1="124" x2="300" y2="218" stroke="var(--g)" stroke-width="2.5" id="body"/>
-      <!-- Arc reactor on chest -->
-      <circle cx="300" cy="160" r="10" fill="rgba(0,212,255,0.12)" stroke="rgba(0,212,255,0.4)" stroke-width="1">
-        <animate attributeName="stroke-opacity" values="0.4;0.85;0.4" dur="2s" repeatCount="indefinite"/>
-      </circle>
-      <circle cx="300" cy="160" r="5" fill="rgba(0,212,255,0.25)">
-        <animate attributeName="r" values="5;6.5;5" dur="2s" repeatCount="indefinite"/>
-      </circle>
-      <!-- Arms -->
-      <line id="arm-l" x1="300" y1="148" x2="258" y2="182" stroke="var(--g)" stroke-width="2.5" stroke-linecap="round"/>
-      <line id="arm-r" x1="300" y1="148" x2="342" y2="182" stroke="var(--g)" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- Hands -->
-      <circle id="hnd-l" cx="258" cy="182" r="3" fill="var(--g)" opacity="0.5"/>
-      <circle id="hnd-r" cx="342" cy="182" r="3" fill="var(--g)" opacity="0.5"/>
-      <!-- Hips -->
-      <line x1="280" y1="218" x2="320" y2="218" stroke="rgba(0,255,136,0.3)" stroke-width="1" stroke-dasharray="2 3"/>
-      <!-- Legs -->
-      <line id="leg-l" x1="300" y1="218" x2="272" y2="300" stroke="var(--g)" stroke-width="2.5" stroke-linecap="round"/>
-      <line id="leg-r" x1="300" y1="218" x2="328" y2="300" stroke="var(--g)" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- Feet -->
-      <line id="ft-l" x1="272" y1="300" x2="255" y2="312" stroke="var(--g)" stroke-width="2" stroke-linecap="round"/>
-      <line id="ft-r" x1="328" y1="300" x2="345" y2="312" stroke="var(--g)" stroke-width="2" stroke-linecap="round"/>
-      <!-- Cigarette (hidden by default) -->
-      <g id="cigarette" opacity="0" style="transition:opacity .5s">
-        <line x1="258" y1="182" x2="236" y2="170" stroke="rgba(255,255,220,0.8)" stroke-width="2.5" stroke-linecap="round"/>
-        <circle cx="235" cy="170" r="2.5" fill="#ff6600"><animate attributeName="fill" values="#ff6600;#ff9900;#ff6600" dur="1s" repeatCount="indefinite"/></circle>
-        <circle cx="235" cy="170" r="4" fill="none" stroke="rgba(255,100,0,0.3)"><animate attributeName="r" values="4;8;4" dur="1.5s" repeatCount="indefinite"/></circle>
-      </g>
-      <!-- Smoke particles (hidden by default) -->
-      <g id="smoke" opacity="0" style="transition:opacity .5s">
-        <circle cx="232" cy="162" r="2.5" fill="rgba(200,200,200,0.3)"><animate attributeName="cy" values="162;140;118" dur="3s" repeatCount="indefinite"/><animate attributeName="r" values="2.5;5;8" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.3;0.1;0" dur="3s" repeatCount="indefinite"/></circle>
-        <circle cx="236" cy="155" r="2" fill="rgba(200,200,200,0.2)"><animate attributeName="cy" values="155;133;111" dur="2.5s" repeatCount="indefinite" begin="0.8s"/><animate attributeName="r" values="2;4.5;7" dur="2.5s" repeatCount="indefinite" begin="0.8s"/><animate attributeName="opacity" values="0.25;0.1;0" dur="2.5s" repeatCount="indefinite" begin="0.8s"/></circle>
-      </g>
-      <!-- Scan line through figure -->
-      <line x1="250" y1="70" x2="350" y2="70" stroke="rgba(0,255,136,0.35)" stroke-width="1">
-        <animate attributeName="y1" values="70;330;70" dur="2.5s" repeatCount="indefinite"/>
-        <animate attributeName="y2" values="70;330;70" dur="2.5s" repeatCount="indefinite"/>
-        <animate attributeName="opacity" values="0;0.35;0" dur="2.5s" repeatCount="indefinite"/>
-      </line>
-    </g>
-
-    <!-- Name label under figure -->
-    <text x="300" y="340" text-anchor="middle" fill="rgba(0,255,136,0.2)" font-size="8" font-family="Orbitron,sans-serif" letter-spacing="6">SEB.SALIH // ONLINE</text>
-  </svg>
-
-  <!-- Quick actions below -->
-  <div id="qa">
-    <button class="qa amb" onclick="startOnboarding()">🧬 KARTLEGG</button>
-    <button class="qa gold" onclick="toggleLegal()">⚖️ JURIDISK</button>
-    <button class="qa" onclick="openNote()">💾 NOTER</button>
-  </div>
-</div>
-
-<!-- RIGHT -->
-<div id="col-r">
-  <div class="panel" style="flex:1;overflow-y:auto">
-    <div class="ptop"></div><div class="pt">// mål 2026</div>
-    <div id="goals"></div>
-  </div>
-  <div class="panel">
-    <div class="ptop"></div><div class="pt">// i dag</div>
-    <div class="dgrid">
-      <div class="dc"><div class="dv" id="dv-sl" style="color:var(--g)">–</div><div class="dl">SØVN T</div></div>
-      <div class="dc"><div class="dv" id="dv-ex" style="color:var(--b)">–</div><div class="dl">TRENING MIN</div></div>
-      <div class="dc"><div class="dv" id="dv-mo" style="color:var(--p)">–</div><div class="dl">HUMØR /10</div></div>
-      <div class="dc"><div class="dv" id="dv-wa" style="color:var(--o)">–</div><div class="dl">VANN GL</div></div>
+<!-- APP -->
+<div id="app" class="hidden">
+  <div id="hdr">
+    <div id="hdr-name">MONIR</div>
+    <div class="sep">//</div>
+    <div id="hdr-lvl">LVL 1</div>
+    <div id="xp-wrap">
+      <div id="xp-bg"><div id="xp-fill"></div></div>
+      <div id="xp-txt">0 / 1000 XP</div>
     </div>
+    <div id="hdr-city">Oslo</div>
+    <div class="sep">//</div>
+    <div id="hdr-time">00:00</div>
   </div>
-  <div class="panel">
-    <div class="ptop"></div><div class="pt">// monir minne — <span id="mcnt">0 fakta</span></div>
-    <div id="mprev" class="mprev">Ingen fakta ennå...</div>
-  </div>
-</div>
 
-<!-- CHAT — large and readable -->
-<div id="chat">
-  <div id="chat-main">
-    <div class="ch-hdr">
-      <span style="font-size:7px;letter-spacing:3px;color:rgba(0,255,136,0.22)">MONIR.TERMINAL</span>
-      <div style="display:flex;gap:5px">
-        <button class="mbtn" id="tts-btn" onclick="toggleTTS()">🔇 TALE</button>
-        <button class="mbtn mic" id="mic-btn" onclick="toggleVoice()">🎤 MIC</button>
-        <button class="mbtn" onclick="startOnboarding()">🧬 KARTLEGG</button>
-        <button class="mbtn lg" id="lg-btn" onclick="toggleLegal()">⚖️ JURIDISK</button>
+  <div id="main">
+    <!-- LEFT: Stats + Rep -->
+    <div id="left">
+      <div class="ptitle">STATS</div>
+      <div class="statrow"><span class="slabel">DISIPLIN</span><div class="sbg"><div class="sfill" id="s-dis" style="background:var(--cyan);width:0%"></div></div><span class="sval" id="sv-dis">—</span></div>
+      <div class="statrow"><span class="slabel">INTELLIGENS</span><div class="sbg"><div class="sfill" id="s-int" style="background:#a78bfa;width:0%"></div></div><span class="sval" id="sv-int">—</span></div>
+      <div class="statrow"><span class="slabel">HELSE</span><div class="sbg"><div class="sfill" id="s-hel" style="background:var(--green);width:0%"></div></div><span class="sval" id="sv-hel">—</span></div>
+      <div class="statrow"><span class="slabel">BUSINESS</span><div class="sbg"><div class="sfill" id="s-biz" style="background:var(--gold);width:0%"></div></div><span class="sval" id="sv-biz">—</span></div>
+      <div class="ptitle" style="margin-top:14px">REPUTATION</div>
+      <div class="reprow"><span class="rlabel">BUILDER</span><span class="stars" id="r-bld">☆☆☆☆☆</span></div>
+      <div class="reprow"><span class="rlabel">TEKNIKER</span><span class="stars" id="r-tec">☆☆☆☆☆</span></div>
+      <div class="reprow"><span class="rlabel">GRÜNDER</span><span class="stars" id="r-ent">☆☆☆☆☆</span></div>
+      <div class="reprow"><span class="rlabel">UTØVER</span><span class="stars" id="r-ath">☆☆☆☆☆</span></div>
+      <div class="reprow"><span class="rlabel">LEDER</span><span class="stars" id="r-lea">☆☆☆☆☆</span></div>
+    </div>
+
+    <!-- CENTER: Figure + Priority -->
+    <div id="center">
+      <div id="fig-wrap">
+        <svg id="stick-fig" viewBox="0 0 120 220" width="90" height="180">
+          <circle id="f-head" cx="60" cy="28" r="16" fill="none" stroke="#00ff7f" stroke-width="2.5"/>
+          <line id="f-neck" x1="60" y1="44" x2="60" y2="56" stroke="#00ff7f" stroke-width="2.5" stroke-linecap="round"/>
+          <line id="f-body" x1="60" y1="56" x2="60" y2="118" stroke="#00ff7f" stroke-width="2.5" stroke-linecap="round"/>
+          <line id="f-larm" x1="60" y1="72" x2="28" y2="98" stroke="#00ff7f" stroke-width="2.5" stroke-linecap="round"/>
+          <line id="f-rarm" x1="60" y1="72" x2="92" y2="98" stroke="#00ff7f" stroke-width="2.5" stroke-linecap="round"/>
+          <line id="f-lleg" x1="60" y1="118" x2="36" y2="172" stroke="#00ff7f" stroke-width="2.5" stroke-linecap="round"/>
+          <line id="f-rleg" x1="60" y1="118" x2="84" y2="172" stroke="#00ff7f" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="60" cy="28" r="3" fill="#00ff7f" opacity=".35"/>
+        </svg>
+        <div id="fig-label">IDLE</div>
+      </div>
+      <div id="pri-box">
+        <div id="pri-out" style="color:var(--dim);font-size:10px">// Klikk PRIORITER for AI-analyse av fokus og empire</div>
+        <div id="pri-foot"><button id="btn-pri">⚡ PRIORITER</button></div>
       </div>
     </div>
-    <div id="onb-ban" class="ban"><span>🧬 KARTLEGGINGSMODUS — MONIR stiller spørsmål</span><span class="bx" onclick="stopOnboarding()">AVSLUTT ✕</span></div>
-    <div id="leg-ban" class="ban"><span>⚖️ LEGALSTREETSMARTER — Sjekker norske rettskilder</span><span class="bx" onclick="disableLegal()">AVSLUTT ✕</span></div>
-    <div id="src-row"><span class="sc">LOVDATA:</span></div>
-    <div id="cmsgs"></div>
-    <div id="chips"></div>
-  </div>
-  <div id="cside">
-    <div class="ci" style="flex:1">
-      <textarea id="cin" placeholder="Skriv til MONIR... (Enter = send)" onkeydown="handleKey(event)" rows="6"></textarea>
-    </div>
-    <button id="cbtn" onclick="send()">SEND ›› MONIR</button>
-  </div>
-</div>
-</div>
 
-<!-- NOTE OVERLAY -->
-<div id="note-ov" style="display:none;position:fixed;inset:0;background:rgba(0,5,15,0.88);backdrop-filter:blur(10px);z-index:100;align-items:center;justify-content:center">
-  <div style="background:rgba(0,14,30,0.98);border:1px solid rgba(0,255,136,0.28);padding:22px;min-width:320px;max-width:440px;position:relative">
-    <div style="font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:3px;color:var(--g);margin-bottom:14px;border-bottom:1px solid rgba(0,255,136,0.12);padding-bottom:8px">💾 LAGRE FAKTA</div>
-    <textarea id="note-inp" style="width:100%;background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.2);padding:10px;color:var(--g);font-family:'Share Tech Mono',monospace;font-size:12px;outline:none;resize:vertical;min-height:70px;margin-bottom:12px" placeholder="Eks: Jeg trener alltid om morgenen..."></textarea>
-    <div style="display:flex;gap:7px">
-      <button onclick="closeNote()" style="flex:1;padding:9px;background:transparent;border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.3);font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;cursor:pointer">AVBRYT</button>
-      <button onclick="saveNote()" style="flex:2;padding:9px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.28);color:var(--g);font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;cursor:pointer">LAGRE I MINNE</button>
+    <!-- RIGHT: Tabs -->
+    <div id="right">
+      <div id="tabs">
+        <button class="tbtn active" data-t="quest">QUEST</button>
+        <button class="tbtn" data-t="empire">EMPIRE</button>
+        <button class="tbtn" data-t="assets">ASSETS</button>
+      </div>
+      <div id="tab-c"></div>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div id="chat-s">
+    <div id="msgs"></div>
+    <div id="chat-bar">
+      <button class="cbtn" id="btn-kart">KARTLEGG</button>
+      <input id="chat-in" type="text" placeholder="Skriv til MONIR...">
+      <button class="cbtn" id="btn-voice">🎙</button>
+      <button class="cbtn" id="btn-send">SEND</button>
+      <button class="cbtn" id="btn-leg">⚖ JUS</button>
     </div>
   </div>
 </div>
 
 <script>
-// ════════════════════════════════════════════════
-// CANVAS
-// ════════════════════════════════════════════════
-const cv=document.getElementById('bg'),cx=cv.getContext('2d');
-function resize(){cv.width=innerWidth;cv.height=innerHeight}resize();window.addEventListener('resize',resize);
-const stars=Array.from({length:200},()=>({x:Math.random(),y:Math.random(),r:Math.random()*1.3+0.2,a:Math.random()*0.4+0.08,t:Math.random()*Math.PI*2,sp:0.15+Math.random()*0.4}));
-const CH='01░▒■◆⊕∑Δλπβγ//::──§¶⟨⟩';
-const ptcls=Array.from({length:55},()=>({x:Math.random(),y:Math.random(),ch:CH[Math.floor(Math.random()*CH.length)],sp:0.04+Math.random()*0.12,al:Math.random()*0.07+0.02,col:['#00ff88','#00d4ff','#aa44ff','#ffaa00'][Math.floor(Math.random()*4)],sz:7+Math.floor(Math.random()*6)}));
-let fr=0;
-(function loop(){fr++;const W=cv.width,H=cv.height,now=fr/60;cx.fillStyle='rgba(1,12,26,0.14)';cx.fillRect(0,0,W,H);stars.forEach(s=>{const a=s.a*(0.5+0.5*Math.sin(now*s.sp+s.t));cx.fillStyle=`rgba(180,220,255,${a})`;cx.beginPath();cx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);cx.fill()});ptcls.forEach(p=>{cx.globalAlpha=p.al;cx.fillStyle=p.col;cx.font=p.sz+'px monospace';cx.fillText(p.ch,p.x*W,p.y*H);p.y-=p.sp/H;if(p.y<-0.02){p.y=1.02;p.x=Math.random();p.ch=CH[Math.floor(Math.random()*CH.length)]}});cx.globalAlpha=1;requestAnimationFrame(loop)})();
-
-// ════════════════════════════════════════════════
-// STICK FIGURE STATE MACHINE — Fortnite lobby style
-// ════════════════════════════════════════════════
-const fig = {
-  armL: document.getElementById('arm-l'),
-  armR: document.getElementById('arm-r'),
-  legL: document.getElementById('leg-l'),
-  legR: document.getElementById('leg-r'),
-  ftL:  document.getElementById('ft-l'),
-  ftR:  document.getElementById('ft-r'),
-  hndL: document.getElementById('hnd-l'),
-  hndR: document.getElementById('hnd-r'),
-  body: document.getElementById('body'),
-  cig:  document.getElementById('cigarette'),
-  smk:  document.getElementById('smoke'),
-  lbl:  document.getElementById('state-lbl'),
-  mouth:document.getElementById('mouth'),
-  figG: document.getElementById('figure'),
+// ── STATE ──────────────────────────────────────
+const S = {
+  char:null, habits:[], quests:[], businesses:[], assets:[],
+  activeTab:'quest', figState:'idle', figTimer:0, listening:false,
+  ob:{step:0, data:{}}
 };
+const STEPS = 9;
+const stepTitles = ['IDENTITET','KROPP','STATS','MAIN QUEST','MILESTONES','EMPIRE','EIENDELER','VANER','ACHIEVEMENTS'];
 
-// Helper: set SVG line endpoints
-function setLine(el, x1, y1, x2, y2) {
-  el.setAttribute('x1', x1); el.setAttribute('y1', y1);
-  el.setAttribute('x2', x2); el.setAttribute('y2', y2);
+// ── BOOT ───────────────────────────────────────
+async function boot() {
+  const el = document.getElementById('boot-text');
+  const fill = document.getElementById('boot-fill');
+  const lines = ['MONIR LIFE OS v3.0','━━━━━━━━━━━━━━━━━','> Initialiserer...','> Laster profil...','> AI-motor klar.','> System OK.'];
+  for (let i=0; i<lines.length; i++) {
+    el.textContent += lines[i]+'\n';
+    fill.style.width = ((i+1)/lines.length*100)+'%';
+    await wait(i===0?380:140);
+  }
+  await wait(350);
+  const b = document.getElementById('boot');
+  b.style.transition='opacity .4s'; b.style.opacity='0';
+  await wait(400); b.classList.add('hidden');
+  await initApp();
 }
-function setCircle(el, cx, cy) {
-  el.setAttribute('cx', cx); el.setAttribute('cy', cy);
+
+async function initApp() {
+  try { S.char = await fetch('/api/character').then(r=>r.json()); }
+  catch(e) { S.char = {onboarded:false}; }
+  if (!S.char.onboarded) startOnboarding();
+  else showApp();
 }
-function setAttr(el, attrs) { Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k,v)); }
 
-// Lerp for smooth transitions
-let figState = {};
-let figTarget = {};
-let lerpFrame = null;
+async function showApp() {
+  document.getElementById('app').classList.remove('hidden');
+  renderHeader();
+  await loadAll();
+  renderTab(S.activeTab);
+  startFigure();
+  startClock();
+  sysMsg('MONIR LIFE OS v3 — System klar.');
+}
 
-function lerpFig() {
-  const keys = Object.keys(figTarget);
-  let done = true;
-  keys.forEach(k => {
-    const cur = figState[k] || figTarget[k];
-    const tgt = figTarget[k];
-    const next = cur + (tgt - cur) * 0.12;
-    if (Math.abs(next - tgt) > 0.1) done = false;
-    figState[k] = next;
+async function loadAll() {
+  const [h,q,b,a] = await Promise.all([
+    fetch('/api/habits').then(r=>r.json()).catch(()=>({habits:[]})),
+    fetch('/api/quests').then(r=>r.json()).catch(()=>({quests:[]})),
+    fetch('/api/businesses').then(r=>r.json()).catch(()=>({businesses:[]})),
+    fetch('/api/assets').then(r=>r.json()).catch(()=>({assets:[]}))
+  ]);
+  S.habits = h.habits||[]; S.quests = q.quests||[];
+  S.businesses = b.businesses||[]; S.assets = a.assets||[];
+}
+
+// ── HEADER ─────────────────────────────────────
+function renderHeader() {
+  const c = S.char||{};
+  document.getElementById('hdr-name').textContent = (c.name||'MONIR').toUpperCase()+' // LIFE OS';
+  document.getElementById('hdr-lvl').textContent = 'LVL '+(c.level||1);
+  document.getElementById('hdr-city').textContent = c.city||'Oslo';
+  const pct = c.xp_next>0 ? Math.min(100,(c.xp/c.xp_next)*100) : 0;
+  document.getElementById('xp-fill').style.width = pct+'%';
+  document.getElementById('xp-txt').textContent = `${c.xp||0} / ${c.xp_next||1000} XP`;
+  [['s-dis','sv-dis',c.discipline||0],['s-int','sv-int',c.intelligence||0],
+   ['s-hel','sv-hel',c.health||0],['s-biz','sv-biz',c.business_score||0]].forEach(([b,v,val])=>{
+    document.getElementById(b).style.width=val+'%';
+    document.getElementById(v).textContent=val;
   });
-  applyFigState(figState);
-  if (!done) lerpFrame = requestAnimationFrame(lerpFig);
+  [['r-bld',c.rep_builder||0],['r-tec',c.rep_tech||0],['r-ent',c.rep_entrepreneur||0],
+   ['r-ath',c.rep_athlete||0],['r-lea',c.rep_leader||0]].forEach(([id,val])=>{
+    document.getElementById(id).textContent='★'.repeat(val)+'☆'.repeat(5-val);
+  });
 }
 
-function setFigTarget(t) {
-  figTarget = {...t};
-  if (lerpFrame) cancelAnimationFrame(lerpFrame);
-  lerpFig();
-}
-
-function applyFigState(s) {
-  setLine(fig.armL, 300, 148, s.alx, s.aly);
-  setLine(fig.armR, 300, 148, s.arx, s.ary);
-  setLine(fig.legL, 300, 218, s.llx, s.lly);
-  setLine(fig.legR, 300, 218, s.rlx, s.rly);
-  setLine(fig.ftL, s.llx, s.lly, s.llx-17, s.lly+12);
-  setLine(fig.ftR, s.rlx, s.rly, s.rlx+17, s.rly+12);
-  setCircle(fig.hndL, s.alx, s.aly);
-  setCircle(fig.hndR, s.arx, s.ary);
-  fig.figG.style.transform = `rotate(${s.rot||0}deg)`;
-  fig.figG.style.transformOrigin = '300px 200px';
-  fig.figG.style.animation = s.anim || '';
-}
-
-// Base idle position
-const BASE = { alx:258, aly:182, arx:342, ary:182, llx:272, lly:300, rlx:328, rly:300, rot:0, anim:'' };
-
-// State definitions
-const STATES = {
-  idle: {
-    pos: {...BASE},
-    dur: [4000, 7000],
-    label: 'STANDBY',
-    onEnter: () => {
-      fig.cig.style.opacity = '0'; fig.smk.style.opacity = '0';
-      fig.mouth.setAttribute('d', 'M294 97 Q300 103 306 97');
-      startIdleAnim();
-    },
-    onExit: () => stopIdleAnim(),
-  },
-  pose: {
-    pos: { alx:248, aly:172, arx:355, ary:168, llx:265, lly:298, rlx:335, rly:298, rot:-4 },
-    dur: [3000, 5000],
-    label: 'POSING',
-    onEnter: () => { fig.cig.style.opacity='0'; fig.smk.style.opacity='0'; fig.mouth.setAttribute('d','M292 97 Q300 101 308 97'); },
-  },
-  dance: {
-    pos: {...BASE},
-    dur: [3000, 6000],
-    label: 'DANCING',
-    onEnter: () => { fig.cig.style.opacity='0'; fig.smk.style.opacity='0'; startDanceAnim(); fig.mouth.setAttribute('d','M292 97 Q300 105 308 97'); },
-    onExit: () => stopDanceAnim(),
-  },
-  smoke: {
-    pos: { alx:240, aly:156, arx:342, ary:182, llx:272, lly:300, rlx:328, rly:300, rot:-2 },
-    dur: [5000, 9000],
-    label: 'CHILLING',
-    onEnter: () => { fig.cig.style.opacity='1'; fig.smk.style.opacity='1'; fig.mouth.setAttribute('d','M294 97 Q300 100 306 97'); },
-    onExit: () => { fig.cig.style.opacity='0'; fig.smk.style.opacity='0'; },
-  },
-  stretch: {
-    pos: { alx:240, aly:100, arx:360, ary:100, llx:265, lly:302, rlx:335, rly:302, rot:0 },
-    dur: [3000, 5000],
-    label: 'STRETCHING',
-    onEnter: () => { fig.cig.style.opacity='0'; fig.smk.style.opacity='0'; fig.mouth.setAttribute('d','M292 97 Q300 102 308 97'); },
-  },
-  wave: {
-    pos: { alx:230, aly:112, arx:342, ary:182, llx:272, lly:300, rlx:328, rly:300, rot:0 },
-    dur: [2000, 4000],
-    label: 'WAVING',
-    onEnter: () => { fig.cig.style.opacity='0'; fig.smk.style.opacity='0'; startWaveAnim(); fig.mouth.setAttribute('d','M292 97 Q300 104 308 97'); },
-    onExit: () => stopWaveAnim(),
-  },
-  think: {
-    pos: { alx:258, aly:182, arx:315, ary:128, llx:272, lly:300, rlx:328, rly:300, rot:3 },
-    dur: [4000, 7000],
-    label: 'THINKING...',
-    onEnter: () => { fig.cig.style.opacity='0'; fig.smk.style.opacity='0'; fig.mouth.setAttribute('d','M295 98 Q300 97 306 98'); },
-  },
-  lean: {
-    pos: { alx:248, aly:190, arx:355, ary:170, llx:260, lly:298, rlx:340, rly:298, rot:6 },
-    dur: [3000, 5000],
-    label: 'CHILLING',
-    onEnter: () => { fig.cig.style.opacity='0'; fig.smk.style.opacity='0'; fig.mouth.setAttribute('d','M293 97 Q300 101 307 97'); },
-  },
-};
-
-let idleTimer = null, danceTimer = null, waveTimer = null;
-let stateTimeout = null;
-let currentState = 'idle';
-
-function startIdleAnim() {
-  let t = 0;
-  function tick() {
-    if (currentState !== 'idle') return;
-    t += 0.03;
-    const swing = Math.sin(t) * 14;
-    applyFigState({
-      alx: 258 + Math.sin(t) * 10, aly: 182 + Math.sin(t + 1) * 6,
-      arx: 342 - Math.sin(t) * 10, ary: 182 - Math.sin(t + 1) * 6,
-      llx: 272 + Math.sin(t * 0.4) * 3, lly: 300,
-      rlx: 328 - Math.sin(t * 0.4) * 3, rly: 300,
-      rot: Math.sin(t * 0.3) * 1.5,
-    });
-    idleTimer = requestAnimationFrame(tick);
-  }
-  tick();
-}
-function stopIdleAnim() { if (idleTimer) cancelAnimationFrame(idleTimer); idleTimer = null; }
-
-function startDanceAnim() {
-  let t = 0;
-  function tick() {
-    if (currentState !== 'dance') return;
-    t += 0.08;
-    const bounce = Math.abs(Math.sin(t * 2)) * -8;
-    const armSwing = Math.sin(t * 2) * 30;
-    const legKick = Math.sin(t * 2) * 12;
-    applyFigState({
-      alx: 258 + armSwing, aly: 182 - Math.abs(armSwing) * 0.4,
-      arx: 342 - armSwing, ary: 182 - Math.abs(armSwing) * 0.4,
-      llx: 272 - legKick, lly: 300 + Math.abs(legKick) * 0.3,
-      rlx: 328 + legKick, rly: 300 + Math.abs(legKick) * 0.3,
-      rot: Math.sin(t) * 6,
-    });
-    danceTimer = requestAnimationFrame(tick);
-  }
-  tick();
-}
-function stopDanceAnim() { if (danceTimer) cancelAnimationFrame(danceTimer); danceTimer = null; }
-
-function startWaveAnim() {
-  let t = 0;
-  function tick() {
-    if (currentState !== 'wave') return;
-    t += 0.15;
-    const waveY = Math.sin(t * 3) * 18;
-    applyFigState({
-      alx: 228 + Math.cos(t * 3) * 10, aly: 108 + waveY,
-      arx: 342, ary: 182,
-      llx: 272, lly: 300, rlx: 328, rly: 300, rot: Math.sin(t) * 2,
-    });
-    waveTimer = requestAnimationFrame(tick);
-  }
-  tick();
-}
-function stopWaveAnim() { if (waveTimer) cancelAnimationFrame(waveTimer); waveTimer = null; }
-
-function goToState(name) {
-  const prev = STATES[currentState];
-  if (prev?.onExit) prev.onExit();
-  currentState = name;
-  const s = STATES[name];
-  fig.lbl.textContent = s.label;
-  if (s.pos) setFigTarget(s.pos);
-  if (s.onEnter) s.onEnter();
-  const [min, max] = s.dur;
-  const dur = min + Math.random() * (max - min);
-  if (stateTimeout) clearTimeout(stateTimeout);
-  stateTimeout = setTimeout(randomState, dur);
-}
-
-function randomState() {
-  const all = Object.keys(STATES).filter(k => k !== currentState);
-  goToState(all[Math.floor(Math.random() * all.length)]);
-}
-
-// Start
-setTimeout(() => goToState('idle'), 500);
-setTimeout(randomState, 5000);
-
-// ════════════════════════════════════════════════
-// STATIC DATA
-// ════════════════════════════════════════════════
-const GOALS = [
-  {id:1,t:'OBDAI Production Release',p:45,c:'#00d4ff'},
-  {id:2,t:'Autovers 50k Revenue',p:30,c:'#ff0066'},
-  {id:3,t:'BMW MS45.1 Tuning Suite',p:60,c:'#ffaa00'},
-  {id:4,t:'Health Baseline 2026',p:20,c:'#aa44ff'},
-  {id:5,t:'AutoSvar AI Launch',p:25,c:'#00d4ff'},
-  {id:6,t:'Event Portfolio Build',p:10,c:'#ff0066'},
-];
-const HABITS = [
-  {n:'Morning Code Review',f:'DAGLIG',s:12,c:'#00d4ff'},
-  {n:'BMW Diagnostics',f:'4x/UKE',s:8,c:'#ffaa00'},
-  {n:'Workout',f:'4x/UKE',s:5,c:'#00ff88'},
-  {n:'Learn AI/ML',f:'3x/UKE',s:6,c:'#aa44ff'},
-  {n:'Cold Exposure',f:'5x/UKE',s:3,c:'#ff0066'},
-];
-let todayData = {sleep:null,exercise:null,mood:null,water:null};
-
-// ════════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════════
-window.addEventListener('load', () => {
-  setTimeout(() => document.getElementById('boot').classList.add('done'), 3000);
-  renderGoals(); renderHabits();
-  setInterval(updateClock, 1000); updateClock();
-  loadData(); loadHistory(); loadNotes();
-  showNormalChips();
-  if (synth) { pickVoice(); synth.onvoiceschanged = pickVoice; }
-  appendMsg('MONIR', 'Hei Sebastian. Jeg er MONIR — online og klar. Trykk <span style="color:var(--o)">🧬 KARTLEGG</span> for at jeg skal bli kjent med deg, <span style="color:var(--gold)">⚖️ JURIDISK</span> for rettslig research, eller spør meg om hva som helst.', 'ai');
+// ── TABS ───────────────────────────────────────
+document.addEventListener('click', e=>{
+  const t = e.target.closest('.tbtn');
+  if(t){ document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active')); t.classList.add('active'); S.activeTab=t.dataset.t; renderTab(t.dataset.t); }
 });
 
-function updateClock() {
-  const n = new Date();
-  const t = [n.getHours(),n.getMinutes(),n.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':');
-  document.getElementById('clk').textContent = t;
-  document.getElementById('sf').textContent = `MONIR • ${n.getDate()}. juni 2026 • ${t.slice(0,5)}`;
+function renderTab(name) {
+  const c = document.getElementById('tab-c');
+  if(name==='quest') c.innerHTML = renderQuestTab();
+  else if(name==='empire') c.innerHTML = renderEmpireTab();
+  else c.innerHTML = renderAssetsTab();
+  if(name==='quest') bindQuestTab();
 }
 
-// ════════════════════════════════════════════════
-// RENDER
-// ════════════════════════════════════════════════
-function renderGoals() {
-  document.getElementById('goals').innerHTML = GOALS.map(g => `
-    <div class="gi">
-      <div class="gi-h"><span class="gn">${g.t}</span><span class="gp" style="color:${g.c}">${g.p}%</span></div>
-      <div class="gbar"><div class="gfill" style="width:${g.p}%;background:${g.c};opacity:.7"></div></div>
-    </div>`).join('');
-}
-
-function renderHabits() {
-  document.getElementById('habits').innerHTML = HABITS.map((h,i) => `
-    <div class="hi" onclick="toggleHabit(${i})">
-      <div class="hb" style="background:${h.c}"></div>
-      <div style="flex:1;min-width:0"><span class="hn">${h.n}</span><span class="hf">${h.f}</span></div>
-      <span class="hs">${h.s}d 🔥</span>
-      <div class="hck" id="hck-${i}">✓</div>
-    </div>`).join('');
-}
-
-function toggleHabit(i) {
-  const el = document.getElementById('hck-'+i);
-  el.classList.toggle('on');
-  toast(el.classList.contains('on') ? '✓ '+HABITS[i].n : 'Fjernet');
-}
-
-function renderToday() {
-  document.getElementById('dv-sl').textContent = todayData.sleep ?? '–';
-  document.getElementById('dv-ex').textContent = todayData.exercise ?? '–';
-  document.getElementById('dv-mo').textContent = todayData.mood ?? '–';
-  document.getElementById('dv-wa').textContent = todayData.water ?? '–';
-  if (todayData.exercise) {
-    document.getElementById('ld-ex').textContent = todayData.exercise + ' min';
+function renderQuestTab() {
+  const ch = S.char||{};
+  const prog = ch.main_quest_progress||0;
+  let h = `<div class="mqtitle">${ch.main_quest||'—'}</div>
+<div class="mqbar"><div class="sbg" style="flex:1;height:4px"><div class="sfill" style="width:${prog}%;background:var(--gold)"></div></div><span class="mqpct">${prog}%</span></div>`;
+  if(S.quests.length){
+    h+='<div class="sec-t">MILEPÆLER</div>';
+    S.quests.forEach(q=>{h+=`<div class="mile${q.completed?' done':''}" data-qid="${q.id}"><input type="checkbox" ${q.completed?'checked':''} id="q${q.id}"><label for="q${q.id}">${q.title}</label></div>`;});
   }
-  if (todayData.mood) {
-    document.getElementById('ld-mo').textContent = todayData.mood + '/10';
-    const pct = Math.round(todayData.mood * 11.9);
-    document.getElementById('g-mo').setAttribute('stroke-dasharray', pct + ' 119');
-    document.getElementById('g-mo-t').textContent = todayData.mood+'/10';
+  if(S.habits.length){
+    h+='<div class="sec-t">DAGLIGE VANER</div>';
+    S.habits.forEach(hb=>{h+=`<div class="hrow${hb.done_today?' done':''}" data-hid="${hb.id}"><div class="hcheck">${hb.done_today?'✓':''}</div><span class="hname">${hb.emoji||'⚡'} ${hb.name}</span><span class="hxp">+${hb.xp_reward||20}XP</span></div>`;});
   }
-  if (todayData.sleep) {
-    document.getElementById('ld-sl').textContent = todayData.sleep + ' t';
-    const pct = Math.round(Math.min(100, (todayData.sleep/8)*100) * 1.19);
-    document.getElementById('g-slp').setAttribute('stroke-dasharray', pct + ' 119');
-    document.getElementById('g-slp-t').textContent = todayData.sleep + 'h';
-  }
+  return h;
 }
 
-// ════════════════════════════════════════════════
-// API
-// ════════════════════════════════════════════════
-async function loadData() {
-  try {
-    const r = await fetch('/api/today'); const d = await r.json();
-    if (d.sleep != null) todayData.sleep = d.sleep;
-    if (d.exercise != null) todayData.exercise = d.exercise;
-    if (d.mood != null) todayData.mood = d.mood;
-    if (d.water != null) todayData.water = d.water;
-    renderToday();
-  } catch(e) {}
+function renderEmpireTab() {
+  if(!S.businesses.length) return '<div style="color:var(--dim);font-size:10px;margin-top:12px">Ingen bedrifter registrert.</div>';
+  return S.businesses.map(b=>`<div class="bcard"><div class="bname">${b.name}</div><div class="bmeta">LVL ${b.level} // ${(b.status||'active').toUpperCase()}</div>${b.next_action?`<div class="bact">→ ${b.next_action}</div>`:''}</div>`).join('');
 }
 
-async function loadNotes() {
-  try {
-    const r = await fetch('/api/notes'); const d = await r.json();
-    document.getElementById('mcnt').textContent = d.notes.length + ' fakta';
-    const prev = document.getElementById('mprev');
-    if (!d.notes.length) { prev.textContent = 'Ingen fakta ennå — start en samtale!'; return; }
-    prev.innerHTML = d.notes.slice(0,4).map(n =>
-      `<div class="mpi"><div class="mpi-cat">${(n.category||'general').toUpperCase()}</div>${n.note.slice(0,55)}${n.note.length>55?'…':''}</div>`
-    ).join('');
-  } catch(e) {}
+function renderAssetsTab() {
+  if(!S.assets.length) return '<div style="color:var(--dim);font-size:10px;margin-top:12px">Ingen eiendeler registrert.</div>';
+  return '<div class="agrid">'+S.assets.map(a=>`<div class="acard ${a.status||'locked'}"><div class="aemoji">${a.emoji||'📦'}</div><div class="aname">${a.name}</div><div class="astatus">${(a.status||'LOCKED').toUpperCase()}</div></div>`).join('')+'</div>';
 }
 
-async function loadHistory() {
-  try {
-    const r = await fetch('/api/history'); const d = await r.json();
-    if (!d.messages?.length) return;
-    const sep = document.createElement('div');
-    sep.className = 'msep'; sep.textContent = '── forrige sesjon ──';
-    document.getElementById('cmsgs').appendChild(sep);
-    d.messages.slice(-8).forEach(msg => {
-      const isL = msg.content?.startsWith('[JURIDISK]');
-      const who = msg.role === 'user' ? 'user' : (isL ? 'legal' : 'ai');
-      appendMsg(who === 'user' ? 'YOU' : (isL ? 'MONIR.LEGAL' : 'MONIR'),
-                msg.content.replace('[JURIDISK] ',''), who);
+function bindQuestTab() {
+  document.querySelectorAll('.hrow[data-hid]').forEach(el=>{
+    el.addEventListener('click', async ()=>{
+      const hid=+el.dataset.hid;
+      const res = await fetch('/api/habits/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({habit_id:hid})}).then(r=>r.json()).catch(()=>({}));
+      if(res.status==='done'){
+        floatXP(`+${res.xp}XP`,el);
+        if(res.leveled_up) showLevelUp(res.new_level);
+        S.habits = (await fetch('/api/habits').then(r=>r.json())).habits||[];
+        S.char = await fetch('/api/character').then(r=>r.json());
+        renderHeader(); renderTab('quest');
+      }
     });
-    scrollChat();
-  } catch(e) {}
-}
-
-// ════════════════════════════════════════════════
-// TTS + VOICE
-// ════════════════════════════════════════════════
-let ttsEnabled = false;
-const synth = window.speechSynthesis;
-let norVoice = null;
-function pickVoice() {
-  const v = synth?.getVoices() || [];
-  norVoice = v.find(x=>x.lang.startsWith('nb')||x.lang.startsWith('no')) || v.find(x=>x.lang.startsWith('sv')) || null;
-}
-function toggleTTS() {
-  ttsEnabled = !ttsEnabled;
-  const btn = document.getElementById('tts-btn');
-  btn.textContent = ttsEnabled ? '🔊 TALE' : '🔇 TALE';
-  btn.classList.toggle('on', ttsEnabled);
-  if (!ttsEnabled && synth) synth.cancel();
-  toast(ttsEnabled ? 'MONIR snakker nå 🔊' : 'Tale av 🔇');
-}
-function speakText(text) {
-  if (!ttsEnabled || !synth) return;
-  synth.cancel();
-  const clean = text.replace(/[*_#`⚖️🏛️📊📋🎯⚠️]/g,'').replace(/\n+/g,'. ').slice(0,800);
-  const utt = new SpeechSynthesisUtterance(clean);
-  utt.lang = 'nb-NO'; utt.rate = 1.05; utt.pitch = 0.92;
-  if (norVoice) utt.voice = norVoice;
-  synth.speak(utt);
-}
-
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recog = null, voiceActive = false;
-if (SR) {
-  recog = new SR(); recog.lang = 'nb-NO'; recog.continuous = false; recog.interimResults = false;
-  recog.onresult = e => { document.getElementById('cin').value = Array.from(e.results).map(r=>r[0].transcript).join(' '); stopVoice(); send(); };
-  recog.onerror = () => stopVoice(); recog.onend = () => stopVoice();
-}
-function toggleVoice() {
-  if (!SR) { toast('Bruk Chrome for tale', '#ffaa00'); return; }
-  if (voiceActive) { stopVoice(); return; }
-  voiceActive = true; recog.start();
-  document.getElementById('wv').classList.add('on');
-  document.getElementById('mic-btn').classList.add('listening');
-  document.getElementById('mic-btn').textContent = '⏹ MIC';
-}
-function stopVoice() {
-  voiceActive = false; if (recog) try { recog.stop(); } catch(e) {}
-  document.getElementById('wv').classList.remove('on');
-  const b = document.getElementById('mic-btn');
-  if (b) { b.classList.remove('listening'); b.textContent = '🎤 MIC'; }
-}
-
-// ════════════════════════════════════════════════
-// MODES
-// ════════════════════════════════════════════════
-let chatMode = 'normal';
-
-function startOnboarding() {
-  chatMode = 'onboarding';
-  document.getElementById('onb-ban').classList.add('on');
-  document.getElementById('cin').value = 'Start kartleggingen nå.';
-  send();
-}
-function stopOnboarding() {
-  chatMode = 'normal';
-  document.getElementById('onb-ban').classList.remove('on');
-  showNormalChips();
-}
-
-function toggleLegal() { chatMode === 'legal' ? disableLegal() : enableLegal(); }
-function enableLegal() {
-  chatMode = 'legal';
-  document.getElementById('leg-ban').classList.add('on');
-  document.getElementById('lg-btn').classList.add('on');
-  document.getElementById('ht-legal').style.display = '';
-  document.getElementById('cbtn').classList.add('ls');
-  document.getElementById('cin').classList.add('lg');
-  document.getElementById('cin').placeholder = 'Spør om norsk lov, rettigheter, kontrakter... (Enter = send)';
-  showLegalChips();
-  toast('⚖️ LegalStreetSmart aktivert', '#ffcc44');
-}
-function disableLegal() {
-  chatMode = 'normal';
-  document.getElementById('leg-ban').classList.remove('on');
-  document.getElementById('lg-btn').classList.remove('on');
-  document.getElementById('ht-legal').style.display = 'none';
-  document.getElementById('cbtn').classList.remove('ls');
-  document.getElementById('cin').classList.remove('lg');
-  document.getElementById('cin').placeholder = 'Skriv til MONIR... (Enter = send)';
-  document.getElementById('src-row').classList.remove('on');
-  showNormalChips();
-}
-
-const NC = [['FOKUS I DAG','Hva bør jeg fokusere på i dag?'],['ANALYSER VANER','Analyser mine vaner og gi konkrete råd'],['PROSJEKTSTATUS','Hva er status på OBDAI og Autovers?'],['UKE RAPPORT','Oppsummer uken min og gi motivasjon'],['BMW HJELP','Hjelp meg med BMW-diagnose']];
-const LC = [['OPPSIGELSE','Hva er mine rettigheter ved urettmessig oppsigelse?'],['LEIEKONTRAKT','Hva gjelder juridisk ved tvist med utleier om depositum?'],['AS ANSVAR','Når har styremedlem og daglig leder personlig ansvar i AS?'],['INKASSO','Hva kan inkasso kreve og hva er mine rettigheter?'],['KONTRAKT BRUDD','Hva skjer rettslig ved kontraktsbrudd fra leverandør?'],['GDPR','Hvilke plikter har mitt AS under GDPR?']];
-function showNormalChips() { document.getElementById('chips').innerHTML = NC.map(([l,q])=>`<div class="chip" onclick="quickSend('${q.replace(/'/g,"\\'")}')"> ${l}</div>`).join(''); }
-function showLegalChips() { document.getElementById('chips').innerHTML = LC.map(([l,q])=>`<div class="chip lc" onclick="quickSend('${q.replace(/'/g,"\\'")}')">⚖️ ${l}</div>`).join(''); }
-function quickSend(msg) { document.getElementById('cin').value = msg; send(); }
-
-// ════════════════════════════════════════════════
-// CHAT
-// ════════════════════════════════════════════════
-function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }
-
-async function send() {
-  const inp = document.getElementById('cin');
-  const msg = inp.value.trim(); if (!msg) return;
-  inp.value = '';
-  appendMsg('YOU', msg, 'user');
-
-  const isLegal = chatMode === 'legal';
-  const btn = document.getElementById('cbtn');
-  btn.disabled = true;
-
-  // Figure reacts — thinking state
-  goToState('think');
-
-  let res;
-  try {
-    res = await fetch(isLegal ? '/api/legal' : '/api/chat', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(isLegal ? {question:msg} : {message:msg,mode:chatMode})
+  });
+  document.querySelectorAll('.mile[data-qid]').forEach(el=>{
+    el.addEventListener('click', async e=>{
+      if(e.target.tagName==='INPUT'){
+        const qid=+el.dataset.qid, done=e.target.checked;
+        await fetch('/api/quests/toggle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quest_id:qid,completed:done})});
+        if(done){ floatXP('+100XP',el); S.char=await fetch('/api/character').then(r=>r.json()); renderHeader(); }
+        S.quests=(await fetch('/api/quests').then(r=>r.json())).quests||[];
+        renderTab('quest');
+      }
     });
-  } catch(e) { appendMsg('ERR','Nettverksfeil — server nede?','ai'); btn.disabled=false; return; }
-
-  if (!res.ok) { const err=await res.json().catch(()=>({})); appendMsg('ERR',err.error||'Feil','ai'); btn.disabled=false; return; }
-
-  const reader = res.body.getReader(), dec = new TextDecoder();
-  let aiText = '', el = null;
-  const who = isLegal ? 'legal' : 'ai';
-  const lbl = isLegal ? 'MONIR.LEGAL' : 'MONIR';
-
-  while (true) {
-    const {done,value} = await reader.read(); if (done) break;
-    const lines = dec.decode(value).split('\n');
-    for (const line of lines) {
-      if (!line.startsWith('data:')) continue;
-      try {
-        const ev = JSON.parse(line.slice(5));
-        if (ev.t === 'sources') showSources(ev.v);
-        else if (ev.t === 'text') {
-          if (!el) el = appendMsg(lbl, '', who);
-          aiText += ev.v;
-          el.querySelector('.ma-txt, .ml-txt').textContent = aiText;
-          scrollChat();
-        }
-      } catch(_) {}
-    }
-  }
-
-  btn.disabled = false;
-  if (aiText) { speakText(aiText); setTimeout(loadNotes, 4000); }
-
-  // Figure back to random state after response
-  setTimeout(randomState, 500);
-}
-
-function appendMsg(lbl, text, who) {
-  const m = document.getElementById('cmsgs');
-  const el = document.createElement('div');
-  if (who === 'user') {
-    el.className = 'mu';
-    el.innerHTML = `<span class="mu-lbl">YOU</span><div class="mu-txt">${text}</div>`;
-  } else if (who === 'legal') {
-    el.className = 'ml';
-    el.innerHTML = `<span class="ml-lbl">MONIR.LEGAL</span><div class="ml-txt">${text}</div>`;
-  } else {
-    el.className = 'ma';
-    el.innerHTML = `<span class="ma-lbl">${lbl||'MONIR'}</span><div class="ma-txt">${text}</div>`;
-  }
-  m.appendChild(el); scrollChat();
-  return el;
-}
-
-function scrollChat() { const m=document.getElementById('cmsgs'); m.scrollTop=m.scrollHeight; }
-
-function showSources(sources) {
-  const row = document.getElementById('src-row');
-  row.classList.add('on');
-  row.querySelectorAll('.sch').forEach(e=>e.remove());
-  (Array.isArray(sources)?sources:[sources]).forEach(s=>{
-    const c=document.createElement('span');c.className='sch';c.textContent=s;row.appendChild(c);
   });
 }
 
-// ════════════════════════════════════════════════
-// NOTES
-// ════════════════════════════════════════════════
-function openNote() { document.getElementById('note-ov').style.display='flex'; document.getElementById('note-inp').value=''; }
-function closeNote() { document.getElementById('note-ov').style.display='none'; }
-async function saveNote() {
-  const txt = document.getElementById('note-inp').value.trim(); if (!txt) return;
-  await fetch('/api/notes/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({note:txt,category:'personal'})});
-  closeNote(); loadNotes(); toast('Lagret i minne ✓');
+// ── PRIORITY ───────────────────────────────────
+document.getElementById('btn-pri').addEventListener('click', runPriority);
+async function runPriority() {
+  const out=document.getElementById('pri-out'), btn=document.getElementById('btn-pri');
+  out.textContent=''; out.style.color='var(--text)';
+  btn.disabled=true; btn.textContent='⚡ ANALYSERER...';
+  setFigState('think');
+  try {
+    const resp = await fetch('/api/priority',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({context:''})});
+    const reader=resp.body.getReader(), dec=new TextDecoder(); let buf='';
+    while(true){
+      const {done,value}=await reader.read(); if(done) break;
+      buf+=dec.decode(value,{stream:true});
+      const parts=buf.split('\n\n'); buf=parts.pop();
+      for(const p of parts){ if(!p.startsWith('data:')) continue; try{ const d=JSON.parse(p.slice(5).trim()); if(d.t==='text'){out.textContent+=d.v;out.scrollTop=out.scrollHeight;} }catch(e){} }
+    }
+  } catch(e){ out.textContent='// Feil ved analyse.'; }
+  btn.disabled=false; btn.textContent='⚡ PRIORITER';
+  setFigState('idle');
 }
 
-// ════════════════════════════════════════════════
-// TOAST
-// ════════════════════════════════════════════════
-function toast(msg, col='#00ff88') {
-  const el=document.createElement('div');el.className='ti';el.style.borderColor=col;el.style.color=col;el.textContent=msg;
-  document.getElementById('toast').appendChild(el);setTimeout(()=>el.remove(),3000);
+// ── CHAT ───────────────────────────────────────
+const msgsEl=document.getElementById('msgs'), chatIn=document.getElementById('chat-in');
+
+function addMsg(role, text) {
+  const d=document.createElement('div'); d.className='msg '+role; d.textContent=text;
+  msgsEl.appendChild(d); msgsEl.scrollTop=msgsEl.scrollHeight; return d;
 }
+function sysMsg(t){ const d=document.createElement('div'); d.className='msg sys'; d.textContent=t; msgsEl.appendChild(d); msgsEl.scrollTop=msgsEl.scrollHeight; }
+
+async function sendChat(mode='normal') {
+  const msg=chatIn.value.trim(); if(!msg) return;
+  chatIn.value=''; addMsg('user',msg);
+  const aiEl=addMsg('ai',''); setFigState('think');
+  try {
+    const resp=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,mode})});
+    const reader=resp.body.getReader(), dec=new TextDecoder(); let buf='';
+    while(true){
+      const {done,value}=await reader.read(); if(done) break;
+      buf+=dec.decode(value,{stream:true});
+      const parts=buf.split('\n\n'); buf=parts.pop();
+      for(const p of parts){ if(!p.startsWith('data:')) continue; try{ const d=JSON.parse(p.slice(5).trim()); if(d.t==='text'){aiEl.textContent+=d.v;msgsEl.scrollTop=msgsEl.scrollHeight;} }catch(e){} }
+    }
+  } catch(e){ aiEl.textContent='Feil ved tilkobling.'; }
+  setFigState('idle');
+}
+
+async function sendLegal() {
+  const msg=chatIn.value.trim(); if(!msg) return;
+  chatIn.value=''; addMsg('user','[JUS] '+msg);
+  const aiEl=addMsg('ai',''); setFigState('think');
+  try {
+    const resp=await fetch('/api/legal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:msg})});
+    const reader=resp.body.getReader(), dec=new TextDecoder(); let buf='';
+    while(true){
+      const {done,value}=await reader.read(); if(done) break;
+      buf+=dec.decode(value,{stream:true});
+      const parts=buf.split('\n\n'); buf=parts.pop();
+      for(const p of parts){ if(!p.startsWith('data:')) continue; try{
+        const d=JSON.parse(p.slice(5).trim());
+        if(d.t==='text'){aiEl.textContent+=d.v;msgsEl.scrollTop=msgsEl.scrollHeight;}
+        if(d.t==='sources'&&d.v.length){ const s=document.createElement('div'); s.style.cssText='font-size:9px;color:var(--dim);margin-top:3px'; s.textContent='📚 '+d.v.join(' | '); aiEl.appendChild(s); }
+      }catch(e){} }
+    }
+  } catch(e){ aiEl.textContent='Feil.'; }
+  setFigState('idle');
+}
+
+document.getElementById('btn-send').addEventListener('click',()=>sendChat());
+document.getElementById('btn-leg').addEventListener('click',sendLegal);
+chatIn.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();} });
+
+// ── KARTLEGG ───────────────────────────────────
+document.getElementById('btn-kart').addEventListener('click',()=>{
+  if(!S.char||!S.char.onboarded){
+    startOnboarding();
+  } else {
+    if(confirm('Start ny kartlegging? Eksisterende data overskrives.')) {
+      S.ob={step:0,data:newObData()};
+      document.getElementById('ob-overlay').classList.remove('hidden');
+      document.getElementById('app').classList.add('hidden');
+      renderObStep();
+    }
+  }
+});
+
+// ── VOICE ──────────────────────────────────────
+const SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
+let recognition;
+if(SpeechRec){
+  recognition=new SpeechRec(); recognition.lang='nb-NO'; recognition.continuous=false; recognition.interimResults=false;
+  recognition.onresult=e=>{ chatIn.value=e.results[0][0].transcript; document.getElementById('btn-voice').classList.remove('on'); S.listening=false; };
+  recognition.onend=()=>{ document.getElementById('btn-voice').classList.remove('on'); S.listening=false; };
+}
+document.getElementById('btn-voice').addEventListener('click',()=>{
+  if(!recognition) return;
+  if(S.listening){recognition.stop();}
+  else{recognition.start();S.listening=true;document.getElementById('btn-voice').classList.add('on');}
+});
+
+// ── STICK FIGURE ───────────────────────────────
+const POSES={
+  idle:  {la:[60,72,28,98], ra:[60,72,92,98], ll:[60,118,36,172], rl:[60,118,84,172]},
+  wave:  {la:[60,72,25,52], ra:[60,72,100,52], ll:[60,118,36,172], rl:[60,118,84,172]},
+  think: {la:[60,72,28,98], ra:[60,72,78,58], ll:[60,118,36,172], rl:[60,118,84,172]},
+  pose:  {la:[60,72,18,62], ra:[60,72,102,62], ll:[60,118,28,178], rl:[60,118,92,178]},
+  lean:  {la:[60,72,20,102], ra:[60,72,90,96], ll:[60,118,28,172], rl:[60,118,80,172]}
+};
+let figCur={...POSES.idle}, figTgt={...POSES.idle}, figAnimId=null, figBreath=0, figTimerCount=0;
+
+function setFigState(s){
+  S.figState=s; figTgt={...POSES[s]||POSES.idle};
+  document.getElementById('fig-label').textContent=s.toUpperCase();
+}
+function lp(a,b,t){return a+(b-a)*t}
+
+function figTick(ts){
+  figBreath=Math.sin(ts/1200)*3;
+  const sp=0.06;
+  ['la','ra','ll','rl'].forEach(k=>{
+    figCur[k]=figCur[k].map((v,i)=>lp(v,figTgt[k][i],sp));
+  });
+  if(S.figState==='idle'){
+    figCur.la[1]=lp(figCur.la[1],72+figBreath,0.1);
+    figCur.ra[1]=lp(figCur.ra[1],72+figBreath,0.1);
+  }
+  const map={la:'f-larm',ra:'f-rarm',ll:'f-lleg',rl:'f-rleg'};
+  Object.entries(map).forEach(([k,id])=>{
+    const el=document.getElementById(id),v=figCur[k];
+    if(el){el.setAttribute('x1',v[0].toFixed(1));el.setAttribute('y1',v[1].toFixed(1));el.setAttribute('x2',v[2].toFixed(1));el.setAttribute('y2',v[3].toFixed(1));}
+  });
+  const head=document.getElementById('f-head');
+  if(head) head.setAttribute('cy',(28+Math.sin(ts/1800)*1.5).toFixed(2));
+  figTimerCount++;
+  if(figTimerCount>280&&S.figState==='idle'){
+    figTimerCount=0;
+    const states=['idle','idle','wave','pose','lean','think'];
+    const next=states[Math.floor(Math.random()*states.length)];
+    setFigState(next);
+    if(next!=='idle') setTimeout(()=>setFigState('idle'),3200);
+  }
+  figAnimId=requestAnimationFrame(figTick);
+}
+function startFigure(){ if(figAnimId) cancelAnimationFrame(figAnimId); figAnimId=requestAnimationFrame(figTick); }
+
+// ── CLOCK ──────────────────────────────────────
+function startClock(){
+  const tick=()=>{ document.getElementById('hdr-time').textContent=new Date().toLocaleTimeString('nb-NO',{hour:'2-digit',minute:'2-digit'}); };
+  tick(); setInterval(tick,30000);
+}
+
+// ── XP EFFECTS ────────────────────────────────
+function floatXP(text,ref){
+  const rect=ref?ref.getBoundingClientRect():{top:200,left:200};
+  const d=document.createElement('div'); d.className='xpfloat'; d.textContent=text;
+  d.style.left=(rect.left+20)+'px'; d.style.top=rect.top+'px';
+  document.body.appendChild(d); setTimeout(()=>d.remove(),1500);
+}
+function showLevelUp(lvl){
+  const d=document.createElement('div'); d.id='lvlup'; d.textContent=`⬆ LEVEL UP! LVL ${lvl}`;
+  document.body.appendChild(d); setFigState('wave');
+  setTimeout(()=>{ d.remove(); setFigState('idle'); },2500);
+}
+
+// ── ONBOARDING ─────────────────────────────────
+function newObData(){
+  return {name:'',age:null,city:'Oslo',height_cm:null,weight_kg:null,
+    discipline:50,intelligence:50,health:50,business_score:50,
+    rep_builder:3,rep_tech:3,rep_entrepreneur:3,rep_athlete:2,rep_leader:3,
+    main_quest:'',main_quest_progress:0,
+    businesses:[],assets:[],vehicles:[],milestones:[],achievements:[],habits:[]};
+}
+
+function startOnboarding(){
+  S.ob={step:0,data:newObData()};
+  document.getElementById('ob-overlay').classList.remove('hidden');
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('boot').classList.add('hidden');
+  renderObStep();
+}
+
+function renderObPips(){
+  const c=document.getElementById('ob-pips'); c.innerHTML='';
+  for(let i=0;i<STEPS;i++){const d=document.createElement('div');d.className='pip'+(i<S.ob.step?' done':i===S.ob.step?' active':'');c.appendChild(d);}
+  document.getElementById('ob-info').textContent=`STEG ${S.ob.step+1} / ${STEPS}`;
+}
+
+function renderObStep(){
+  renderObPips();
+  document.getElementById('ob-sub').textContent=`STEG ${S.ob.step+1}: ${stepTitles[S.ob.step]}`;
+  document.getElementById('ob-next').textContent=S.ob.step===STEPS-1?'START MONIR ›':'NESTE ›';
+  document.getElementById('ob-prev').style.visibility=S.ob.step===0?'hidden':'visible';
+  const b=document.getElementById('ob-body'), d=S.ob.data;
+
+  const steps=[
+    // 0: Identity
+    ()=>`<label class="obl">NAVN</label><input id="o-name" value="${d.name}">
+<div class="ob-row"><div><label class="obl">ALDER</label><input id="o-age" type="number" min="1" max="120" value="${d.age||''}"></div>
+<div><label class="obl">BY</label><input id="o-city" value="${d.city}"></div></div>`,
+
+    // 1: Body
+    ()=>`<div class="ob-row">
+<div><label class="obl">HØYDE (cm)</label><input id="o-h" type="number" value="${d.height_cm||''}"></div>
+<div><label class="obl">VEKT (kg)</label><input id="o-w" type="number" step="0.1" value="${d.weight_kg||''}"></div></div>`,
+
+    // 2: Stats
+    ()=>`<div style="color:var(--dim);font-size:10px;margin-bottom:10px">SELVVURDERING 0-100 // REPUTATION 1-5:</div>
+${mkSlider('o-dis','DISIPLIN',d.discipline,0,100)}${mkSlider('o-int','INTELLIGENS',d.intelligence,0,100)}
+${mkSlider('o-hel','HELSE',d.health,0,100)}${mkSlider('o-biz','BUSINESS',d.business_score,0,100)}
+<div style="color:var(--dim);font-size:9px;margin:10px 0 6px;letter-spacing:2px">REPUTATION:</div>
+${mkSlider('o-rb','BUILDER',d.rep_builder,1,5)}${mkSlider('o-rt','TEKNIKER',d.rep_tech,1,5)}
+${mkSlider('o-re','GRÜNDER',d.rep_entrepreneur,1,5)}${mkSlider('o-ra','UTØVER',d.rep_athlete,1,5)}
+${mkSlider('o-rl','LEDER',d.rep_leader,1,5)}`,
+
+    // 3: Main Quest
+    ()=>`<label class="obl">MAIN QUEST (din store livsambisjon)</label>
+<input id="o-mq" value="${d.main_quest}" placeholder="Eks: Bli finansielt uavhengig innen 35">
+${mkSlider('o-mqp','FREMGANG',d.main_quest_progress,0,100,'%')}`,
+
+    // 4: Milestones
+    ()=>`<div style="color:var(--dim);font-size:10px;margin-bottom:8px">Milepæler mot main quest. Huk av fullførte.</div>
+<ul class="ob-list" id="ms-list">${d.milestones.map((m,i)=>`<li><input type="checkbox" ${m.completed?'checked':''} data-idx="${i}"><input type="text" value="${esc(m.title)}" data-ti="${i}"><button class="rm" data-ri="${i}">✕</button></li>`).join('')}</ul>
+<button class="ob-add" id="add-ms">+ Milepæl</button>`,
+
+    // 5: Empire
+    ()=>`<div style="color:var(--dim);font-size:10px;margin-bottom:8px">Bedrifter og prosjekter.</div>
+<ul class="ob-list" id="biz-list">${d.businesses.map((b,i)=>`<li><input type="text" value="${esc(b.name)}" data-ti="${i}" placeholder="Navn"><input class="lnum" type="number" value="${b.level||1}" min="1" max="10" data-li="${i}" title="Level"><button class="rm" data-ri="${i}">✕</button></li>`).join('')}</ul>
+<button class="ob-add" id="add-biz">+ Bedrift</button>`,
+
+    // 6: Assets
+    ()=>`<div style="color:var(--dim);font-size:10px;margin-bottom:8px">Eiendeler, kjøretøy, eiendom.</div>
+<ul class="ob-list" id="asset-list">${d.assets.map((a,i)=>`<li><input class="lemu" type="text" value="${a.emoji||'📦'}" data-ei="${i}"><input type="text" value="${esc(a.name)}" data-ti="${i}" placeholder="Navn"><select data-si="${i}" style="width:88px"><option value="owned" ${a.status==='owned'?'selected':''}>OWNED</option><option value="in-dev" ${a.status==='in-dev'?'selected':''}>IN DEV</option><option value="locked" ${a.status==='locked'?'selected':''}>LOCKED</option></select><button class="rm" data-ri="${i}">✕</button></li>`).join('')}</ul>
+<button class="ob-add" id="add-asset">+ Eiendel</button>`,
+
+    // 7: Habits
+    ()=>`<div style="color:var(--dim);font-size:10px;margin-bottom:8px">Daglige rutiner (XP per utførelse).</div>
+<ul class="ob-list" id="hab-list">${d.habits.map((h,i)=>`<li><input class="lemu" type="text" value="${h.emoji||'⚡'}" data-ei="${i}"><input type="text" value="${esc(h.name)}" data-ti="${i}" placeholder="Vane"><input class="lxp" type="number" value="${h.xp||20}" min="5" max="200" data-xi="${i}" title="XP"><button class="rm" data-ri="${i}">✕</button></li>`).join('')}</ul>
+<button class="ob-add" id="add-hab">+ Vane</button>`,
+
+    // 8: Achievements
+    ()=>`<div style="color:var(--dim);font-size:10px;margin-bottom:8px">Bragder du allerede har oppnådd.</div>
+<ul class="ob-list" id="ach-list">${d.achievements.map((a,i)=>`<li><input type="checkbox" ${a.unlocked?'checked':''} data-idx="${i}"><input type="text" value="${esc(a.name)}" data-ti="${i}" placeholder="Bragd"><button class="rm" data-ri="${i}">✕</button></li>`).join('')}</ul>
+<button class="ob-add" id="add-ach">+ Bragd</button>`
+  ];
+
+  b.innerHTML = steps[S.ob.step]();
+
+  // Attach slider live updates
+  b.querySelectorAll('input[type=range]').forEach(el=>{
+    el.addEventListener('input',()=>{ const sp=document.getElementById('v-'+el.id.slice(2)); if(sp) sp.textContent=el.value+(el.id==='o-mqp'?'%':''); });
+  });
+
+  // Attach list listeners per step
+  if(S.ob.step===4) attachList('ms-list','milestones','add-ms',{title:'',completed:false});
+  if(S.ob.step===5) attachBiz();
+  if(S.ob.step===6) attachAssets();
+  if(S.ob.step===7) attachHabs();
+  if(S.ob.step===8) attachList('ach-list','achievements','add-ach',{name:'',unlocked:false});
+}
+
+function mkSlider(id,label,val,mn,mx,suffix=''){
+  return `<div class="sr"><label>${label}</label><input type="range" id="${id}" min="${mn}" max="${mx}" value="${val}"><span id="v-${id}">${val}${suffix}</span></div>`;
+}
+function esc(s){ return (s||'').replace(/"/g,'&quot;'); }
+
+function saveObStep(){
+  const d=S.ob.data, s=S.ob.step;
+  const g=id=>document.getElementById(id);
+  if(s===0){ if(g('o-name')) d.name=g('o-name').value.trim(); if(g('o-age')) d.age=+g('o-age').value||null; if(g('o-city')) d.city=g('o-city').value.trim(); }
+  if(s===1){ if(g('o-h')) d.height_cm=+g('o-h').value||null; if(g('o-w')) d.weight_kg=+g('o-w').value||null; }
+  if(s===2){
+    ['dis','int','hel','biz'].forEach((k,i)=>{ const el=g('o-'+k); if(el) [{discipline:0,intelligence:1,health:2,business_score:3},[d.discipline,d.intelligence,d.health,d.business_score]]; });
+    if(g('o-dis')) d.discipline=+g('o-dis').value;
+    if(g('o-int')) d.intelligence=+g('o-int').value;
+    if(g('o-hel')) d.health=+g('o-hel').value;
+    if(g('o-biz')) d.business_score=+g('o-biz').value;
+    if(g('o-rb')) d.rep_builder=+g('o-rb').value;
+    if(g('o-rt')) d.rep_tech=+g('o-rt').value;
+    if(g('o-re')) d.rep_entrepreneur=+g('o-re').value;
+    if(g('o-ra')) d.rep_athlete=+g('o-ra').value;
+    if(g('o-rl')) d.rep_leader=+g('o-rl').value;
+  }
+  if(s===3){ if(g('o-mq')) d.main_quest=g('o-mq').value.trim(); if(g('o-mqp')) d.main_quest_progress=+g('o-mqp').value; }
+}
+
+function attachList(listId, key, addId, tpl){
+  const list=document.getElementById(listId);
+  if(!list) return;
+  list.addEventListener('input',e=>{
+    const t=e.target;
+    if(t.dataset.ti!==undefined){ const item=S.ob.data[key][+t.dataset.ti]; if(item) item[key==='achievements'?'name':'title']=t.value; }
+    if(t.type==='checkbox'&&t.dataset.idx!==undefined){ const item=S.ob.data[key][+t.dataset.idx]; if(item) item[key==='achievements'?'unlocked':'completed']=t.checked; }
+  });
+  list.addEventListener('click',e=>{ if(e.target.dataset.ri!==undefined){S.ob.data[key].splice(+e.target.dataset.ri,1);renderObStep();} });
+  document.getElementById(addId)?.addEventListener('click',()=>{ S.ob.data[key].push({...tpl}); renderObStep(); setTimeout(()=>{ const items=list.querySelectorAll('li'); if(items.length) items[items.length-1].querySelector('input[type=text]')?.focus(); },50); });
+}
+
+function attachBiz(){
+  const list=document.getElementById('biz-list'); if(!list) return;
+  list.addEventListener('input',e=>{ const t=e.target,i=+t.dataset.ti; if(t.dataset.ti!==undefined&&S.ob.data.businesses[i]) S.ob.data.businesses[i].name=t.value; const li=+t.dataset.li; if(t.dataset.li!==undefined&&S.ob.data.businesses[li]) S.ob.data.businesses[li].level=+t.value; });
+  list.addEventListener('click',e=>{ if(e.target.dataset.ri!==undefined){S.ob.data.businesses.splice(+e.target.dataset.ri,1);renderObStep();} });
+  document.getElementById('add-biz')?.addEventListener('click',()=>{S.ob.data.businesses.push({name:'',level:1});renderObStep();});
+}
+
+function attachAssets(){
+  const list=document.getElementById('asset-list'); if(!list) return;
+  list.addEventListener('input',e=>{ const t=e.target,i=+t.dataset.ei; const j=+t.dataset.ti; const k=+t.dataset.si; if(t.dataset.ei!==undefined&&S.ob.data.assets[i]) S.ob.data.assets[i].emoji=t.value; if(t.dataset.ti!==undefined&&S.ob.data.assets[j]) S.ob.data.assets[j].name=t.value; if(t.dataset.si!==undefined&&S.ob.data.assets[k]) S.ob.data.assets[k].status=t.value; });
+  list.addEventListener('click',e=>{ if(e.target.dataset.ri!==undefined){S.ob.data.assets.splice(+e.target.dataset.ri,1);renderObStep();} });
+  document.getElementById('add-asset')?.addEventListener('click',()=>{S.ob.data.assets.push({name:'',emoji:'📦',status:'locked'});renderObStep();});
+}
+
+function attachHabs(){
+  const list=document.getElementById('hab-list'); if(!list) return;
+  list.addEventListener('input',e=>{ const t=e.target; const i=+t.dataset.ei; const j=+t.dataset.ti; const k=+t.dataset.xi; if(t.dataset.ei!==undefined&&S.ob.data.habits[i]) S.ob.data.habits[i].emoji=t.value; if(t.dataset.ti!==undefined&&S.ob.data.habits[j]) S.ob.data.habits[j].name=t.value; if(t.dataset.xi!==undefined&&S.ob.data.habits[k]) S.ob.data.habits[k].xp=+t.value; });
+  list.addEventListener('click',e=>{ if(e.target.dataset.ri!==undefined){S.ob.data.habits.splice(+e.target.dataset.ri,1);renderObStep();} });
+  document.getElementById('add-hab')?.addEventListener('click',()=>{S.ob.data.habits.push({name:'',emoji:'⚡',xp:20});renderObStep();});
+}
+
+document.getElementById('ob-next').addEventListener('click', async ()=>{
+  saveObStep();
+  if(S.ob.step===0&&!S.ob.data.name){ alert('Skriv inn navn for å fortsette.'); return; }
+  if(S.ob.step<STEPS-1){ S.ob.step++; renderObStep(); }
+  else await submitOnboarding();
+});
+
+document.getElementById('ob-prev').addEventListener('click',()=>{ saveObStep(); if(S.ob.step>0){S.ob.step--;renderObStep();} });
+
+async function submitOnboarding(){
+  const btn=document.getElementById('ob-next');
+  btn.textContent='LAGRER...'; btn.disabled=true;
+  try {
+    const r=await fetch('/api/onboarding/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(S.ob.data)});
+    const res=await r.json();
+    document.getElementById('ob-overlay').classList.add('hidden');
+    S.char=await fetch('/api/character').then(r=>r.json());
+    showApp();
+    sysMsg(`MONIR AKTIVERT // LVL ${res.level} // SYSTEM KLAR`);
+    setFigState('wave'); setTimeout(()=>setFigState('idle'),3000);
+  } catch(e){
+    btn.textContent='START MONIR ›'; btn.disabled=false;
+    alert('Feil ved lagring. Prøv igjen.');
+  }
+}
+
+// ── UTILS ──────────────────────────────────────
+function wait(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+// ── LAUNCH ─────────────────────────────────────
+boot();
 </script>
 </body>
 </html>
