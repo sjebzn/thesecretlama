@@ -371,36 +371,50 @@ function updateFigureForLevel(lvl){
 }
 
 // ═══════════════════════════════════
-// UNIVERSE THREAD
+// UNIVERSE DATA THREADS
 // ═══════════════════════════════════
 let uCol='#4ade80';
-const threads=[];
-const THREAD_COUNT=6;
 
-function initThreads(cx,cy){
-  threads.length=0;
+const DATA_LABELS=[
+  'HELSE','XP','FOKUS','KR','SØVN','STEG','VEKT','PULS',
+  'ENERGI','BINGE','MÅL','MOOD','KG','PLAN','REPS','H2O',
+  'KODE','BИЗНЕС','DATA','SIGNAL','MINNE','LOKASJON','TEMP'
+];
+
+const THREADS=[];
+const THREAD_COUNT=8;
+const DATA_NODES=[];   // data packets travelling inward
+const ABSORB_FLASHES=[];  // flash at stickman on absorb
+
+function hexToRgb(hex){
+  return{r:parseInt(hex.slice(1,3),16),g:parseInt(hex.slice(3,5),16),b:parseInt(hex.slice(5,7),16)};
+}
+
+function initThreads(){
+  THREADS.length=0;
   for(let i=0;i<THREAD_COUNT;i++){
-    const angle=(Math.PI*2/THREAD_COUNT)*i+Math.random()*0.4;
-    threads.push({
-      angle:angle+Math.random()*0.3,
-      drift:(Math.random()-0.5)*0.004,
-      len:40+Math.random()*60,
-      maxLen:120+Math.random()*200,
-      speed:0.6+Math.random()*0.8,
-      particles:[],
-      pTimer:0
+    const baseAngle=(Math.PI*2/THREAD_COUNT)*i;
+    THREADS.push({
+      angle:baseAngle+Math.random()*0.5-0.25,
+      drift:(Math.random()-0.5)*0.003,
+      len:80+Math.random()*80,
+      maxLen:140+Math.random()*160,
+      spawnTimer:Math.floor(Math.random()*120)
     });
   }
 }
 
-function spawnParticle(t,cx,cy){
-  const d=t.len*0.3+Math.random()*t.len*0.5;
-  t.particles.push({
-    x:cx+Math.cos(t.angle)*d,
-    y:cy+Math.sin(t.angle)*d,
-    vx:(Math.random()-0.5)*0.3,
-    vy:(Math.random()-0.5)*0.3-0.15,
-    life:1,decay:0.012+Math.random()*0.01
+function spawnDataNode(t,cx,cy){
+  const tipX=cx+Math.cos(t.angle)*t.len;
+  const tipY=cy+Math.sin(t.angle)*t.len;
+  DATA_NODES.push({
+    x:tipX, y:tipY,
+    tx:cx, ty:cy,
+    label:DATA_LABELS[Math.floor(Math.random()*DATA_LABELS.length)],
+    progress:0,
+    speed:0.008+Math.random()*0.006,
+    startX:tipX, startY:tipY,
+    angle:t.angle
   });
 }
 
@@ -410,8 +424,6 @@ function drawUniverse(ts){
   const W=cnv.width,H=cnv.height;
   const ctx=cnv.getContext('2d');
 
-  // stickman head position mapped from SVG to canvas coords
-  // SVG viewBox 0 0 240 290, svg is ~240x290 centered in panel
   const svgEl=document.getElementById('main-svg');
   const sr=svgEl?svgEl.getBoundingClientRect():null;
   const cr=cnv.getBoundingClientRect();
@@ -420,42 +432,92 @@ function drawUniverse(ts){
 
   ctx.clearRect(0,0,W,H);
 
-  const hex=uCol;
-  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  const {r,g,b}=hexToRgb(uCol);
 
-  threads.forEach(t=>{
+  // ── THREADS (static antennae, fading outward)
+  THREADS.forEach(t=>{
     t.angle+=t.drift;
-    t.len=Math.min(t.maxLen,t.len+t.speed*(0.5+Math.sin(ts/2000+t.angle)*0.5));
+    t.len=Math.min(t.maxLen,t.len+(0.3+Math.sin(ts/3000+t.angle)*0.2));
 
-    // draw thread line
     const ex=cx+Math.cos(t.angle)*t.len;
     const ey=cy+Math.sin(t.angle)*t.len;
+
+    // thread line with gradient fade
     const grad=ctx.createLinearGradient(cx,cy,ex,ey);
-    grad.addColorStop(0,`rgba(${r},${g},${b},0.5)`);
-    grad.addColorStop(0.4,`rgba(${r},${g},${b},0.2)`);
+    grad.addColorStop(0,`rgba(${r},${g},${b},0.4)`);
+    grad.addColorStop(0.6,`rgba(${r},${g},${b},0.15)`);
     grad.addColorStop(1,`rgba(${r},${g},${b},0)`);
     ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(ex,ey);
-    ctx.strokeStyle=grad;ctx.lineWidth=1;ctx.stroke();
+    ctx.strokeStyle=grad;ctx.lineWidth=0.8;ctx.stroke();
 
-    // glow dot at tip
-    const grd=ctx.createRadialGradient(ex,ey,0,ex,ey,4);
-    grd.addColorStop(0,`rgba(${r},${g},${b},0.6)`);
-    grd.addColorStop(1,`rgba(${r},${g},${b},0)`);
-    ctx.beginPath();ctx.arc(ex,ey,4,0,Math.PI*2);
-    ctx.fillStyle=grd;ctx.fill();
+    // scanning dot pulsing at tip
+    const pulse=0.5+0.5*Math.sin(ts/600+t.angle*3);
+    ctx.beginPath();ctx.arc(ex,ey,2+pulse,0,Math.PI*2);
+    ctx.fillStyle=`rgba(${r},${g},${b},${0.3+pulse*0.4})`;
+    ctx.fill();
 
-    // particles
-    t.pTimer++;
-    if(t.pTimer>18){t.pTimer=0;spawnParticle(t,cx,cy);}
-    t.particles=t.particles.filter(p=>{
-      p.x+=p.vx;p.y+=p.vy;p.life-=p.decay;
-      if(p.life<=0)return false;
-      ctx.beginPath();ctx.arc(p.x,p.y,1.2,0,Math.PI*2);
-      ctx.fillStyle=`rgba(${r},${g},${b},${p.life*0.5})`;
-      ctx.fill();
-      return true;
-    });
+    // spawn data nodes periodically
+    t.spawnTimer--;
+    if(t.spawnTimer<=0){
+      t.spawnTimer=80+Math.floor(Math.random()*100);
+      spawnDataNode(t,cx,cy);
+    }
   });
+
+  // ── DATA NODES travelling inward
+  for(let i=DATA_NODES.length-1;i>=0;i--){
+    const n=DATA_NODES[i];
+    n.progress+=n.speed;
+
+    const lx=n.startX+(n.tx-n.startX)*n.progress;
+    const ly=n.startY+(n.ty-n.startY)*n.progress;
+
+    const dist=Math.hypot(lx-cx,ly-cy);
+    if(dist<12||n.progress>=1){
+      // absorbed — flash at stickman
+      ABSORB_FLASHES.push({life:1,label:n.label});
+      DATA_NODES.splice(i,1);
+      continue;
+    }
+
+    // fade in near tip, fade out near stickman
+    const alpha=Math.min(1,n.progress*5)*Math.max(0,(dist-12)/40);
+
+    // pill background
+    ctx.font='bold 8px monospace';
+    const tw=ctx.measureText(n.label).width;
+    const pw=tw+8, ph=12;
+    const px=lx-pw/2, py=ly-ph/2;
+
+    ctx.fillStyle=`rgba(17,17,20,${alpha*0.85})`;
+    ctx.strokeStyle=`rgba(${r},${g},${b},${alpha*0.9})`;
+    ctx.lineWidth=0.8;
+    ctx.beginPath();
+    ctx.roundRect(px,py,pw,ph,3);
+    ctx.fill();ctx.stroke();
+
+    // label text
+    ctx.fillStyle=`rgba(${r},${g},${b},${alpha})`;
+    ctx.fillText(n.label,lx-tw/2,ly+3.5);
+
+    // leading dot
+    ctx.beginPath();ctx.arc(lx,ly-ph/2-2,1.5,0,Math.PI*2);
+    ctx.fillStyle=`rgba(${r},${g},${b},${alpha*0.8})`;
+    ctx.fill();
+  }
+
+  // ── ABSORB FLASHES at stickman center
+  for(let i=ABSORB_FLASHES.length-1;i>=0;i--){
+    const f=ABSORB_FLASHES[i];
+    f.life-=0.04;
+    if(f.life<=0){ABSORB_FLASHES.splice(i,1);continue;}
+    const rad=6+(1-f.life)*18;
+    const grd=ctx.createRadialGradient(cx,cy,0,cx,cy,rad);
+    grd.addColorStop(0,`rgba(${r},${g},${b},${f.life*0.6})`);
+    grd.addColorStop(1,`rgba(${r},${g},${b},0)`);
+    ctx.beginPath();ctx.arc(cx,cy,rad,0,Math.PI*2);
+    ctx.fillStyle=grd;ctx.fill();
+  }
 
   requestAnimationFrame(drawUniverse);
 }
@@ -466,12 +528,7 @@ function startUniverse(){
   const resize=()=>{cnv.width=cnv.offsetWidth;cnv.height=cnv.offsetHeight;};
   resize();
   window.addEventListener('resize',resize);
-  const svgEl=document.getElementById('main-svg');
-  const sr=svgEl?svgEl.getBoundingClientRect():null;
-  const cr=cnv.getBoundingClientRect();
-  const cx=sr?(sr.left-cr.left+sr.width/2):cnv.width/2;
-  const cy=sr?(sr.top-cr.top+sr.height*(138/290)):cnv.height/2-30;
-  initThreads(cx,cy);
+  initThreads();
   requestAnimationFrame(drawUniverse);
 }
 
