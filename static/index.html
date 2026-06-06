@@ -2,1022 +2,811 @@
 <html lang="no">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<title>MONIR</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MONIR // LIFE OS</title>
 <style>
-:root{--g:#00ff88;--b:#00d4ff;--p:#aa44ff;--r:#ff0066;--o:#ffaa00;--gold:#ffcc44;--bg:#010c1a;--panel:rgba(0,14,30,0.9)}
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--g);font-family:'Share Tech Mono',monospace}
-#bg{position:fixed;inset:0;z-index:0}
-.hex{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg width='56' height='48' viewBox='0 0 56 48' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M28 2l26 15v14L28 46 2 31V17L28 2z' fill='none' stroke='rgba(0,255,136,0.03)' stroke-width='1'/%3E%3C/svg%3E")}
-.scanlines{position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.05) 2px,rgba(0,0,0,0.05) 4px);pointer-events:none;z-index:999}
-.vignette{position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.7) 100%);pointer-events:none;z-index:1}
+:root{
+  --bg:#111114;--panel:#18181b;--panel2:#1f1f23;--border:#2a2a30;
+  --text:#e4e4e7;--dim:#52525b;--dim2:#71717a;
+  --green:#4ade80;--blue:#38bdf8;--purple:#a78bfa;--orange:#fb923c;--yellow:#fbbf24;
+  --f:'Courier New',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f);font-size:13px}
+button{background:transparent;border:1px solid var(--border);color:var(--text);cursor:pointer;font-family:var(--f);font-size:11px;padding:5px 10px;transition:all .15s}
+button:hover{border-color:var(--green);color:var(--green)}
+input,select,textarea{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text);font-family:var(--f);font-size:12px;padding:7px 10px;outline:none;width:100%}
+input:focus,select:focus{border-color:var(--blue)}
+input[type=range]{padding:0;cursor:pointer;accent-color:var(--blue)}
+input[type=checkbox]{accent-color:var(--green);cursor:pointer;width:auto}
+select option{background:var(--panel)}
+.hidden{display:none!important}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--border)}
 
 /* ── BOOT ── */
-#boot{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;transition:opacity 1s}
-#boot.done{opacity:0;pointer-events:none}
-.bl{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:5px;color:var(--g);opacity:0;animation:blin .5s ease forwards}
-.bl:nth-child(2){animation-delay:.5s}.bl:nth-child(3){animation-delay:1s}.bl:nth-child(4){animation-delay:1.5s}
-.bb{width:300px;height:1px;background:rgba(0,255,136,0.08);margin-top:14px;overflow:hidden;opacity:0;animation:blin .3s ease 1.8s forwards}
-.bbf{height:100%;width:0;background:var(--g);animation:bbl 1.5s ease 2s forwards}
-@keyframes bbl{to{width:100%}}@keyframes blin{to{opacity:1;transform:none}}
+#boot{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+#boot-text{color:var(--green);font-size:12px;line-height:1.9;white-space:pre;opacity:.9}
+#boot-bar{width:220px;height:1px;background:var(--dim)}
+#boot-fill{height:100%;background:var(--green);width:0;transition:width .07s}
 
-/* ── LAYOUT ── */
-#app{position:fixed;inset:0;z-index:2;display:grid;grid-template-rows:40px 1fr 360px;grid-template-columns:240px 1fr 255px;gap:5px;padding:7px}
+/* ── ONBOARDING ── */
+#ob-overlay{position:fixed;inset:0;background:rgba(17,17,20,.97);z-index:50;display:flex;align-items:center;justify-content:center;overflow-y:auto;padding:20px}
+#ob-box{width:min(540px,96vw);border:1px solid var(--border);background:var(--panel);padding:28px 30px;border-radius:4px}
+#ob-title{color:var(--green);font-size:14px;letter-spacing:4px}
+#ob-sub{color:var(--dim2);font-size:10px;letter-spacing:2px;margin:4px 0 16px}
+#ob-pips{display:flex;gap:4px;margin-bottom:16px}
+.pip{height:2px;flex:1;background:var(--dim)}.pip.done{background:var(--green)}.pip.active{background:var(--blue)}
+#ob-body{min-height:190px}
+.obl{color:var(--dim2);font-size:10px;letter-spacing:1px;display:block;margin:12px 0 5px}
+.ob-row{display:flex;gap:10px}.ob-row>div{flex:1}
+.sr{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.sr>label{width:110px;font-size:10px;color:var(--dim2);flex-shrink:0}
+.sr input[type=range]{flex:1}.sr>span{width:26px;text-align:right;color:var(--blue);font-size:12px}
+.ob-list{list-style:none}
+.ob-list li{display:flex;gap:6px;margin-bottom:6px;align-items:center}
+.ob-list li .lt{flex:1}.ob-list li .ls{width:55px;flex-shrink:0}.ob-list li .le{width:36px;flex-shrink:0}.ob-list li .lx{width:52px;flex-shrink:0}
+.ob-list li .rm{padding:2px 6px;color:#ef4444;border-color:#ef4444;font-size:10px;flex-shrink:0}
+.ob-add{color:var(--green);border-color:var(--green);font-size:10px;padding:3px 10px;margin-top:6px;border-radius:2px}
+#ob-footer{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:14px;border-top:1px solid var(--border)}
+#ob-step-label{color:var(--dim2);font-size:10px}
+.ob-btn{padding:7px 22px;font-size:11px;letter-spacing:1px}
+.ob-btn.primary{border-color:var(--green);color:var(--green)}
+.ob-btn.primary:hover{background:rgba(74,222,128,.1)}
+
+/* ── APP GRID ── */
+#app{
+  display:grid;
+  grid-template-rows:44px 1fr 148px;
+  grid-template-columns:200px 1fr 260px;
+  grid-template-areas:"hdr hdr hdr" "left center right" "chat chat chat";
+  height:100vh;
+}
 
 /* ── HEADER ── */
-header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid rgba(0,255,136,0.1);background:rgba(0,5,14,0.5)}
-.ht{font-family:'Orbitron',sans-serif;font-size:17px;font-weight:900;letter-spacing:7px;animation:glitch 14s infinite}
-@keyframes glitch{0%,91%,100%{color:var(--g);text-shadow:0 0 18px rgba(0,255,136,0.35)}92%{color:#ff0066;transform:translateX(-3px)}93%{color:var(--g);transform:none}94%{clip-path:inset(30% 0 40% 0);transform:translateX(4px);color:var(--b)}95%{clip-path:none;transform:none}}
-.hm{display:flex;align-items:center;gap:10px}
-.hdot{width:6px;height:6px;border-radius:50%;background:var(--g);box-shadow:0 0 8px var(--g);animation:hdp 2s ease-in-out infinite}
-@keyframes hdp{0%,100%{opacity:1}50%{opacity:.2}}
-.htag{font-size:7.5px;letter-spacing:2px;color:rgba(0,255,136,0.35);border:1px solid rgba(0,255,136,0.14);padding:2px 7px}
-.htag.hi{color:var(--g);border-color:rgba(0,255,136,0.35)}
-.htag.gold{color:rgba(255,204,68,0.6);border-color:rgba(255,204,68,0.22)}
-.htag.gold.hi{color:var(--gold);border-color:rgba(255,204,68,0.45)}
-.hclk{font-family:'Orbitron',sans-serif;font-size:14px;color:var(--b);letter-spacing:3px;text-shadow:0 0 12px rgba(0,212,255,0.4)}
+#hdr{
+  grid-area:hdr;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;border-bottom:1px solid var(--border);
+  background:var(--panel);
+}
+#hdr-logo{color:var(--green);font-size:13px;letter-spacing:4px;font-weight:bold}
+#hdr-right{display:flex;align-items:center;gap:12px}
+#hdr-level{color:var(--blue);font-size:11px}
+#hdr-xp-bar{width:80px;height:3px;background:var(--border);border-radius:2px}
+#hdr-xp-fill{height:100%;background:var(--blue);border-radius:2px;width:0;transition:width .4s}
+#hdr-name{color:var(--dim2);font-size:10px;letter-spacing:1px}
+#hdr-time{color:var(--dim);font-size:10px}
 
-/* ── PANELS ── */
-.panel{background:var(--panel);border:1px solid rgba(0,255,136,0.11);position:relative;overflow:hidden;padding:9px 10px;backdrop-filter:blur(18px)}
-.panel::before,.panel::after{content:'';position:absolute;width:9px;height:9px;border-color:rgba(0,255,136,0.3);border-style:solid}
-.panel::before{top:-1px;left:-1px;border-width:1px 0 0 1px}
-.panel::after{bottom:-1px;right:-1px;border-width:0 1px 1px 0}
-.ptop{position:absolute;top:0;left:15%;right:15%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,136,0.35),transparent)}
-.pt{font-family:'Orbitron',sans-serif;font-size:6.5px;letter-spacing:3px;color:rgba(0,255,136,0.22);margin-bottom:7px;margin-top:1px}
+/* ── LEFT PANEL ── */
+#left{
+  grid-area:left;
+  border-right:1px solid var(--border);
+  overflow-y:auto;padding:14px 12px;
+  display:flex;flex-direction:column;gap:16px;
+}
+.sec-label{font-size:9px;letter-spacing:2px;color:var(--dim2);margin-bottom:8px;text-transform:uppercase}
 
-/* ── LEFT ── */
-#col-l{grid-column:1;grid-row:2;display:flex;flex-direction:column;gap:5px}
-.uav{width:50px;height:50px;border-radius:50%;border:2px solid var(--g);background:radial-gradient(circle,rgba(0,255,136,0.16),rgba(0,8,22,0.95));display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:20px;font-weight:700;margin:0 auto 5px;animation:avp 3.5s ease-in-out infinite}
-@keyframes avp{0%,100%{box-shadow:0 0 0 2px rgba(0,255,136,0.07),0 0 14px rgba(0,255,136,0.22)}50%{box-shadow:0 0 0 5px rgba(0,255,136,0.12),0 0 30px rgba(0,255,136,0.4),0 0 55px rgba(0,212,255,0.08)}}
-.un{font-family:'Orbitron',sans-serif;font-size:9.5px;font-weight:700;text-align:center;letter-spacing:3px;margin-bottom:2px}
-.ut{font-size:6px;color:rgba(0,212,255,0.4);text-align:center;letter-spacing:1px;line-height:1.8;margin-bottom:8px}
-.gauges{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:5px}
-.gw{text-align:center}
-.gl{font-size:6px;letter-spacing:1px;color:rgba(255,255,255,0.25);margin-top:2px}
-/* Habits */
-.hi{display:flex;align-items:center;gap:5px;padding:4px 1px;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:background .15s}
-.hi:last-child{border-bottom:none}
-.hi:hover{background:rgba(0,255,136,0.04)}
-.hb{width:3px;height:22px;border-radius:1px;flex-shrink:0}
-.hn{font-size:8px;color:rgba(255,255,255,0.65);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hf{font-size:6px;color:rgba(255,255,255,0.2);letter-spacing:1px}
-.hs{font-size:7px;color:var(--o);white-space:nowrap;margin-right:2px}
-.hck{width:14px;height:14px;border:1px solid rgba(255,255,255,0.16);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0;transition:all .2s}
-.hck.on{border-color:var(--g);background:rgba(0,255,136,0.12);color:var(--g)}
-.sf{font-size:6.5px;color:rgba(0,255,136,0.25);text-align:center;margin-top:auto;padding-top:6px;border-top:1px solid rgba(0,255,136,0.07);line-height:1.8;letter-spacing:1px}
+/* Stats */
+.stat-row{margin-bottom:8px}
+.stat-top{display:flex;justify-content:space-between;margin-bottom:3px}
+.stat-name{font-size:10px;color:var(--dim2)}
+.stat-val{font-size:10px}
+.stat-bar{height:3px;background:var(--border);border-radius:2px}
+.stat-fill{height:100%;border-radius:2px;transition:width .5s}
+
+/* Reputation */
+.rep-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.rep-name{font-size:10px;color:var(--dim2);width:80px}
+.rep-stars{display:flex;gap:2px}
+.star{font-size:11px;opacity:.25}.star.on{opacity:1}
+
+/* Quest */
+#quest-name{font-size:11px;color:var(--yellow);margin-bottom:6px;line-height:1.3}
+#quest-bar-wrap{height:4px;background:var(--border);border-radius:2px}
+#quest-fill{height:100%;background:var(--yellow);border-radius:2px;width:0;transition:width .5s}
+#quest-pct{font-size:9px;color:var(--dim2);margin-top:4px}
 
 /* ── CENTER ── */
-#col-c{grid-column:2;grid-row:2;display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden}
+#center{
+  grid-area:center;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+#main-svg{width:240px;height:290px;overflow:visible}
 
-/* HUD rings */
-.ring{position:absolute;border-radius:50%;animation:spin linear infinite;border:1px solid}
-@keyframes spin{from{rotate:0deg}to{rotate:360deg}}
+/* ── RIGHT PANEL ── */
+#right{
+  grid-area:right;
+  border-left:1px solid var(--border);
+  overflow-y:auto;padding:14px 12px;
+  display:flex;flex-direction:column;gap:16px;
+}
+#today-date{font-size:10px;color:var(--dim2);letter-spacing:1px}
 
-/* Quick actions */
-#qa{display:flex;gap:5px;padding:4px 6px 2px;width:100%;flex-shrink:0;justify-content:center}
-.qa{background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.16);padding:8px 12px;cursor:pointer;transition:all .2s;font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:1px;color:rgba(0,255,136,0.6);display:flex;align-items:center;gap:5px;flex:1;justify-content:center}
-.qa:hover{background:rgba(0,255,136,0.1);border-color:rgba(0,255,136,0.4);color:var(--g);box-shadow:0 0 12px rgba(0,255,136,0.1)}
-.qa.gold{border-color:rgba(255,204,68,0.2);color:rgba(255,204,68,0.6);background:rgba(255,204,68,0.03)}
-.qa.gold:hover{background:rgba(255,204,68,0.1);border-color:rgba(255,204,68,0.45);color:var(--gold)}
-.qa.amb{border-color:rgba(255,136,0,0.2);color:rgba(255,136,0,0.6);background:rgba(255,136,0,0.03)}
-.qa.amb:hover{background:rgba(255,136,0,0.1);border-color:rgba(255,136,0,0.45);color:var(--o)}
+/* Habits */
+.habit-card{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;border:1px solid var(--border);border-radius:3px;
+  cursor:pointer;transition:all .15s;margin-bottom:6px;
+  background:var(--panel2);
+}
+.habit-card:hover{border-color:var(--green)}
+.habit-card.hc-done{opacity:.45;border-color:var(--dim)}
+.hc-circle{
+  width:18px;height:18px;border:1.5px solid var(--dim);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:10px;
+  flex-shrink:0;transition:all .2s;color:var(--green);
+}
+.hc-done .hc-circle{background:rgba(74,222,128,.15);border-color:var(--green)}
+.hc-emoji{font-size:14px;flex-shrink:0}
+.hc-info{flex:1;min-width:0}
+.hc-name{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hc-meta{display:flex;gap:6px;margin-top:2px}
+.hc-xp{font-size:9px;color:var(--green)}
+.hc-streak{font-size:9px;color:var(--orange)}
 
-/* ── RIGHT ── */
-#col-r{grid-column:3;grid-row:2;display:flex;flex-direction:column;gap:5px}
-.gi{padding:3px 1px;margin-bottom:6px;cursor:pointer;transition:background .15s}
-.gi:hover{background:rgba(0,255,136,0.03)}
-.gi-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
-.gn{font-size:8px;color:rgba(255,255,255,0.58);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:5px}
-.gp{font-size:9px;font-family:'Orbitron',sans-serif;font-weight:700}
-.gbar{height:2px;background:rgba(255,255,255,0.05);overflow:hidden}
-.gfill{height:100%;transition:width 2s ease;box-shadow:0 0 5px currentColor}
-@keyframes sh{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
-.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
-.dc{background:rgba(0,255,136,0.02);border:1px solid rgba(0,255,136,0.08);padding:8px 5px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
-.dc::before{content:'';position:absolute;top:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,136,0.2),transparent)}
-.dc:hover{background:rgba(0,255,136,0.06);border-color:rgba(0,255,136,0.25)}
-.dv{font-family:'Orbitron',sans-serif;font-size:19px;font-weight:700;line-height:1}
-.dl{font-size:6px;letter-spacing:1px;color:rgba(255,255,255,0.18);margin-top:3px}
-/* Memory preview */
-.mprev{font-size:7.5px;line-height:1.7;color:rgba(0,255,136,0.42)}
-.mpi{padding:3px 0 3px 7px;border-left:2px solid rgba(0,255,136,0.18);margin-bottom:3px}
-.mpi-cat{font-size:6px;color:rgba(0,212,255,0.32);letter-spacing:.08em}
+/* Empire */
+.emp-item{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.emp-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.emp-name{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* ── CHAT ── */
-#chat{grid-column:1/-1;grid-row:3;display:flex;gap:5px}
-#chat-main{flex:1;display:flex;flex-direction:column;background:rgba(0,3,10,0.9);border:1px solid rgba(0,255,136,0.12);border-top:2px solid rgba(0,255,136,0.25)}
-.ch-hdr{padding:5px 12px;border-bottom:1px solid rgba(0,255,136,0.08);display:flex;justify-content:space-between;align-items:center;gap:6px;flex-shrink:0}
-.mbtn{padding:4px 10px;border:1px solid rgba(0,255,136,0.2);background:rgba(0,255,136,0.04);color:rgba(0,255,136,0.5);font-family:'Share Tech Mono',monospace;font-size:7.5px;letter-spacing:1px;cursor:pointer;transition:all .2s;white-space:nowrap}
-.mbtn:hover,.mbtn.on{background:rgba(0,255,136,0.1);border-color:rgba(0,255,136,0.45);color:var(--g)}
-.mbtn.lg{border-color:rgba(255,204,68,0.2);color:rgba(255,204,68,0.5);background:rgba(255,204,68,0.03)}
-.mbtn.lg:hover,.mbtn.lg.on{background:rgba(255,204,68,0.1);border-color:rgba(255,204,68,0.5);color:var(--gold)}
-.mbtn.mic{border-color:rgba(0,212,255,0.2);color:rgba(0,212,255,0.5);background:rgba(0,212,255,0.03)}
-.mbtn.mic:hover{background:rgba(0,212,255,0.1);border-color:rgba(0,212,255,0.5);color:var(--b)}
-.mbtn.mic.listening{background:rgba(255,0,102,0.1);border-color:#ff0066;color:#ff0066;animation:mrec .9s ease-in-out infinite}
-@keyframes mrec{0%,100%{box-shadow:0 0 4px rgba(255,0,102,0.3)}50%{box-shadow:0 0 16px rgba(255,0,102,0.7)}}
-
-/* banners */
-.ban{display:none;padding:4px 12px;font-size:7px;letter-spacing:1px;justify-content:space-between;align-items:center;flex-shrink:0}
-.ban.on{display:flex}
-#onb-ban{background:rgba(255,136,0,0.05);border-bottom:1px solid rgba(255,136,0,0.16);color:rgba(255,136,0,0.65)}
-#leg-ban{background:rgba(255,204,68,0.04);border-bottom:1px solid rgba(255,204,68,0.16);color:rgba(255,204,68,0.7)}
-.bx{cursor:pointer;font-size:7px;padding:2px 8px;border:1px solid rgba(255,0,102,0.22);color:rgba(255,0,102,0.45);letter-spacing:1px;transition:all .2s}
-.bx:hover{border-color:#ff0066;color:#ff0066}
-
-/* sources */
-#src-row{display:none;padding:3px 12px;gap:5px;flex-wrap:wrap;align-items:center;border-bottom:1px solid rgba(255,204,68,0.08);flex-shrink:0}
-#src-row.on{display:flex}
-.sc{font-size:6.5px;letter-spacing:1px;color:rgba(255,204,68,0.35)}
-.sch{padding:1px 7px;border:1px solid rgba(255,204,68,0.25);font-size:6.5px;color:rgba(255,204,68,0.5);letter-spacing:1px}
-
-/* ── MESSAGES — BIG AND READABLE ── */
-#cmsgs{flex:1;overflow-y:auto;padding:10px 16px;font-size:14px;line-height:2}
-#cmsgs::-webkit-scrollbar{width:2px}
-#cmsgs::-webkit-scrollbar-thumb{background:rgba(0,255,136,0.2)}
-.mu{margin-bottom:12px;padding:6px 12px;border-left:2px solid rgba(0,212,255,0.4);background:rgba(0,212,255,0.04);white-space:pre-wrap;word-break:break-word}
-.mu-lbl{font-size:6.5px;letter-spacing:3px;color:rgba(0,212,255,0.4);display:block;margin-bottom:3px}
-.mu-txt{color:#cce8ff;font-size:14px;line-height:1.85}
-.ma{margin-bottom:12px;padding:6px 12px;border-left:2px solid rgba(0,255,136,0.4);background:rgba(0,255,136,0.04);white-space:pre-wrap;word-break:break-word}
-.ma-lbl{font-size:6.5px;letter-spacing:3px;color:rgba(0,255,136,0.4);display:block;margin-bottom:3px}
-.ma-txt{color:#e0ffed;font-size:14px;line-height:1.85}
-.ml{margin-bottom:12px;padding:6px 12px;border-left:2px solid rgba(255,204,68,0.45);background:rgba(255,204,68,0.04);white-space:pre-wrap;word-break:break-word}
-.ml-lbl{font-size:6.5px;letter-spacing:3px;color:rgba(255,170,0,0.45);display:block;margin-bottom:3px}
-.ml-txt{color:#fff5cc;font-size:14px;line-height:1.85}
-.msep{font-size:7px;color:rgba(0,255,136,0.18);text-align:center;padding:6px;margin-bottom:8px;border-bottom:1px solid rgba(0,255,136,0.07);letter-spacing:.1em}
-
-/* chips */
-#chips{display:flex;gap:5px;flex-wrap:wrap;padding:5px 12px;border-top:1px solid rgba(0,255,136,0.06);flex-shrink:0}
-.chip{padding:3px 9px;border:1px solid rgba(0,255,136,0.15);font-size:7px;letter-spacing:1px;color:rgba(0,255,136,0.45);cursor:pointer;transition:all .2s;white-space:nowrap}
-.chip:hover{border-color:rgba(0,255,136,0.38);color:var(--g);background:rgba(0,255,136,0.05)}
-.chip.lc{border-color:rgba(255,204,68,0.17);color:rgba(255,204,68,0.42)}
-.chip.lc:hover{border-color:rgba(255,204,68,0.42);color:var(--gold);background:rgba(255,204,68,0.05)}
-
-/* input side */
-#cside{display:flex;flex-direction:column;gap:5px;width:260px}
-.ci{flex:1;background:rgba(0,10,24,0.92);border:1px solid rgba(0,255,136,0.17);position:relative}
-.ci::before{content:'›';position:absolute;top:10px;left:10px;font-size:12px;color:rgba(0,255,136,0.2);pointer-events:none}
-#cin{width:100%;height:100%;background:transparent;border:none;padding:10px 10px 10px 24px;color:var(--g);font-family:'Share Tech Mono',monospace;font-size:12px;outline:none;resize:none}
-#cin::placeholder{color:rgba(0,255,136,0.1)}
-#cin:focus{border-color:rgba(0,255,136,0.35)}
-#cin.lg{color:rgba(255,200,80,0.9)}
-#cin.lg::placeholder{color:rgba(255,170,0,0.1)}
-#cbtn{background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.22);color:var(--g);font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:3px;padding:12px;cursor:pointer;transition:all .2s}
-#cbtn:hover{background:rgba(0,255,136,0.14);box-shadow:0 0 14px rgba(0,255,136,0.12)}
-#cbtn.ls{background:rgba(255,204,68,0.06);border-color:rgba(255,204,68,0.25);color:var(--gold)}
-#cbtn.ls:hover{background:rgba(255,204,68,0.14)}
-#cbtn:disabled{opacity:.3;cursor:not-allowed}
-
-/* TOAST */
-#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none}
-.ti{background:rgba(0,12,28,0.97);border:1px solid rgba(0,255,136,0.4);padding:7px 16px;font-size:9px;letter-spacing:2px;color:var(--g);animation:tin .25s ease,tout .25s ease 2.5s forwards;white-space:nowrap}
-@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@keyframes tout{from{opacity:1}to{opacity:0}}
-
-/* WAVEFORM */
-#wv{position:fixed;bottom:370px;left:50%;transform:translateX(-50%);display:none;align-items:center;gap:3px;z-index:50;background:rgba(0,6,18,0.95);border:1px solid rgba(255,0,102,0.4);padding:8px 14px}
-#wv.on{display:flex}
-#wv span{display:inline-block;width:3px;background:#ff0066;border-radius:2px;animation:wva .6s ease-in-out infinite}
-#wv span:nth-child(2){animation-delay:.1s}#wv span:nth-child(3){animation-delay:.2s}
-#wv span:nth-child(4){animation-delay:.3s}#wv span:nth-child(5){animation-delay:.4s}
-@keyframes wva{0%,100%{height:4px}50%{height:18px}}
-.wvl{font-size:8px;letter-spacing:3px;color:rgba(255,0,102,0.65);margin-left:7px}
+#chat{
+  grid-area:chat;
+  border-top:1px solid var(--border);
+  background:var(--panel);
+  display:flex;flex-direction:column;
+  min-height:0;
+}
+#msgs{
+  flex:1;overflow-y:auto;padding:8px 16px;
+  display:flex;flex-direction:column;gap:5px;
+  min-height:0;
+}
+.msg{font-size:12px;line-height:1.55;padding:4px 0}
+.msg.user{color:var(--blue)}
+.msg.ai{color:var(--text)}
+.msg.sys{color:var(--dim2);font-size:10px;font-style:italic}
+.msg.lvlup{color:var(--yellow);font-weight:bold}
+#chat-bottom{padding:6px 10px 8px;display:flex;flex-direction:column;gap:5px;flex-shrink:0}
+#chat-input-row{display:flex;gap:6px}
+#chat-in{flex:1;font-size:12px;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);padding:6px 10px;font-family:var(--f)}
+#chat-in:focus{border-color:var(--blue)}
+#btn-send{border-color:var(--blue);color:var(--blue);padding:6px 16px;font-size:11px}
+#btn-send:hover{background:rgba(56,189,248,.1)}
+#btn-voice{padding:6px 10px;font-size:14px}
+#btn-voice.listening{border-color:var(--orange);color:var(--orange);animation:pulse .7s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+#chat-act-row{display:flex;gap:5px;flex-wrap:wrap}
+.cact{font-size:10px;padding:4px 10px;letter-spacing:.5px}
+#cact-kart{border-color:var(--purple);color:var(--purple)}
+#cact-kart:hover{background:rgba(167,139,250,.1)}
+#cact-pri{border-color:var(--orange);color:var(--orange)}
+#cact-pri:hover{background:rgba(251,146,60,.1)}
+#cact-jus{border-color:var(--yellow);color:var(--yellow)}
+#cact-jus:hover{background:rgba(251,191,36,.1)}
 </style>
 </head>
 <body>
-<canvas id="bg"></canvas>
-<div class="hex"></div>
-<div class="vignette"></div>
-<div class="scanlines"></div>
 
+<!-- BOOT -->
 <div id="boot">
-  <div class="bl">⬡ MONIR NEURAL INTERFACE</div>
-  <div class="bl">⬡ LASTER MINNE OG KONTEKST</div>
-  <div class="bl">⬡ LEGALSTREETSMARTER ENGINE AKTIV</div>
-  <div class="bl">⬡ KLAR — 6. JUNI 2026</div>
-  <div class="bb"><div class="bbf"></div></div>
+  <div id="boot-text">MONIR // LIFE OS
+INITIALISERER...</div>
+  <div id="boot-bar"><div id="boot-fill"></div></div>
 </div>
 
-<div id="toast"></div>
-<div id="wv"><span></span><span></span><span></span><span></span><span></span><span class="wvl">MONIR LYTTER...</span></div>
-
-<div id="app">
-<header>
-  <div class="ht">MONIR</div>
-  <div class="hm">
-    <div class="hdot"></div>
-    <div class="htag hi">ONLINE</div>
-    <div class="htag">SEBASTIAN SALIH</div>
-    <div class="htag">LØR 6 JUNI</div>
-    <div class="htag gold" id="ht-legal" style="display:none">⚖️ LEGAL MODE</div>
-  </div>
-  <div class="hclk" id="clk">--:--:--</div>
-</header>
-
-<!-- LEFT -->
-<div id="col-l">
-  <div class="panel" style="flex-shrink:0">
-    <div class="ptop"></div><div class="pt">// profil</div>
-    <div class="uav">S</div>
-    <div class="un">SEBASTIAN SALIH</div>
-    <div class="ut">BMW • OBDAI • AUTOVERS<br>GRÜNDER • AI-UTVIKLER • 2026</div>
-    <div class="gauges">
-      <div class="gw">
-        <svg width="48" height="48" viewBox="0 0 48 48">
-          <circle cx="24" cy="24" r="19" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3" transform="rotate(-90 24 24)" stroke-dasharray="119"/>
-          <circle cx="24" cy="24" r="19" fill="none" stroke="var(--g)" stroke-width="3" stroke-linecap="round" transform="rotate(-90 24 24)" stroke-dasharray="77 119"/>
-          <text x="24" y="28" text-anchor="middle" fill="var(--g)" font-size="9" font-family="Orbitron,sans-serif" font-weight="700">65%</text>
-        </svg>
-        <div class="gl">AKTIVITET</div>
-      </div>
-      <div class="gw">
-        <svg width="48" height="48" viewBox="0 0 48 48">
-          <circle cx="24" cy="24" r="19" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3" transform="rotate(-90 24 24)" stroke-dasharray="119"/>
-          <circle id="g-slp" cx="24" cy="24" r="19" fill="none" stroke="var(--b)" stroke-width="3" stroke-linecap="round" transform="rotate(-90 24 24)" stroke-dasharray="85 119"/>
-          <text x="24" y="28" text-anchor="middle" fill="var(--b)" font-size="9" font-family="Orbitron,sans-serif" font-weight="700" id="g-slp-t">–</text>
-        </svg>
-        <div class="gl">SØVN</div>
-      </div>
-      <div class="gw">
-        <svg width="48" height="48" viewBox="0 0 48 48">
-          <circle cx="24" cy="24" r="19" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3" transform="rotate(-90 24 24)" stroke-dasharray="119"/>
-          <circle cx="24" cy="24" r="19" fill="none" stroke="var(--p)" stroke-width="3" stroke-linecap="round" transform="rotate(-90 24 24)" stroke-dasharray="96 119"/>
-          <text x="24" y="28" text-anchor="middle" fill="var(--p)" font-size="9" font-family="Orbitron,sans-serif" font-weight="700">81%</text>
-        </svg>
-        <div class="gl">FOKUS</div>
-      </div>
-      <div class="gw">
-        <svg width="48" height="48" viewBox="0 0 48 48">
-          <circle cx="24" cy="24" r="19" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3" transform="rotate(-90 24 24)" stroke-dasharray="119"/>
-          <circle id="g-mo" cx="24" cy="24" r="19" fill="none" stroke="var(--o)" stroke-width="3" stroke-linecap="round" transform="rotate(-90 24 24)" stroke-dasharray="105 119"/>
-          <text x="24" y="28" text-anchor="middle" fill="var(--o)" font-size="9" font-family="Orbitron,sans-serif" font-weight="700" id="g-mo-t">–</text>
-        </svg>
-        <div class="gl">HELSE</div>
+<!-- ONBOARDING -->
+<div id="ob-overlay" class="hidden">
+  <div id="ob-box">
+    <div id="ob-title">MONIR // KARTLEGGING</div>
+    <div id="ob-sub">SETT OPP DIN PROFIL</div>
+    <div id="ob-pips"></div>
+    <div id="ob-body"></div>
+    <div id="ob-footer">
+      <span id="ob-step-label"></span>
+      <div style="display:flex;gap:8px">
+        <button class="ob-btn" id="ob-back">← TILBAKE</button>
+        <button class="ob-btn primary" id="ob-next">NESTE →</button>
       </div>
     </div>
   </div>
-  <div class="panel" style="flex:1;overflow-y:auto">
-    <div class="ptop"></div><div class="pt">// vaner — klikk for å markere</div>
-    <div id="habits"></div>
-  </div>
-  <div class="sf" id="sf">MONIR • 6. juni 2026 • --:--</div>
 </div>
 
-<!-- CENTER — full-size SVG HUD with connected figure -->
-<div id="col-c">
-  <!-- background rings (CSS) -->
-  <div class="ring" style="width:200px;height:200px;top:50%;left:50%;margin:-100px 0 0 -100px;animation-duration:16s;border-color:rgba(0,255,136,0.07)"></div>
-  <div class="ring" style="width:290px;height:290px;top:50%;left:50%;margin:-145px 0 0 -145px;animation-duration:30s;animation-direction:reverse;border-color:rgba(0,212,255,0.05)"></div>
-  <div class="ring" style="width:380px;height:380px;top:50%;left:50%;margin:-190px 0 0 -190px;animation-duration:50s;border-color:rgba(255,136,0,0.04)"></div>
+<!-- APP -->
+<div id="app" class="hidden">
 
-  <!-- Main SVG — stick figure + connected HUD labels -->
-  <svg id="hud-svg" viewBox="0 0 600 440" style="flex:1;width:100%;height:100%;position:relative;z-index:5">
+  <!-- HEADER -->
+  <div id="hdr">
+    <div id="hdr-logo">◈ MONIR</div>
+    <div id="hdr-right">
+      <span id="hdr-level">LVL 1</span>
+      <div id="hdr-xp-bar"><div id="hdr-xp-fill"></div></div>
+      <span id="hdr-name">—</span>
+      <span id="hdr-time">—</span>
+    </div>
+  </div>
 
-    <!-- HUD corner brackets -->
-    <path d="M10 50 L10 10 L50 10" fill="none" stroke="rgba(255,136,0,0.25)" stroke-width="1.5"/>
-    <path d="M550 10 L590 10 L590 50" fill="none" stroke="rgba(255,136,0,0.25)" stroke-width="1.5"/>
-    <path d="M10 390 L10 430 L50 430" fill="none" stroke="rgba(255,136,0,0.25)" stroke-width="1.5"/>
-    <path d="M590 390 L590 430 L550 430" fill="none" stroke="rgba(255,136,0,0.25)" stroke-width="1.5"/>
+  <!-- LEFT -->
+  <div id="left">
+    <div>
+      <div class="sec-label">STATS</div>
+      <div id="stats-list"></div>
+    </div>
+    <div>
+      <div class="sec-label">RYKTE</div>
+      <div id="rep-list"></div>
+    </div>
+    <div>
+      <div class="sec-label">MAIN QUEST</div>
+      <div id="quest-name">—</div>
+      <div id="quest-bar-wrap"><div id="quest-fill"></div></div>
+      <div id="quest-pct">0%</div>
+    </div>
+  </div>
 
-    <!-- Scan label top -->
-    <text x="300" y="18" text-anchor="middle" fill="rgba(255,136,0,0.3)" font-size="8" font-family="Orbitron,sans-serif" letter-spacing="3">SCAN</text>
-    <text x="595" y="220" fill="rgba(0,212,255,0.22)" font-size="7" font-family="Orbitron,sans-serif">360°</text>
-    <text id="state-lbl" x="300" y="432" text-anchor="middle" fill="rgba(0,255,136,0.2)" font-size="8" font-family="Orbitron,sans-serif" letter-spacing="5">STANDBY</text>
-
-    <!-- ─── Connected HUD data labels ─── -->
-    <!-- Left side: lines go from figure to labels -->
-    <!-- HUMØR → head area (300, 80) -->
-    <line id="cl-mo" x1="286" y1="78" x2="175" y2="68" stroke="rgba(0,212,255,0.22)" stroke-width="1" stroke-dasharray="4 4"/>
-    <rect x="60" y="55" width="114" height="28" fill="rgba(0,20,40,0.7)" stroke="rgba(0,212,255,0.2)" stroke-width="1"/>
-    <text x="68" y="66" fill="rgba(0,212,255,0.45)" font-size="6.5" font-family="Orbitron,sans-serif" letter-spacing="1">HUMØR</text>
-    <text id="ld-mo" x="68" y="78" fill="#c8eeff" font-size="11" font-family="Orbitron,sans-serif" font-weight="700">9/10</text>
-
-    <!-- HRV → chest (300, 155) -->
-    <line x1="286" y1="148" x2="175" y2="130" stroke="rgba(0,212,255,0.18)" stroke-width="1" stroke-dasharray="4 4"/>
-    <rect x="60" y="118" width="114" height="28" fill="rgba(0,20,40,0.7)" stroke="rgba(0,212,255,0.18)" stroke-width="1"/>
-    <text x="68" y="129" fill="rgba(0,212,255,0.4)" font-size="6.5" font-family="Orbitron,sans-serif" letter-spacing="1">HRV</text>
-    <text x="68" y="141" fill="#c8eeff" font-size="11" font-family="Orbitron,sans-serif" font-weight="700">68 ms</text>
-
-    <!-- SØVN → lower left (left leg area, 270, 270) -->
-    <line x1="275" y1="258" x2="175" y2="238" stroke="rgba(0,255,136,0.18)" stroke-width="1" stroke-dasharray="4 4"/>
-    <rect x="60" y="226" width="114" height="28" fill="rgba(0,20,40,0.7)" stroke="rgba(0,255,136,0.18)" stroke-width="1"/>
-    <text x="68" y="237" fill="rgba(0,255,136,0.38)" font-size="6.5" font-family="Orbitron,sans-serif" letter-spacing="1">SØVN</text>
-    <text id="ld-sl" x="68" y="249" fill="#dfffee" font-size="11" font-family="Orbitron,sans-serif" font-weight="700">– t</text>
-
-    <!-- Right side labels -->
-    <!-- FOKUS → head-right (314, 78) -->
-    <line id="cl-fo" x1="314" y1="78" x2="425" y2="68" stroke="rgba(0,212,255,0.22)" stroke-width="1" stroke-dasharray="4 4"/>
-    <rect x="426" y="55" width="114" height="28" fill="rgba(0,20,40,0.7)" stroke="rgba(0,212,255,0.2)" stroke-width="1"/>
-    <text x="434" y="66" fill="rgba(0,212,255,0.45)" font-size="6.5" font-family="Orbitron,sans-serif" letter-spacing="1">FOKUS</text>
-    <text id="ld-fo" x="434" y="78" fill="#c8eeff" font-size="11" font-family="Orbitron,sans-serif" font-weight="700">HIGH</text>
-
-    <!-- TRENING → right arm area -->
-    <line id="cl-ex" x1="335" y1="165" x2="425" y2="148" stroke="rgba(255,136,0,0.22)" stroke-width="1" stroke-dasharray="4 4"/>
-    <rect x="426" y="136" width="114" height="28" fill="rgba(0,20,40,0.7)" stroke="rgba(255,136,0,0.2)" stroke-width="1"/>
-    <text x="434" y="147" fill="rgba(255,136,0,0.45)" font-size="6.5" font-family="Orbitron,sans-serif" letter-spacing="1">TRENING</text>
-    <text id="ld-ex" x="434" y="159" fill="#ffe8c0" font-size="11" font-family="Orbitron,sans-serif" font-weight="700">– min</text>
-
-    <!-- STRESS → right lower -->
-    <line x1="330" y1="248" x2="425" y2="238" stroke="rgba(255,0,102,0.2)" stroke-width="1" stroke-dasharray="4 4"/>
-    <rect x="426" y="226" width="114" height="28" fill="rgba(0,20,40,0.7)" stroke="rgba(255,0,102,0.18)" stroke-width="1"/>
-    <text x="434" y="237" fill="rgba(255,0,102,0.4)" font-size="6.5" font-family="Orbitron,sans-serif" letter-spacing="1">STRESS</text>
-    <text x="434" y="249" fill="#ffc8d0" font-size="11" font-family="Orbitron,sans-serif" font-weight="700">LOW</text>
-
-    <!-- ─── STICK FIGURE — centered at 300,190 ─── -->
-    <g id="figure" filter="drop-shadow(0 0 14px rgba(0,255,136,0.7))">
-      <!-- Head -->
-      <circle cx="300" cy="90" r="32" fill="none" stroke="rgba(0,255,136,0.06)" stroke-width="8"/>
-      <circle cx="300" cy="90" r="24" fill="rgba(0,255,136,0.03)" stroke="var(--g)" stroke-width="2.5"/>
-      <!-- Eyes -->
-      <circle id="ey-l" cx="292" cy="86" r="2.8" fill="rgba(0,255,136,0.18)" stroke="var(--g)" stroke-width="1.5">
-        <animate attributeName="r" values="2.8;2.8;2.8;0.5;2.8" dur="4s" repeatCount="indefinite"/>
-      </circle>
-      <circle id="ey-r" cx="308" cy="86" r="2.8" fill="rgba(0,255,136,0.18)" stroke="var(--g)" stroke-width="1.5">
-        <animate attributeName="r" values="2.8;2.8;2.8;0.5;2.8" dur="4s" repeatCount="indefinite"/>
-      </circle>
-      <circle cx="292" cy="86" r="1.1" fill="var(--g)"/>
-      <circle cx="308" cy="86" r="1.1" fill="var(--g)"/>
-      <!-- Mouth -->
-      <path id="mouth" d="M294 97 Q300 103 306 97" fill="none" stroke="rgba(0,255,136,0.4)" stroke-width="1.8" stroke-linecap="round"/>
-      <!-- Neck -->
-      <line x1="300" y1="114" x2="300" y2="124" stroke="var(--g)" stroke-width="2.5"/>
-      <!-- Body -->
-      <line x1="300" y1="124" x2="300" y2="218" stroke="var(--g)" stroke-width="2.5" id="body"/>
-      <!-- Arc reactor on chest -->
-      <circle cx="300" cy="160" r="10" fill="rgba(0,212,255,0.12)" stroke="rgba(0,212,255,0.4)" stroke-width="1">
-        <animate attributeName="stroke-opacity" values="0.4;0.85;0.4" dur="2s" repeatCount="indefinite"/>
-      </circle>
-      <circle cx="300" cy="160" r="5" fill="rgba(0,212,255,0.25)">
-        <animate attributeName="r" values="5;6.5;5" dur="2s" repeatCount="indefinite"/>
-      </circle>
-      <!-- Arms -->
-      <line id="arm-l" x1="300" y1="148" x2="258" y2="182" stroke="var(--g)" stroke-width="2.5" stroke-linecap="round"/>
-      <line id="arm-r" x1="300" y1="148" x2="342" y2="182" stroke="var(--g)" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- Hands -->
-      <circle id="hnd-l" cx="258" cy="182" r="3" fill="var(--g)" opacity="0.5"/>
-      <circle id="hnd-r" cx="342" cy="182" r="3" fill="var(--g)" opacity="0.5"/>
-      <!-- Hips -->
-      <line x1="280" y1="218" x2="320" y2="218" stroke="rgba(0,255,136,0.3)" stroke-width="1" stroke-dasharray="2 3"/>
-      <!-- Legs -->
-      <line id="leg-l" x1="300" y1="218" x2="272" y2="300" stroke="var(--g)" stroke-width="2.5" stroke-linecap="round"/>
-      <line id="leg-r" x1="300" y1="218" x2="328" y2="300" stroke="var(--g)" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- Feet -->
-      <line id="ft-l" x1="272" y1="300" x2="255" y2="312" stroke="var(--g)" stroke-width="2" stroke-linecap="round"/>
-      <line id="ft-r" x1="328" y1="300" x2="345" y2="312" stroke="var(--g)" stroke-width="2" stroke-linecap="round"/>
-      <!-- Cigarette (hidden by default) -->
-      <g id="cigarette" opacity="0" style="transition:opacity .5s">
-        <line x1="258" y1="182" x2="236" y2="170" stroke="rgba(255,255,220,0.8)" stroke-width="2.5" stroke-linecap="round"/>
-        <circle cx="235" cy="170" r="2.5" fill="#ff6600"><animate attributeName="fill" values="#ff6600;#ff9900;#ff6600" dur="1s" repeatCount="indefinite"/></circle>
-        <circle cx="235" cy="170" r="4" fill="none" stroke="rgba(255,100,0,0.3)"><animate attributeName="r" values="4;8;4" dur="1.5s" repeatCount="indefinite"/></circle>
+  <!-- CENTER: stickman -->
+  <div id="center">
+    <svg id="main-svg" viewBox="0 0 240 290" xmlns="http://www.w3.org/2000/svg">
+      <!-- platform glow -->
+      <ellipse id="plat-glow" cx="120" cy="254" rx="82" ry="19" fill="rgba(74,222,128,.06)" stroke="#4ade80" stroke-width="1" opacity=".5"/>
+      <!-- platform cylinder -->
+      <path d="M47,254 L47,268 Q120,283 193,268 L193,254" fill="#0f0f12" stroke="#2a2a30" stroke-width="1"/>
+      <ellipse cx="120" cy="254" rx="73" ry="16" fill="#1a1a1e" stroke="#4ade80" stroke-width="1.5"/>
+      <!-- figure group -->
+      <g id="fig-group" stroke="#4ade80" stroke-linecap="round" stroke-width="2.5" fill="none">
+        <!-- head -->
+        <circle id="fig-head" cx="120" cy="138" r="13" fill="#111114"/>
+        <!-- eyes -->
+        <circle cx="115" cy="136" r="1.5" fill="#4ade80" stroke="none"/>
+        <circle cx="125" cy="136" r="1.5" fill="#4ade80" stroke="none"/>
+        <!-- body -->
+        <line id="fig-body" x1="120" y1="151" x2="120" y2="210"/>
+        <!-- left arm -->
+        <line id="fig-la" x1="120" y1="162" x2="82" y2="192"/>
+        <!-- right arm -->
+        <line id="fig-ra" x1="120" y1="162" x2="158" y2="192"/>
+        <!-- left leg -->
+        <line id="fig-ll" x1="120" y1="210" x2="97" y2="252"/>
+        <!-- right leg -->
+        <line id="fig-rl" x1="120" y1="210" x2="143" y2="252"/>
       </g>
-      <!-- Smoke particles (hidden by default) -->
-      <g id="smoke" opacity="0" style="transition:opacity .5s">
-        <circle cx="232" cy="162" r="2.5" fill="rgba(200,200,200,0.3)"><animate attributeName="cy" values="162;140;118" dur="3s" repeatCount="indefinite"/><animate attributeName="r" values="2.5;5;8" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.3;0.1;0" dur="3s" repeatCount="indefinite"/></circle>
-        <circle cx="236" cy="155" r="2" fill="rgba(200,200,200,0.2)"><animate attributeName="cy" values="155;133;111" dur="2.5s" repeatCount="indefinite" begin="0.8s"/><animate attributeName="r" values="2;4.5;7" dur="2.5s" repeatCount="indefinite" begin="0.8s"/><animate attributeName="opacity" values="0.25;0.1;0" dur="2.5s" repeatCount="indefinite" begin="0.8s"/></circle>
-      </g>
-      <!-- Scan line through figure -->
-      <line x1="250" y1="70" x2="350" y2="70" stroke="rgba(0,255,136,0.35)" stroke-width="1">
-        <animate attributeName="y1" values="70;330;70" dur="2.5s" repeatCount="indefinite"/>
-        <animate attributeName="y2" values="70;330;70" dur="2.5s" repeatCount="indefinite"/>
-        <animate attributeName="opacity" values="0;0.35;0" dur="2.5s" repeatCount="indefinite"/>
-      </line>
-    </g>
-
-    <!-- Name label under figure -->
-    <text x="300" y="340" text-anchor="middle" fill="rgba(0,255,136,0.2)" font-size="8" font-family="Orbitron,sans-serif" letter-spacing="6">SEB.SALIH // ONLINE</text>
-  </svg>
-
-  <!-- Quick actions below -->
-  <div id="qa">
-    <button class="qa amb" onclick="startOnboarding()">🧬 KARTLEGG</button>
-    <button class="qa gold" onclick="toggleLegal()">⚖️ JURIDISK</button>
-    <button class="qa" onclick="openNote()">💾 NOTER</button>
+    </svg>
   </div>
-</div>
 
-<!-- RIGHT -->
-<div id="col-r">
-  <div class="panel" style="flex:1;overflow-y:auto">
-    <div class="ptop"></div><div class="pt">// mål 2026</div>
-    <div id="goals"></div>
-  </div>
-  <div class="panel">
-    <div class="ptop"></div><div class="pt">// i dag</div>
-    <div class="dgrid">
-      <div class="dc"><div class="dv" id="dv-sl" style="color:var(--g)">–</div><div class="dl">SØVN T</div></div>
-      <div class="dc"><div class="dv" id="dv-ex" style="color:var(--b)">–</div><div class="dl">TRENING MIN</div></div>
-      <div class="dc"><div class="dv" id="dv-mo" style="color:var(--p)">–</div><div class="dl">HUMØR /10</div></div>
-      <div class="dc"><div class="dv" id="dv-wa" style="color:var(--o)">–</div><div class="dl">VANN GL</div></div>
+  <!-- RIGHT -->
+  <div id="right">
+    <div id="today-date">—</div>
+    <div>
+      <div class="sec-label">DAGENS VANER</div>
+      <div id="habits-list"></div>
+    </div>
+    <div>
+      <div class="sec-label">EMPIRE</div>
+      <div id="empire-list"></div>
     </div>
   </div>
-  <div class="panel">
-    <div class="ptop"></div><div class="pt">// monir minne — <span id="mcnt">0 fakta</span></div>
-    <div id="mprev" class="mprev">Ingen fakta ennå...</div>
-  </div>
-</div>
 
-<!-- CHAT — large and readable -->
-<div id="chat">
-  <div id="chat-main">
-    <div class="ch-hdr">
-      <span style="font-size:7px;letter-spacing:3px;color:rgba(0,255,136,0.22)">MONIR.TERMINAL</span>
-      <div style="display:flex;gap:5px">
-        <button class="mbtn" id="tts-btn" onclick="toggleTTS()">🔇 TALE</button>
-        <button class="mbtn mic" id="mic-btn" onclick="toggleVoice()">🎤 MIC</button>
-        <button class="mbtn" onclick="startOnboarding()">🧬 KARTLEGG</button>
-        <button class="mbtn lg" id="lg-btn" onclick="toggleLegal()">⚖️ JURIDISK</button>
+  <!-- CHAT -->
+  <div id="chat">
+    <div id="msgs"></div>
+    <div id="chat-bottom">
+      <div id="chat-input-row">
+        <input id="chat-in" type="text" placeholder="Skriv til MONIR..." autocomplete="off">
+        <button id="btn-send">SEND</button>
+        <button id="btn-voice" title="Snakk">🎙</button>
       </div>
-    </div>
-    <div id="onb-ban" class="ban"><span>🧬 KARTLEGGINGSMODUS — MONIR stiller spørsmål</span><span class="bx" onclick="stopOnboarding()">AVSLUTT ✕</span></div>
-    <div id="leg-ban" class="ban"><span>⚖️ LEGALSTREETSMARTER — Sjekker norske rettskilder</span><span class="bx" onclick="disableLegal()">AVSLUTT ✕</span></div>
-    <div id="src-row"><span class="sc">LOVDATA:</span></div>
-    <div id="cmsgs"></div>
-    <div id="chips"></div>
-  </div>
-  <div id="cside">
-    <div class="ci" style="flex:1">
-      <textarea id="cin" placeholder="Skriv til MONIR... (Enter = send)" onkeydown="handleKey(event)" rows="6"></textarea>
-    </div>
-    <button id="cbtn" onclick="send()">SEND ›› MONIR</button>
-  </div>
-</div>
-</div>
-
-<!-- NOTE OVERLAY -->
-<div id="note-ov" style="display:none;position:fixed;inset:0;background:rgba(0,5,15,0.88);backdrop-filter:blur(10px);z-index:100;align-items:center;justify-content:center">
-  <div style="background:rgba(0,14,30,0.98);border:1px solid rgba(0,255,136,0.28);padding:22px;min-width:320px;max-width:440px;position:relative">
-    <div style="font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:3px;color:var(--g);margin-bottom:14px;border-bottom:1px solid rgba(0,255,136,0.12);padding-bottom:8px">💾 LAGRE FAKTA</div>
-    <textarea id="note-inp" style="width:100%;background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.2);padding:10px;color:var(--g);font-family:'Share Tech Mono',monospace;font-size:12px;outline:none;resize:vertical;min-height:70px;margin-bottom:12px" placeholder="Eks: Jeg trener alltid om morgenen..."></textarea>
-    <div style="display:flex;gap:7px">
-      <button onclick="closeNote()" style="flex:1;padding:9px;background:transparent;border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.3);font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;cursor:pointer">AVBRYT</button>
-      <button onclick="saveNote()" style="flex:2;padding:9px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.28);color:var(--g);font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;cursor:pointer">LAGRE I MINNE</button>
+      <div id="chat-act-row">
+        <button class="cact" id="cact-kart">◈ KARTLEGG</button>
+        <button class="cact" id="cact-pri">⚡ PRIORITER</button>
+        <button class="cact" id="cact-jus">⚖ JUS</button>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-// ════════════════════════════════════════════════
-// CANVAS
-// ════════════════════════════════════════════════
-const cv=document.getElementById('bg'),cx=cv.getContext('2d');
-function resize(){cv.width=innerWidth;cv.height=innerHeight}resize();window.addEventListener('resize',resize);
-const stars=Array.from({length:200},()=>({x:Math.random(),y:Math.random(),r:Math.random()*1.3+0.2,a:Math.random()*0.4+0.08,t:Math.random()*Math.PI*2,sp:0.15+Math.random()*0.4}));
-const CH='01░▒■◆⊕∑Δλπβγ//::──§¶⟨⟩';
-const ptcls=Array.from({length:55},()=>({x:Math.random(),y:Math.random(),ch:CH[Math.floor(Math.random()*CH.length)],sp:0.04+Math.random()*0.12,al:Math.random()*0.07+0.02,col:['#00ff88','#00d4ff','#aa44ff','#ffaa00'][Math.floor(Math.random()*4)],sz:7+Math.floor(Math.random()*6)}));
-let fr=0;
-(function loop(){fr++;const W=cv.width,H=cv.height,now=fr/60;cx.fillStyle='rgba(1,12,26,0.14)';cx.fillRect(0,0,W,H);stars.forEach(s=>{const a=s.a*(0.5+0.5*Math.sin(now*s.sp+s.t));cx.fillStyle=`rgba(180,220,255,${a})`;cx.beginPath();cx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);cx.fill()});ptcls.forEach(p=>{cx.globalAlpha=p.al;cx.fillStyle=p.col;cx.font=p.sz+'px monospace';cx.fillText(p.ch,p.x*W,p.y*H);p.y-=p.sp/H;if(p.y<-0.02){p.y=1.02;p.x=Math.random();p.ch=CH[Math.floor(Math.random()*CH.length)]}});cx.globalAlpha=1;requestAnimationFrame(loop)})();
-
-// ════════════════════════════════════════════════
-// STICK FIGURE STATE MACHINE — Fortnite lobby style
-// ════════════════════════════════════════════════
-const fig = {
-  armL: document.getElementById('arm-l'),
-  armR: document.getElementById('arm-r'),
-  legL: document.getElementById('leg-l'),
-  legR: document.getElementById('leg-r'),
-  ftL:  document.getElementById('ft-l'),
-  ftR:  document.getElementById('ft-r'),
-  hndL: document.getElementById('hnd-l'),
-  hndR: document.getElementById('hnd-r'),
-  body: document.getElementById('body'),
-  cig:  document.getElementById('cigarette'),
-  smk:  document.getElementById('smoke'),
-  lbl:  document.getElementById('state-lbl'),
-  mouth:document.getElementById('mouth'),
-  figG: document.getElementById('figure'),
+// ═══════════════════════════════════
+// STICKMAN ANIMATION
+// ═══════════════════════════════════
+const POSES={
+  idle:{la:[120,162,82,192],ra:[120,162,158,192],ll:[120,210,97,252],rl:[120,210,143,252]},
+  wave:{la:[120,162,75,128],ra:[120,162,168,130],ll:[120,210,97,252],rl:[120,210,143,252]},
+  think:{la:[120,162,82,192],ra:[120,162,152,148],ll:[120,210,97,252],rl:[120,210,143,252]},
+  pose:{la:[120,162,68,150],ra:[120,162,172,150],ll:[120,210,88,252],rl:[120,210,152,252]},
+  lean:{la:[120,162,75,200],ra:[120,162,165,196],ll:[120,210,95,252],rl:[120,210,148,252]}
 };
+const POSE_SEQ=['idle','idle','idle','wave','idle','think','idle','pose','idle','lean'];
+let poseIdx=0,curPose='idle';
+let cur={la:[...POSES.idle.la],ra:[...POSES.idle.ra],ll:[...POSES.idle.ll],rl:[...POSES.idle.rl]};
+let tgt={la:[...POSES.idle.la],ra:[...POSES.idle.ra],ll:[...POSES.idle.ll],rl:[...POSES.idle.rl]};
+let lastPoseChange=0;
 
-// Helper: set SVG line endpoints
-function setLine(el, x1, y1, x2, y2) {
-  el.setAttribute('x1', x1); el.setAttribute('y1', y1);
-  el.setAttribute('x2', x2); el.setAttribute('y2', y2);
+function lerp(a,b,t){return a+(b-a)*t}
+function setLimb(id,coords){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.setAttribute('x1',coords[0]);el.setAttribute('y1',coords[1]);
+  el.setAttribute('x2',coords[2]);el.setAttribute('y2',coords[3]);
 }
-function setCircle(el, cx, cy) {
-  el.setAttribute('cx', cx); el.setAttribute('cy', cy);
-}
-function setAttr(el, attrs) { Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k,v)); }
-
-// Lerp for smooth transitions
-let figState = {};
-let figTarget = {};
-let lerpFrame = null;
-
-function lerpFig() {
-  const keys = Object.keys(figTarget);
-  let done = true;
-  keys.forEach(k => {
-    const cur = figState[k] || figTarget[k];
-    const tgt = figTarget[k];
-    const next = cur + (tgt - cur) * 0.12;
-    if (Math.abs(next - tgt) > 0.1) done = false;
-    figState[k] = next;
+function animLoop(ts){
+  if(ts-lastPoseChange>3200){
+    poseIdx=(poseIdx+1)%POSE_SEQ.length;
+    curPose=POSE_SEQ[poseIdx];
+    tgt.la=[...POSES[curPose].la];tgt.ra=[...POSES[curPose].ra];
+    tgt.ll=[...POSES[curPose].ll];tgt.rl=[...POSES[curPose].rl];
+    lastPoseChange=ts;
+  }
+  const s=0.06;
+  ['la','ra','ll','rl'].forEach(k=>{
+    for(let i=0;i<4;i++) cur[k][i]=lerp(cur[k][i],tgt[k][i],s);
   });
-  applyFigState(figState);
-  if (!done) lerpFrame = requestAnimationFrame(lerpFig);
+  setLimb('fig-la',cur.la);setLimb('fig-ra',cur.ra);
+  setLimb('fig-ll',cur.ll);setLimb('fig-rl',cur.rl);
+  requestAnimationFrame(animLoop);
+}
+requestAnimationFrame(animLoop);
+
+function updateFigureForLevel(lvl){
+  const sw=Math.min(4.5,2.5+lvl*0.06);
+  const col=lvl<15?'#4ade80':lvl<30?'#38bdf8':lvl<50?'#a78bfa':'#fb923c';
+  const glow=Math.min(6,3+lvl*0.1);
+  document.querySelectorAll('#fig-group line,#fig-group circle').forEach(el=>{
+    el.setAttribute('stroke',col);
+  });
+  document.querySelectorAll('#fig-group circle[fill="#111114"]').forEach(el=>{
+    el.setAttribute('stroke',col);
+    el.setAttribute('stroke-width',sw);
+  });
+  document.querySelectorAll('#fig-group line').forEach(el=>{
+    el.setAttribute('stroke-width',sw);
+  });
+  const eyes=document.querySelectorAll('#fig-group circle[fill]');
+  eyes.forEach(e=>{if(e.getAttribute('fill')!=='#111114')e.setAttribute('fill',col)});
+  document.getElementById('main-svg').style.filter=`drop-shadow(0 0 ${glow}px ${col}44)`;
+  document.getElementById('plat-glow').setAttribute('stroke',col);
+  document.getElementById('plat-glow').setAttribute('fill',col.replace('#','rgba(').replace(')',',0.06)'));
 }
 
-function setFigTarget(t) {
-  figTarget = {...t};
-  if (lerpFrame) cancelAnimationFrame(lerpFrame);
-  lerpFig();
-}
-
-function applyFigState(s) {
-  setLine(fig.armL, 300, 148, s.alx, s.aly);
-  setLine(fig.armR, 300, 148, s.arx, s.ary);
-  setLine(fig.legL, 300, 218, s.llx, s.lly);
-  setLine(fig.legR, 300, 218, s.rlx, s.rly);
-  setLine(fig.ftL, s.llx, s.lly, s.llx-17, s.lly+12);
-  setLine(fig.ftR, s.rlx, s.rly, s.rlx+17, s.rly+12);
-  setCircle(fig.hndL, s.alx, s.aly);
-  setCircle(fig.hndR, s.arx, s.ary);
-  fig.figG.style.transform = `rotate(${s.rot||0}deg)`;
-  fig.figG.style.transformOrigin = '300px 200px';
-  fig.figG.style.animation = s.anim || '';
-}
-
-// Base idle position
-const BASE = { alx:258, aly:182, arx:342, ary:182, llx:272, lly:300, rlx:328, rly:300, rot:0, anim:'' };
-
-// State definitions
-const STATES = {
-  idle: {
-    pos: {...BASE},
-    dur: [4000, 7000],
-    label: 'STANDBY',
-    onEnter: () => {
-      fig.cig.style.opacity = '0'; fig.smk.style.opacity = '0';
-      fig.mouth.setAttribute('d', 'M294 97 Q300 103 306 97');
-      startIdleAnim();
-    },
-    onExit: () => stopIdleAnim(),
-  },
-  pose: {
-    pos: { alx:248, aly:172, arx:355, ary:168, llx:265, lly:298, rlx:335, rly:298, rot:-4 },
-    dur: [3000, 5000],
-    label: 'POSING',
-    onEnter: () => { fig.cig.style.opacity='0'; fig.smk.style.opacity='0'; fig.mouth.setAttribute('d','M292 97 Q300 101 308 97'); },
-  },
-  dance: {
-    pos: {...BASE},
-    dur: [3000, 6000],
-    label: 'DANCING',
-    onEnter: () => { fig.cig.style.opacity='0'; fig.smk.style.opacity='0'; startDanceAnim(); fig.mouth.setAttribute('d','M292 97 Q300 105 308 97'); },
-    onExit: () => stopDanceAnim(),
-  },
-  smoke: {
-    pos: { alx:240, aly:156, arx:342, ary:182, llx:272, lly:300, rlx:328, rly:300, rot:-2 },
-    dur: [5000, 9000],
-    label: 'CHILLING',
-    onEnter: () => { fig.cig.style.opacity='1'; fig.smk.style.opacity='1'; fig.mouth.setAttribute('d','M294 97 Q300 100 306 97'); },
-    onExit: () => { fig.cig.style.opacity='0'; fig.smk.style.opacity='0'; },
-  },
-  stretch: {
-    pos: { alx:240, aly:100, arx:360, ary:100, llx:265, lly:302, rlx:335, rly:302, rot:0 },
-    dur: [3000, 5000],
-    label: 'STRETCHING',
-    onEnter: () => { fig.cig.style.opacity='0'; fig.smk.style.opacity='0'; fig.mouth.setAttribute('d','M292 97 Q300 102 308 97'); },
-  },
-  wave: {
-    pos: { alx:230, aly:112, arx:342, ary:182, llx:272, lly:300, rlx:328, rly:300, rot:0 },
-    dur: [2000, 4000],
-    label: 'WAVING',
-    onEnter: () => { fig.cig.style.opacity='0'; fig.smk.style.opacity='0'; startWaveAnim(); fig.mouth.setAttribute('d','M292 97 Q300 104 308 97'); },
-    onExit: () => stopWaveAnim(),
-  },
-  think: {
-    pos: { alx:258, aly:182, arx:315, ary:128, llx:272, lly:300, rlx:328, rly:300, rot:3 },
-    dur: [4000, 7000],
-    label: 'THINKING...',
-    onEnter: () => { fig.cig.style.opacity='0'; fig.smk.style.opacity='0'; fig.mouth.setAttribute('d','M295 98 Q300 97 306 98'); },
-  },
-  lean: {
-    pos: { alx:248, aly:190, arx:355, ary:170, llx:260, lly:298, rlx:340, rly:298, rot:6 },
-    dur: [3000, 5000],
-    label: 'CHILLING',
-    onEnter: () => { fig.cig.style.opacity='0'; fig.smk.style.opacity='0'; fig.mouth.setAttribute('d','M293 97 Q300 101 307 97'); },
-  },
-};
-
-let idleTimer = null, danceTimer = null, waveTimer = null;
-let stateTimeout = null;
-let currentState = 'idle';
-
-function startIdleAnim() {
-  let t = 0;
-  function tick() {
-    if (currentState !== 'idle') return;
-    t += 0.03;
-    const swing = Math.sin(t) * 14;
-    applyFigState({
-      alx: 258 + Math.sin(t) * 10, aly: 182 + Math.sin(t + 1) * 6,
-      arx: 342 - Math.sin(t) * 10, ary: 182 - Math.sin(t + 1) * 6,
-      llx: 272 + Math.sin(t * 0.4) * 3, lly: 300,
-      rlx: 328 - Math.sin(t * 0.4) * 3, rly: 300,
-      rot: Math.sin(t * 0.3) * 1.5,
-    });
-    idleTimer = requestAnimationFrame(tick);
-  }
-  tick();
-}
-function stopIdleAnim() { if (idleTimer) cancelAnimationFrame(idleTimer); idleTimer = null; }
-
-function startDanceAnim() {
-  let t = 0;
-  function tick() {
-    if (currentState !== 'dance') return;
-    t += 0.08;
-    const bounce = Math.abs(Math.sin(t * 2)) * -8;
-    const armSwing = Math.sin(t * 2) * 30;
-    const legKick = Math.sin(t * 2) * 12;
-    applyFigState({
-      alx: 258 + armSwing, aly: 182 - Math.abs(armSwing) * 0.4,
-      arx: 342 - armSwing, ary: 182 - Math.abs(armSwing) * 0.4,
-      llx: 272 - legKick, lly: 300 + Math.abs(legKick) * 0.3,
-      rlx: 328 + legKick, rly: 300 + Math.abs(legKick) * 0.3,
-      rot: Math.sin(t) * 6,
-    });
-    danceTimer = requestAnimationFrame(tick);
-  }
-  tick();
-}
-function stopDanceAnim() { if (danceTimer) cancelAnimationFrame(danceTimer); danceTimer = null; }
-
-function startWaveAnim() {
-  let t = 0;
-  function tick() {
-    if (currentState !== 'wave') return;
-    t += 0.15;
-    const waveY = Math.sin(t * 3) * 18;
-    applyFigState({
-      alx: 228 + Math.cos(t * 3) * 10, aly: 108 + waveY,
-      arx: 342, ary: 182,
-      llx: 272, lly: 300, rlx: 328, rly: 300, rot: Math.sin(t) * 2,
-    });
-    waveTimer = requestAnimationFrame(tick);
-  }
-  tick();
-}
-function stopWaveAnim() { if (waveTimer) cancelAnimationFrame(waveTimer); waveTimer = null; }
-
-function goToState(name) {
-  const prev = STATES[currentState];
-  if (prev?.onExit) prev.onExit();
-  currentState = name;
-  const s = STATES[name];
-  fig.lbl.textContent = s.label;
-  if (s.pos) setFigTarget(s.pos);
-  if (s.onEnter) s.onEnter();
-  const [min, max] = s.dur;
-  const dur = min + Math.random() * (max - min);
-  if (stateTimeout) clearTimeout(stateTimeout);
-  stateTimeout = setTimeout(randomState, dur);
-}
-
-function randomState() {
-  const all = Object.keys(STATES).filter(k => k !== currentState);
-  goToState(all[Math.floor(Math.random() * all.length)]);
-}
-
-// Start
-setTimeout(() => goToState('idle'), 500);
-setTimeout(randomState, 5000);
-
-// ════════════════════════════════════════════════
-// STATIC DATA
-// ════════════════════════════════════════════════
-const GOALS = [
-  {id:1,t:'OBDAI Production Release',p:45,c:'#00d4ff'},
-  {id:2,t:'Autovers 50k Revenue',p:30,c:'#ff0066'},
-  {id:3,t:'BMW MS45.1 Tuning Suite',p:60,c:'#ffaa00'},
-  {id:4,t:'Health Baseline 2026',p:20,c:'#aa44ff'},
-  {id:5,t:'AutoSvar AI Launch',p:25,c:'#00d4ff'},
-  {id:6,t:'Event Portfolio Build',p:10,c:'#ff0066'},
+// ═══════════════════════════════════
+// ONBOARDING WIZARD
+// ═══════════════════════════════════
+let ob={};
+const OB_STEPS=[
+  {id:'identity',title:'HVEM ER DU?'},
+  {id:'body',title:'KROPP'},
+  {id:'stats',title:'ATTRIBUTTER'},
+  {id:'rep',title:'RYKTE'},
+  {id:'quest',title:'MAIN QUEST'},
+  {id:'assets',title:'EIENDELER'},
+  {id:'businesses',title:'VIRKSOMHETER'},
+  {id:'habits',title:'DAGLIGE VANER'},
+  {id:'achievements',title:'OPPNÅELSER'}
 ];
-const HABITS = [
-  {n:'Morning Code Review',f:'DAGLIG',s:12,c:'#00d4ff'},
-  {n:'BMW Diagnostics',f:'4x/UKE',s:8,c:'#ffaa00'},
-  {n:'Workout',f:'4x/UKE',s:5,c:'#00ff88'},
-  {n:'Learn AI/ML',f:'3x/UKE',s:6,c:'#aa44ff'},
-  {n:'Cold Exposure',f:'5x/UKE',s:3,c:'#ff0066'},
-];
-let todayData = {sleep:null,exercise:null,mood:null,water:null};
+let obStep=0;
 
-// ════════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════════
-window.addEventListener('load', () => {
-  setTimeout(() => document.getElementById('boot').classList.add('done'), 3000);
-  renderGoals(); renderHabits();
-  setInterval(updateClock, 1000); updateClock();
-  loadData(); loadHistory(); loadNotes();
-  showNormalChips();
-  if (synth) { pickVoice(); synth.onvoiceschanged = pickVoice; }
-  appendMsg('MONIR', 'Hei Sebastian. Jeg er MONIR — online og klar. Trykk <span style="color:var(--o)">🧬 KARTLEGG</span> for at jeg skal bli kjent med deg, <span style="color:var(--gold)">⚖️ JURIDISK</span> for rettslig research, eller spør meg om hva som helst.', 'ai');
+function initOb(){
+  ob={
+    name:'',age:25,city:'Oslo',height_cm:180,weight_kg:80,
+    discipline:50,intelligence:50,health:50,business_score:50,
+    rep_builder:3,rep_tech:3,rep_entrepreneur:3,rep_athlete:2,rep_leader:3,
+    main_quest:'Bli finansielt uavhengig',main_quest_progress:0,
+    assets:[],businesses:[],vehicles:[],milestones:[],achievements:[],habits:[]
+  };
+}
+
+function renderPips(){
+  const c=document.getElementById('ob-pips');
+  c.innerHTML=OB_STEPS.map((_,i)=>`<div class="pip${i<obStep?' done':i===obStep?' active':''}"></div>`).join('');
+}
+
+function obHtml(step){
+  const s=OB_STEPS[step];
+  if(s.id==='identity') return `
+    <div class="ob-row">
+      <div><span class="obl">NAVN</span><input id="ob-name" value="${ob.name}" placeholder="Fullt navn" maxlength="40"></div>
+      <div><span class="obl">ALDER</span><input id="ob-age" type="number" value="${ob.age}" min="1" max="120"></div>
+    </div>
+    <div class="ob-row">
+      <div><span class="obl">BY</span><input id="ob-city" value="${ob.city}" placeholder="Oslo"></div>
+    </div>`;
+  if(s.id==='body') return `
+    <div class="sr"><label>HØYDE (cm)</label><input type="range" id="ob-h" min="140" max="220" value="${ob.height_cm}"><span id="ob-hv">${ob.height_cm}</span></div>
+    <div class="sr"><label>VEKT (kg)</label><input type="range" id="ob-w" min="40" max="200" value="${ob.weight_kg}"><span id="ob-wv">${ob.weight_kg}</span></div>`;
+  if(s.id==='stats') return `
+    <div class="sr"><label>DISIPLIN</label><input type="range" id="ob-disc" min="1" max="100" value="${ob.discipline}"><span id="ob-dv">${ob.discipline}</span></div>
+    <div class="sr"><label>INTELLIGENS</label><input type="range" id="ob-int" min="1" max="100" value="${ob.intelligence}"><span id="ob-iv">${ob.intelligence}</span></div>
+    <div class="sr"><label>HELSE</label><input type="range" id="ob-hlt" min="1" max="100" value="${ob.health}"><span id="ob-hlv">${ob.health}</span></div>
+    <div class="sr"><label>BUSINESS</label><input type="range" id="ob-biz" min="1" max="100" value="${ob.business_score}"><span id="ob-bv">${ob.business_score}</span></div>`;
+  if(s.id==='rep') return `
+    <div class="sr"><label>BYGGER</label><input type="range" id="ob-rb" min="1" max="5" value="${ob.rep_builder}"><span id="ob-rbv">${ob.rep_builder}</span></div>
+    <div class="sr"><label>TECH</label><input type="range" id="ob-rt" min="1" max="5" value="${ob.rep_tech}"><span id="ob-rtv">${ob.rep_tech}</span></div>
+    <div class="sr"><label>GRÜNDER</label><input type="range" id="ob-re" min="1" max="5" value="${ob.rep_entrepreneur}"><span id="ob-rev">${ob.rep_entrepreneur}</span></div>
+    <div class="sr"><label>ATLET</label><input type="range" id="ob-ra" min="1" max="5" value="${ob.rep_athlete}"><span id="ob-rav">${ob.rep_athlete}</span></div>
+    <div class="sr"><label>LEDER</label><input type="range" id="ob-rl" min="1" max="5" value="${ob.rep_leader}"><span id="ob-rlv">${ob.rep_leader}</span></div>`;
+  if(s.id==='quest') return `
+    <span class="obl">MAIN QUEST — DIN STORE AMBISJON</span>
+    <input id="ob-mq" value="${ob.main_quest}" placeholder="Hva er ditt store mål?" style="margin-bottom:12px">
+    <div class="sr"><label>FREMGANG (%)</label><input type="range" id="ob-mqp" min="0" max="100" value="${ob.main_quest_progress}"><span id="ob-mqpv">${ob.main_quest_progress}</span></div>
+    <span class="obl">MILEPÆLER (valgfritt)</span>
+    <ul class="ob-list" id="ob-ms">${ob.milestones.map((m,i)=>`<li>
+      <input class="lt" value="${m.title}" onchange="ob.milestones[${i}].title=this.value">
+      <input type="checkbox" ${m.completed?'checked':''} onchange="ob.milestones[${i}].completed=this.checked" style="width:auto">
+      <button class="rm" onclick="ob.milestones.splice(${i},1);renderObStep()">✕</button>
+    </li>`).join('')}</ul>
+    <button class="ob-add" onclick="ob.milestones.push({title:'',completed:false});renderObStep()">+ LEGG TIL</button>`;
+  if(s.id==='assets') return `
+    <span class="obl">EIENDELER (leilighet, bil, utstyr...)</span>
+    <ul class="ob-list" id="ob-al">${ob.assets.map((a,i)=>`<li>
+      <input class="le" value="${a.emoji}" placeholder="📦" onchange="ob.assets[${i}].emoji=this.value">
+      <input class="lt" value="${a.name}" placeholder="Navn på eiendel" onchange="ob.assets[${i}].name=this.value">
+      <select class="ls" onchange="ob.assets[${i}].status=this.value">
+        <option ${a.status==='owned'?'selected':''}>owned</option>
+        <option ${a.status==='leased'?'selected':''}>leased</option>
+        <option ${a.status==='goal'?'selected':''}>goal</option>
+      </select>
+      <button class="rm" onclick="ob.assets.splice(${i},1);renderObStep()">✕</button>
+    </li>`).join('')}</ul>
+    <button class="ob-add" onclick="ob.assets.push({name:'',emoji:'📦',status:'owned'});renderObStep()">+ LEGG TIL</button>`;
+  if(s.id==='businesses') return `
+    <span class="obl">VIRKSOMHETER & PROSJEKTER</span>
+    <ul class="ob-list" id="ob-bl">${ob.businesses.map((b,i)=>`<li>
+      <input class="lt" value="${b.name}" placeholder="Bedriftsnavn" onchange="ob.businesses[${i}].name=this.value">
+      <input class="ls" type="number" min="1" max="10" value="${b.level||1}" placeholder="Lvl" onchange="ob.businesses[${i}].level=+this.value">
+      <select class="ls" onchange="ob.businesses[${i}].status=this.value">
+        <option ${b.status==='active'?'selected':''}>active</option>
+        <option ${b.status==='paused'?'selected':''}>paused</option>
+        <option ${b.status==='idea'?'selected':''}>idea</option>
+      </select>
+      <button class="rm" onclick="ob.businesses.splice(${i},1);renderObStep()">✕</button>
+    </li>`).join('')}</ul>
+    <button class="ob-add" onclick="ob.businesses.push({name:'',level:1,status:'active'});renderObStep()">+ LEGG TIL</button>`;
+  if(s.id==='habits') return `
+    <span class="obl">DAGLIGE VANER (klikk for å fullføre dem)</span>
+    <ul class="ob-list" id="ob-hl">${ob.habits.map((h,i)=>`<li>
+      <input class="le" value="${h.emoji||'⚡'}" placeholder="⚡" onchange="ob.habits[${i}].emoji=this.value">
+      <input class="lt" value="${h.name}" placeholder="Vane" onchange="ob.habits[${i}].name=this.value">
+      <input class="lx" type="number" min="5" max="500" value="${h.xp||20}" placeholder="XP" onchange="ob.habits[${i}].xp=+this.value">
+      <button class="rm" onclick="ob.habits.splice(${i},1);renderObStep()">✕</button>
+    </li>`).join('')}</ul>
+    <button class="ob-add" onclick="ob.habits.push({name:'',emoji:'⚡',xp:20,freq:'DAGLIG'});renderObStep()">+ LEGG TIL</button>`;
+  if(s.id==='achievements') return `
+    <span class="obl">OPPNÅELSER DU ALLEREDE HAR</span>
+    <ul class="ob-list" id="ob-achl">${ob.achievements.map((a,i)=>`<li>
+      <input class="lt" value="${a.name}" placeholder="Hva har du oppnådd?" onchange="ob.achievements[${i}].name=this.value">
+      <input type="checkbox" ${a.unlocked?'checked':''} onchange="ob.achievements[${i}].unlocked=this.checked" style="width:auto">
+      <button class="rm" onclick="ob.achievements.splice(${i},1);renderObStep()">✕</button>
+    </li>`).join('')}</ul>
+    <button class="ob-add" onclick="ob.achievements.push({name:'',unlocked:true});renderObStep()">+ LEGG TIL</button>`;
+  return '';
+}
+
+function collectOb(){
+  const s=OB_STEPS[obStep];
+  if(s.id==='identity'){
+    ob.name=(document.getElementById('ob-name')||{}).value||ob.name;
+    ob.age=+(document.getElementById('ob-age')||{}).value||ob.age;
+    ob.city=(document.getElementById('ob-city')||{}).value||ob.city;
+  }
+  if(s.id==='body'){
+    ob.height_cm=+(document.getElementById('ob-h')||{}).value||ob.height_cm;
+    ob.weight_kg=+(document.getElementById('ob-w')||{}).value||ob.weight_kg;
+  }
+  if(s.id==='stats'){
+    ob.discipline=+(document.getElementById('ob-disc')||{}).value||ob.discipline;
+    ob.intelligence=+(document.getElementById('ob-int')||{}).value||ob.intelligence;
+    ob.health=+(document.getElementById('ob-hlt')||{}).value||ob.health;
+    ob.business_score=+(document.getElementById('ob-biz')||{}).value||ob.business_score;
+  }
+  if(s.id==='rep'){
+    ob.rep_builder=+(document.getElementById('ob-rb')||{}).value||ob.rep_builder;
+    ob.rep_tech=+(document.getElementById('ob-rt')||{}).value||ob.rep_tech;
+    ob.rep_entrepreneur=+(document.getElementById('ob-re')||{}).value||ob.rep_entrepreneur;
+    ob.rep_athlete=+(document.getElementById('ob-ra')||{}).value||ob.rep_athlete;
+    ob.rep_leader=+(document.getElementById('ob-rl')||{}).value||ob.rep_leader;
+  }
+  if(s.id==='quest'){
+    ob.main_quest=(document.getElementById('ob-mq')||{}).value||ob.main_quest;
+    ob.main_quest_progress=+(document.getElementById('ob-mqp')||{}).value||0;
+  }
+}
+
+function renderObStep(){
+  renderPips();
+  document.getElementById('ob-body').innerHTML=obHtml(obStep);
+  document.getElementById('ob-step-label').textContent=`STEG ${obStep+1} / ${OB_STEPS.length} — ${OB_STEPS[obStep].title}`;
+  document.getElementById('ob-back').classList.toggle('hidden',obStep===0);
+  document.getElementById('ob-next').textContent=obStep===OB_STEPS.length-1?'FULLFØR ✓':'NESTE →';
+  // wire ranges
+  [['ob-h','ob-hv'],['ob-w','ob-wv'],['ob-disc','ob-dv'],['ob-int','ob-iv'],
+   ['ob-hlt','ob-hlv'],['ob-biz','ob-bv'],['ob-rb','ob-rbv'],['ob-rt','ob-rtv'],
+   ['ob-re','ob-rev'],['ob-ra','ob-rav'],['ob-rl','ob-rlv'],['ob-mqp','ob-mqpv']].forEach(([rid,vid])=>{
+    const r=document.getElementById(rid),v=document.getElementById(vid);
+    if(r&&v) r.oninput=()=>v.textContent=r.value;
+  });
+}
+
+function startOb(){
+  initOb();obStep=0;
+  document.getElementById('ob-overlay').classList.remove('hidden');
+  renderObStep();
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('ob-next').addEventListener('click',async()=>{
+    collectOb();
+    if(obStep<OB_STEPS.length-1){obStep++;renderObStep();}
+    else{
+      // submit
+      try{
+        const r=await fetch('/api/onboarding/save',{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify(ob)
+        });
+        if(r.ok){document.getElementById('ob-overlay').classList.add('hidden');loadData();}
+        else sysMsg('Feil under lagring, prøv igjen.');
+      }catch(e){sysMsg('Nettverksfeil.');}
+    }
+  });
+  document.getElementById('ob-back').addEventListener('click',()=>{
+    if(obStep>0){obStep--;renderObStep();}
+  });
 });
 
-function updateClock() {
-  const n = new Date();
-  const t = [n.getHours(),n.getMinutes(),n.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':');
-  document.getElementById('clk').textContent = t;
-  document.getElementById('sf').textContent = `MONIR • ${n.getDate()}. juni 2026 • ${t.slice(0,5)}`;
+// ═══════════════════════════════════
+// DATA LOADING
+// ═══════════════════════════════════
+async function loadData(){
+  try{
+    const r=await fetch('/api/character');
+    if(!r.ok) return;
+    const d=await r.json();
+    if(!d.onboarded){startOb();return;}
+    renderAll(d);
+  }catch(e){console.error(e);}
 }
 
-// ════════════════════════════════════════════════
-// RENDER
-// ════════════════════════════════════════════════
-function renderGoals() {
-  document.getElementById('goals').innerHTML = GOALS.map(g => `
-    <div class="gi">
-      <div class="gi-h"><span class="gn">${g.t}</span><span class="gp" style="color:${g.c}">${g.p}%</span></div>
-      <div class="gbar"><div class="gfill" style="width:${g.p}%;background:${g.c};opacity:.7"></div></div>
+function renderAll(d){
+  const char=d.char||{};
+  const lvl=char.level||1;
+  const xp=char.xp||0;
+  const xpn=char.xp_next||1000;
+
+  // Header
+  document.getElementById('hdr-level').textContent=`LVL ${lvl}`;
+  document.getElementById('hdr-xp-fill').style.width=`${Math.round(xp/xpn*100)}%`;
+  document.getElementById('hdr-name').textContent=(d.name||'—').toUpperCase();
+  document.getElementById('hdr-time').textContent=new Date().toLocaleTimeString('no-NO',{hour:'2-digit',minute:'2-digit'});
+
+  // Stickman
+  updateFigureForLevel(lvl);
+
+  // Stats
+  const stats=[
+    {name:'DISIPLIN',val:char.discipline||0,col:'var(--blue)'},
+    {name:'INTELLIGENS',val:char.intelligence||0,col:'var(--purple)'},
+    {name:'HELSE',val:char.health||0,col:'var(--green)'},
+    {name:'BUSINESS',val:char.business_score||0,col:'var(--orange)'}
+  ];
+  document.getElementById('stats-list').innerHTML=stats.map(s=>`
+    <div class="stat-row">
+      <div class="stat-top">
+        <span class="stat-name">${s.name}</span>
+        <span class="stat-val" style="color:${s.col}">${s.val}</span>
+      </div>
+      <div class="stat-bar"><div class="stat-fill" style="width:${s.val}%;background:${s.col}"></div></div>
     </div>`).join('');
-}
 
-function renderHabits() {
-  document.getElementById('habits').innerHTML = HABITS.map((h,i) => `
-    <div class="hi" onclick="toggleHabit(${i})">
-      <div class="hb" style="background:${h.c}"></div>
-      <div style="flex:1;min-width:0"><span class="hn">${h.n}</span><span class="hf">${h.f}</span></div>
-      <span class="hs">${h.s}d 🔥</span>
-      <div class="hck" id="hck-${i}">✓</div>
+  // Reputation
+  const reps=[
+    {name:'BYGGER',val:char.rep_builder||0,emoji:'🔨'},
+    {name:'TECH',val:char.rep_tech||0,emoji:'💻'},
+    {name:'GRÜNDER',val:char.rep_entrepreneur||0,emoji:'🚀'},
+    {name:'ATLET',val:char.rep_athlete||0,emoji:'💪'},
+    {name:'LEDER',val:char.rep_leader||0,emoji:'👑'}
+  ];
+  document.getElementById('rep-list').innerHTML=reps.map(r=>`
+    <div class="rep-row">
+      <span class="rep-name">${r.emoji} ${r.name}</span>
+      <div class="rep-stars">${[1,2,3,4,5].map(i=>`<span class="star${i<=r.val?' on':''}">★</span>`).join('')}</div>
     </div>`).join('');
+
+  // Quest
+  const mq=char.main_quest||'—';
+  const mqp=char.main_quest_progress||0;
+  document.getElementById('quest-name').textContent=mq;
+  document.getElementById('quest-fill').style.width=mqp+'%';
+  document.getElementById('quest-pct').textContent=mqp+'%';
+
+  // Date
+  document.getElementById('today-date').textContent=new Date().toLocaleDateString('no-NO',{weekday:'long',year:'numeric',month:'long',day:'numeric'}).toUpperCase();
+
+  // Habits
+  const habits=d.habits||[];
+  document.getElementById('habits-list').innerHTML=habits.length
+    ?habits.map(h=>`
+      <div class="habit-card${h.done_today?' hc-done':''}" data-hid="${h.id}" onclick="completeHabit(${h.id},this)">
+        <div class="hc-circle">${h.done_today?'✓':''}</div>
+        <span class="hc-emoji">${h.emoji||'⚡'}</span>
+        <div class="hc-info">
+          <div class="hc-name">${h.name}</div>
+          <div class="hc-meta">
+            <span class="hc-xp">+${h.xp_reward||20} XP</span>
+            ${h.streak>0?`<span class="hc-streak">🔥 ${h.streak}d</span>`:''}
+          </div>
+        </div>
+      </div>`).join('')
+    :'<div style="color:var(--dim2);font-size:10px;padding:8px 0">Ingen vaner ennå — sett opp via KARTLEGG</div>';
+
+  // Empire
+  const biz=d.businesses||[];
+  const ECOLS=['var(--green)','var(--blue)','var(--purple)','var(--orange)','var(--yellow)'];
+  document.getElementById('empire-list').innerHTML=biz.length
+    ?biz.map((b,i)=>`
+      <div class="emp-item">
+        <div class="emp-dot" style="background:${ECOLS[i%ECOLS.length]}"></div>
+        <span class="emp-name">${b.name}</span>
+      </div>`).join('')
+    :'<div style="color:var(--dim2);font-size:10px;padding:4px 0">Ingen virksomheter ennå</div>';
 }
 
-function toggleHabit(i) {
-  const el = document.getElementById('hck-'+i);
-  el.classList.toggle('on');
-  toast(el.classList.contains('on') ? '✓ '+HABITS[i].n : 'Fjernet');
-}
-
-function renderToday() {
-  document.getElementById('dv-sl').textContent = todayData.sleep ?? '–';
-  document.getElementById('dv-ex').textContent = todayData.exercise ?? '–';
-  document.getElementById('dv-mo').textContent = todayData.mood ?? '–';
-  document.getElementById('dv-wa').textContent = todayData.water ?? '–';
-  if (todayData.exercise) {
-    document.getElementById('ld-ex').textContent = todayData.exercise + ' min';
-  }
-  if (todayData.mood) {
-    document.getElementById('ld-mo').textContent = todayData.mood + '/10';
-    const pct = Math.round(todayData.mood * 11.9);
-    document.getElementById('g-mo').setAttribute('stroke-dasharray', pct + ' 119');
-    document.getElementById('g-mo-t').textContent = todayData.mood+'/10';
-  }
-  if (todayData.sleep) {
-    document.getElementById('ld-sl').textContent = todayData.sleep + ' t';
-    const pct = Math.round(Math.min(100, (todayData.sleep/8)*100) * 1.19);
-    document.getElementById('g-slp').setAttribute('stroke-dasharray', pct + ' 119');
-    document.getElementById('g-slp-t').textContent = todayData.sleep + 'h';
-  }
-}
-
-// ════════════════════════════════════════════════
-// API
-// ════════════════════════════════════════════════
-async function loadData() {
-  try {
-    const r = await fetch('/api/today'); const d = await r.json();
-    if (d.sleep != null) todayData.sleep = d.sleep;
-    if (d.exercise != null) todayData.exercise = d.exercise;
-    if (d.mood != null) todayData.mood = d.mood;
-    if (d.water != null) todayData.water = d.water;
-    renderToday();
-  } catch(e) {}
-}
-
-async function loadNotes() {
-  try {
-    const r = await fetch('/api/notes'); const d = await r.json();
-    document.getElementById('mcnt').textContent = d.notes.length + ' fakta';
-    const prev = document.getElementById('mprev');
-    if (!d.notes.length) { prev.textContent = 'Ingen fakta ennå — start en samtale!'; return; }
-    prev.innerHTML = d.notes.slice(0,4).map(n =>
-      `<div class="mpi"><div class="mpi-cat">${(n.category||'general').toUpperCase()}</div>${n.note.slice(0,55)}${n.note.length>55?'…':''}</div>`
-    ).join('');
-  } catch(e) {}
-}
-
-async function loadHistory() {
-  try {
-    const r = await fetch('/api/history'); const d = await r.json();
-    if (!d.messages?.length) return;
-    const sep = document.createElement('div');
-    sep.className = 'msep'; sep.textContent = '── forrige sesjon ──';
-    document.getElementById('cmsgs').appendChild(sep);
-    d.messages.slice(-8).forEach(msg => {
-      const isL = msg.content?.startsWith('[JURIDISK]');
-      const who = msg.role === 'user' ? 'user' : (isL ? 'legal' : 'ai');
-      appendMsg(who === 'user' ? 'YOU' : (isL ? 'MONIR.LEGAL' : 'MONIR'),
-                msg.content.replace('[JURIDISK] ',''), who);
+async function completeHabit(hid, el){
+  if(el.classList.contains('hc-done')) return;
+  el.classList.add('hc-done');
+  el.querySelector('.hc-circle').textContent='✓';
+  try{
+    const r=await fetch('/api/habits/complete',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({habit_id:hid})
     });
-    scrollChat();
-  } catch(e) {}
+    const d=await r.json();
+    if(d.leveled_up) sysMsg(`⬆ LEVEL UP! Du er nå LVL ${d.new_level}!`,'lvlup');
+    else sysMsg(`+${d.xp_gained} XP`,'sys');
+    // refresh header xp
+    document.getElementById('hdr-xp-fill').style.width=`${Math.round(d.xp/d.xp_next*100)}%`;
+    document.getElementById('hdr-level').textContent=`LVL ${d.new_level||d.level}`;
+    updateFigureForLevel(d.new_level||d.level);
+  }catch(e){sysMsg('Feil','sys');}
 }
 
-// ════════════════════════════════════════════════
-// TTS + VOICE
-// ════════════════════════════════════════════════
-let ttsEnabled = false;
-const synth = window.speechSynthesis;
-let norVoice = null;
-function pickVoice() {
-  const v = synth?.getVoices() || [];
-  norVoice = v.find(x=>x.lang.startsWith('nb')||x.lang.startsWith('no')) || v.find(x=>x.lang.startsWith('sv')) || null;
-}
-function toggleTTS() {
-  ttsEnabled = !ttsEnabled;
-  const btn = document.getElementById('tts-btn');
-  btn.textContent = ttsEnabled ? '🔊 TALE' : '🔇 TALE';
-  btn.classList.toggle('on', ttsEnabled);
-  if (!ttsEnabled && synth) synth.cancel();
-  toast(ttsEnabled ? 'MONIR snakker nå 🔊' : 'Tale av 🔇');
-}
-function speakText(text) {
-  if (!ttsEnabled || !synth) return;
-  synth.cancel();
-  const clean = text.replace(/[*_#`⚖️🏛️📊📋🎯⚠️]/g,'').replace(/\n+/g,'. ').slice(0,800);
-  const utt = new SpeechSynthesisUtterance(clean);
-  utt.lang = 'nb-NO'; utt.rate = 1.05; utt.pitch = 0.92;
-  if (norVoice) utt.voice = norVoice;
-  synth.speak(utt);
-}
-
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recog = null, voiceActive = false;
-if (SR) {
-  recog = new SR(); recog.lang = 'nb-NO'; recog.continuous = false; recog.interimResults = false;
-  recog.onresult = e => { document.getElementById('cin').value = Array.from(e.results).map(r=>r[0].transcript).join(' '); stopVoice(); send(); };
-  recog.onerror = () => stopVoice(); recog.onend = () => stopVoice();
-}
-function toggleVoice() {
-  if (!SR) { toast('Bruk Chrome for tale', '#ffaa00'); return; }
-  if (voiceActive) { stopVoice(); return; }
-  voiceActive = true; recog.start();
-  document.getElementById('wv').classList.add('on');
-  document.getElementById('mic-btn').classList.add('listening');
-  document.getElementById('mic-btn').textContent = '⏹ MIC';
-}
-function stopVoice() {
-  voiceActive = false; if (recog) try { recog.stop(); } catch(e) {}
-  document.getElementById('wv').classList.remove('on');
-  const b = document.getElementById('mic-btn');
-  if (b) { b.classList.remove('listening'); b.textContent = '🎤 MIC'; }
-}
-
-// ════════════════════════════════════════════════
-// MODES
-// ════════════════════════════════════════════════
-let chatMode = 'normal';
-
-function startOnboarding() {
-  chatMode = 'onboarding';
-  document.getElementById('onb-ban').classList.add('on');
-  document.getElementById('cin').value = 'Start kartleggingen nå.';
-  send();
-}
-function stopOnboarding() {
-  chatMode = 'normal';
-  document.getElementById('onb-ban').classList.remove('on');
-  showNormalChips();
-}
-
-function toggleLegal() { chatMode === 'legal' ? disableLegal() : enableLegal(); }
-function enableLegal() {
-  chatMode = 'legal';
-  document.getElementById('leg-ban').classList.add('on');
-  document.getElementById('lg-btn').classList.add('on');
-  document.getElementById('ht-legal').style.display = '';
-  document.getElementById('cbtn').classList.add('ls');
-  document.getElementById('cin').classList.add('lg');
-  document.getElementById('cin').placeholder = 'Spør om norsk lov, rettigheter, kontrakter... (Enter = send)';
-  showLegalChips();
-  toast('⚖️ LegalStreetSmart aktivert', '#ffcc44');
-}
-function disableLegal() {
-  chatMode = 'normal';
-  document.getElementById('leg-ban').classList.remove('on');
-  document.getElementById('lg-btn').classList.remove('on');
-  document.getElementById('ht-legal').style.display = 'none';
-  document.getElementById('cbtn').classList.remove('ls');
-  document.getElementById('cin').classList.remove('lg');
-  document.getElementById('cin').placeholder = 'Skriv til MONIR... (Enter = send)';
-  document.getElementById('src-row').classList.remove('on');
-  showNormalChips();
-}
-
-const NC = [['FOKUS I DAG','Hva bør jeg fokusere på i dag?'],['ANALYSER VANER','Analyser mine vaner og gi konkrete råd'],['PROSJEKTSTATUS','Hva er status på OBDAI og Autovers?'],['UKE RAPPORT','Oppsummer uken min og gi motivasjon'],['BMW HJELP','Hjelp meg med BMW-diagnose']];
-const LC = [['OPPSIGELSE','Hva er mine rettigheter ved urettmessig oppsigelse?'],['LEIEKONTRAKT','Hva gjelder juridisk ved tvist med utleier om depositum?'],['AS ANSVAR','Når har styremedlem og daglig leder personlig ansvar i AS?'],['INKASSO','Hva kan inkasso kreve og hva er mine rettigheter?'],['KONTRAKT BRUDD','Hva skjer rettslig ved kontraktsbrudd fra leverandør?'],['GDPR','Hvilke plikter har mitt AS under GDPR?']];
-function showNormalChips() { document.getElementById('chips').innerHTML = NC.map(([l,q])=>`<div class="chip" onclick="quickSend('${q.replace(/'/g,"\\'")}')"> ${l}</div>`).join(''); }
-function showLegalChips() { document.getElementById('chips').innerHTML = LC.map(([l,q])=>`<div class="chip lc" onclick="quickSend('${q.replace(/'/g,"\\'")}')">⚖️ ${l}</div>`).join(''); }
-function quickSend(msg) { document.getElementById('cin').value = msg; send(); }
-
-// ════════════════════════════════════════════════
+// ═══════════════════════════════════
 // CHAT
-// ════════════════════════════════════════════════
-function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }
+// ═══════════════════════════════════
+let chatMode='normal';
+function sysMsg(txt,cls='sys'){
+  const d=document.createElement('div');
+  d.className=`msg ${cls}`;d.textContent=txt;
+  document.getElementById('msgs').appendChild(d);
+  d.scrollIntoView({behavior:'smooth'});
+}
+function addMsg(role,text){
+  const d=document.createElement('div');
+  d.className=`msg ${role}`;d.textContent=text;
+  document.getElementById('msgs').appendChild(d);
+  d.scrollIntoView({behavior:'smooth'});
+  return d;
+}
 
-async function send() {
-  const inp = document.getElementById('cin');
-  const msg = inp.value.trim(); if (!msg) return;
-  inp.value = '';
-  appendMsg('YOU', msg, 'user');
-
-  const isLegal = chatMode === 'legal';
-  const btn = document.getElementById('cbtn');
-  btn.disabled = true;
-
-  // Figure reacts — thinking state
-  goToState('think');
-
-  let res;
-  try {
-    res = await fetch(isLegal ? '/api/legal' : '/api/chat', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(isLegal ? {question:msg} : {message:msg,mode:chatMode})
+async function sendMsg(text, mode){
+  if(!text.trim()) return;
+  document.getElementById('chat-in').value='';
+  addMsg('user',text);
+  const el=addMsg('ai','');
+  try{
+    const r=await fetch('/api/chat',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:text,mode:mode||chatMode})
     });
-  } catch(e) { appendMsg('ERR','Nettverksfeil — server nede?','ai'); btn.disabled=false; return; }
-
-  if (!res.ok) { const err=await res.json().catch(()=>({})); appendMsg('ERR',err.error||'Feil','ai'); btn.disabled=false; return; }
-
-  const reader = res.body.getReader(), dec = new TextDecoder();
-  let aiText = '', el = null;
-  const who = isLegal ? 'legal' : 'ai';
-  const lbl = isLegal ? 'MONIR.LEGAL' : 'MONIR';
-
-  while (true) {
-    const {done,value} = await reader.read(); if (done) break;
-    const lines = dec.decode(value).split('\n');
-    for (const line of lines) {
-      if (!line.startsWith('data:')) continue;
-      try {
-        const ev = JSON.parse(line.slice(5));
-        if (ev.t === 'sources') showSources(ev.v);
-        else if (ev.t === 'text') {
-          if (!el) el = appendMsg(lbl, '', who);
-          aiText += ev.v;
-          el.querySelector('.ma-txt, .ml-txt').textContent = aiText;
-          scrollChat();
-        }
-      } catch(_) {}
+    const reader=r.body.getReader();const dec=new TextDecoder();
+    let buf='';
+    while(true){
+      const{done,value}=await reader.read();
+      if(done)break;
+      buf+=dec.decode(value,{stream:true});
+      const lines=buf.split('\n');buf=lines.pop();
+      for(const line of lines){
+        if(!line.startsWith('data:'))continue;
+        const raw=line.slice(5).trim();
+        if(raw==='[DONE]')break;
+        try{const j=JSON.parse(raw);if(j.t)el.textContent+=j.t;}catch(_){}
+      }
+      el.scrollIntoView({behavior:'smooth'});
     }
-  }
-
-  btn.disabled = false;
-  if (aiText) { speakText(aiText); setTimeout(loadNotes, 4000); }
-
-  // Figure back to random state after response
-  setTimeout(randomState, 500);
+  }catch(e){el.textContent='Tilkoblingsfeil.';}
 }
 
-function appendMsg(lbl, text, who) {
-  const m = document.getElementById('cmsgs');
-  const el = document.createElement('div');
-  if (who === 'user') {
-    el.className = 'mu';
-    el.innerHTML = `<span class="mu-lbl">YOU</span><div class="mu-txt">${text}</div>`;
-  } else if (who === 'legal') {
-    el.className = 'ml';
-    el.innerHTML = `<span class="ml-lbl">MONIR.LEGAL</span><div class="ml-txt">${text}</div>`;
+document.addEventListener('DOMContentLoaded',()=>{
+  const inp=document.getElementById('chat-in');
+  document.getElementById('btn-send').onclick=()=>sendMsg(inp.value);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg(inp.value);}});
+
+  document.getElementById('cact-kart').onclick=startOb;
+  document.getElementById('cact-jus').onclick=()=>{
+    const q=inp.value.trim();
+    if(q){sendMsg(q,'legal');inp.value='';}
+    else sysMsg('Skriv et juridisk spørsmål og trykk ⚖ JUS','sys');
+  };
+  document.getElementById('cact-pri').onclick=async()=>{
+    const el=addMsg('ai','');
+    try{
+      const r=await fetch('/api/priority',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({context:inp.value||''})
+      });
+      const reader=r.body.getReader();const dec=new TextDecoder();
+      let buf='';
+      while(true){
+        const{done,value}=await reader.read();
+        if(done)break;
+        buf+=dec.decode(value,{stream:true});
+        const lines=buf.split('\n');buf=lines.pop();
+        for(const line of lines){
+          if(!line.startsWith('data:'))continue;
+          const raw=line.slice(5).trim();
+          if(raw==='[DONE]')break;
+          try{const j=JSON.parse(raw);if(j.t)el.textContent+=j.t;}catch(_){}
+        }
+        el.scrollIntoView({behavior:'smooth'});
+      }
+    }catch(e){el.textContent='Feil.';}
+  };
+
+  // Voice
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(SpeechRecognition){
+    const sr=new SpeechRecognition();
+    sr.lang='nb-NO';sr.continuous=false;sr.interimResults=false;
+    const btn=document.getElementById('btn-voice');
+    btn.onclick=()=>{
+      if(btn.classList.contains('listening')){sr.stop();btn.classList.remove('listening');return;}
+      sr.start();btn.classList.add('listening');
+    };
+    sr.onresult=e=>{
+      const t=e.results[0][0].transcript;
+      document.getElementById('chat-in').value=t;
+      btn.classList.remove('listening');
+    };
+    sr.onerror=()=>btn.classList.remove('listening');
+    sr.onend=()=>btn.classList.remove('listening');
   } else {
-    el.className = 'ma';
-    el.innerHTML = `<span class="ma-lbl">${lbl||'MONIR'}</span><div class="ma-txt">${text}</div>`;
+    document.getElementById('btn-voice').style.display='none';
   }
-  m.appendChild(el); scrollChat();
-  return el;
-}
+});
 
-function scrollChat() { const m=document.getElementById('cmsgs'); m.scrollTop=m.scrollHeight; }
-
-function showSources(sources) {
-  const row = document.getElementById('src-row');
-  row.classList.add('on');
-  row.querySelectorAll('.sch').forEach(e=>e.remove());
-  (Array.isArray(sources)?sources:[sources]).forEach(s=>{
-    const c=document.createElement('span');c.className='sch';c.textContent=s;row.appendChild(c);
-  });
+// ═══════════════════════════════════
+// BOOT SEQUENCE
+// ═══════════════════════════════════
+const BOOT_LINES=[
+  'MONIR // LIFE OS v3.0',
+  'LASTER KARAKTER...',
+  'KOBLER TIL AI-MOTOR...',
+  'BYGGER EMPIRE...',
+  'SYSTEM KLART'
+];
+async function boot(){
+  const fill=document.getElementById('boot-fill');
+  const txt=document.getElementById('boot-text');
+  let i=0;
+  for(const line of BOOT_LINES){
+    await new Promise(r=>setTimeout(r,280));
+    txt.textContent+='\n'+line;
+    fill.style.width=`${Math.round((++i/BOOT_LINES.length)*100)}%`;
+  }
+  await new Promise(r=>setTimeout(r,400));
+  document.getElementById('boot').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  await loadData();
+  // clock tick
+  setInterval(()=>{
+    const el=document.getElementById('hdr-time');
+    if(el) el.textContent=new Date().toLocaleTimeString('no-NO',{hour:'2-digit',minute:'2-digit'});
+  },30000);
+  // midnight refresh
+  const now=new Date();
+  const ms=(new Date(now.getFullYear(),now.getMonth(),now.getDate()+1)-now);
+  setTimeout(()=>loadData(),ms);
 }
-
-// ════════════════════════════════════════════════
-// NOTES
-// ════════════════════════════════════════════════
-function openNote() { document.getElementById('note-ov').style.display='flex'; document.getElementById('note-inp').value=''; }
-function closeNote() { document.getElementById('note-ov').style.display='none'; }
-async function saveNote() {
-  const txt = document.getElementById('note-inp').value.trim(); if (!txt) return;
-  await fetch('/api/notes/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({note:txt,category:'personal'})});
-  closeNote(); loadNotes(); toast('Lagret i minne ✓');
-}
-
-// ════════════════════════════════════════════════
-// TOAST
-// ════════════════════════════════════════════════
-function toast(msg, col='#00ff88') {
-  const el=document.createElement('div');el.className='ti';el.style.borderColor=col;el.style.color=col;el.textContent=msg;
-  document.getElementById('toast').appendChild(el);setTimeout(()=>el.remove(),3000);
-}
+boot();
 </script>
 </body>
 </html>
