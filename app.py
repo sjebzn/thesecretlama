@@ -221,9 +221,10 @@ async def fetch_legal_context(question: str):
 # AUTO-LEARN
 # ════════════════════════════════════════════════
 
-async def extract_facts(user_msg: str):
+async def extract_facts(user_msg: str) -> list:
+    """Extract and save personal facts. Returns list of newly saved fact strings."""
     if not ANTHROPIC_API_KEY or len(user_msg) < 25:
-        return
+        return []
     try:
         client = anthropic.AsyncAnthropic(api_key=ANTHROPIC_API_KEY)
         resp = await client.messages.create(
@@ -238,11 +239,12 @@ async def extract_facts(user_msg: str):
         )
         text = resp.content[0].text.strip()
         if not text.startswith('['):
-            return
+            return []
         facts = json.loads(text)
         if not facts:
-            return
+            return []
         db = get_db()
+        saved = []
         for f in facts[:3]:
             note = (f.get('note') or '').strip()
             if len(note) < 10:
@@ -256,10 +258,12 @@ async def extract_facts(user_msg: str):
                     "INSERT INTO memory_notes (user_id, category, note, source) VALUES (1, ?, ?, 'auto')",
                     (f.get('category', 'general'), note)
                 )
+                saved.append(note)
         db.commit()
         db.close()
+        return saved
     except Exception:
-        pass
+        return []
 
 def build_system_prompt(mode: str = "normal") -> str:
     db = get_db()
@@ -270,7 +274,7 @@ def build_system_prompt(mode: str = "normal") -> str:
     habits = db.execute("SELECT name FROM habits WHERE user_id=1").fetchall()
     db.close()
 
-    name = user["name"] if user else "Bruker"
+    name = user["name"] if user else "Sebastian"
     bio = user["bio"] if user else ""
     notes_text = "\n".join([f"• [{n['category']}] {n['note']}" for n in notes]) if notes else "Ingen ennå"
     biz_text = "\n".join([f"• {b['name']} (Level {b['level']}, {b['status']})" for b in businesses]) if businesses else "Ingen"
@@ -432,7 +436,7 @@ async def get_character():
         "main_quest": char["main_quest"], "main_quest_progress": char["main_quest_progress"],
         "height_cm": char["height_cm"], "weight_kg": char["weight_kg"],
         "age": char["age"], "net_worth_trend": char["net_worth_trend"],
-        "name": user["name"] if user else "Bruker",
+        "name": user["name"] if user else "Sebastian",
         "city": user["city"] if user else "Oslo",
     }
 
@@ -671,6 +675,8 @@ async def chat(body: ChatBody):
 
     async def stream() -> AsyncIterator[str]:
         full_response = ""
+        # Start fact extraction in parallel while streaming the main response
+        extract_task = asyncio.create_task(extract_facts(body.message))
         client = anthropic.AsyncAnthropic(api_key=ANTHROPIC_API_KEY)
         async with client.messages.stream(
             model="claude-sonnet-4-6", max_tokens=1024, system=system, messages=messages
@@ -678,7 +684,6 @@ async def chat(body: ChatBody):
             async for text in s.text_stream:
                 full_response += text
                 yield f"data: {json.dumps({'t': 'text', 'v': text})}\n\n"
-        yield f"data: {json.dumps({'t': 'done'})}\n\n"
 
         try:
             db2 = get_db()
@@ -692,7 +697,16 @@ async def chat(body: ChatBody):
             db2.close()
         except Exception:
             pass
-        asyncio.create_task(extract_facts(body.message))
+
+        # Emit memory event if new facts were learned — client receives before done
+        try:
+            new_facts = await extract_task
+            if new_facts:
+                yield f"data: {json.dumps({'t': 'memory', 'facts': new_facts})}\n\n"
+        except Exception:
+            pass
+
+        yield f"data: {json.dumps({'t': 'done'})}\n\n"
 
     return StreamingResponse(stream(), media_type="text/event-stream")
 

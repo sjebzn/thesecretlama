@@ -308,7 +308,6 @@ let cur={la:[...POSES.idle.la],ra:[...POSES.idle.ra],ll:[...POSES.idle.ll],rl:[.
 let tgt={la:[...POSES.idle.la],ra:[...POSES.idle.ra],ll:[...POSES.idle.ll],rl:[...POSES.idle.rl]};
 let lastPoseChange=0;
 
-// Forced pose state (overrides normal sequence)
 let forcedPoseName=null;
 let forcedPoseUntil=0;
 let nodeSpeedMult=1;
@@ -320,11 +319,7 @@ function forcePose(name,ms){
   const p=POSES[name]||POSES.idle;
   tgt.la=[...p.la];tgt.ra=[...p.ra];tgt.ll=[...p.ll];tgt.rl=[...p.rl];
 }
-
-function clearForcedPose(){
-  forcedPoseName=null;
-  forcedPoseUntil=0;
-}
+function clearForcedPose(){forcedPoseName=null;forcedPoseUntil=0;}
 
 function lerp(a,b,t){return a+(b-a)*t}
 function setLimb(id,coords){
@@ -336,10 +331,9 @@ function setLimb(id,coords){
 function animLoop(ts){
   const now=performance.now();
   if(forcedPoseName&&now<forcedPoseUntil){
-    // hold forced pose
     const p=POSES[forcedPoseName]||POSES.idle;
     tgt.la=[...p.la];tgt.ra=[...p.ra];tgt.ll=[...p.ll];tgt.rl=[...p.rl];
-    lastPoseChange=ts; // prevent normal sequence takeover
+    lastPoseChange=ts;
   } else {
     if(forcedPoseName&&now>=forcedPoseUntil) forcedPoseName=null;
     if(ts-lastPoseChange>3200){
@@ -442,7 +436,6 @@ function spawnDataNode(t,cx,cy,customLabel){
   });
 }
 
-// Inject specific words as fast-moving data nodes from random directions
 function injectWordNodes(words){
   const {cx,cy}=getCanvasCenter();
   words.filter(w=>w.length>1).slice(0,6).forEach((word,i)=>{
@@ -462,6 +455,33 @@ function injectWordNodes(words){
       });
     },i*100);
   });
+}
+
+// High-tech memory nodes — spawned when MONIR learns new facts
+function injectMemoryNodes(facts){
+  const {cx,cy}=getCanvasCenter();
+  const count=Math.min(facts.length,4);
+  facts.slice(0,count).forEach((fact,i)=>{
+    setTimeout(()=>{
+      const angle=(Math.PI*2/Math.max(count,1))*i - Math.PI/2;
+      const dist=115+Math.random()*65;
+      // Build a short label from the fact text
+      const short=fact.replace(/[^A-Za-z0-9æøåÆØÅ ]/g,'').trim().slice(0,9).toUpperCase()||'MINNE';
+      DATA_NODES.push({
+        x:cx+Math.cos(angle)*dist,
+        y:cy+Math.sin(angle)*dist,
+        tx:cx,ty:cy,
+        label:'◈'+short,
+        progress:0,
+        speed:0.010+Math.random()*0.006,
+        startX:cx+Math.cos(angle)*dist,
+        startY:cy+Math.sin(angle)*dist,
+        isMemory:true
+      });
+    },i*280);
+  });
+  nodeSpeedMult=Math.max(nodeSpeedMult,2);
+  setTimeout(()=>{nodeSpeedMult=1;},5000);
 }
 
 function drawUniverse(ts){
@@ -508,27 +528,53 @@ function drawUniverse(ts){
     const ly=n.startY+(n.ty-n.startY)*n.progress;
     const dist=Math.hypot(lx-cx,ly-cy);
     if(dist<12||n.progress>=1){
-      ABSORB_FLASHES.push({life:1,isWord:n.isWord});
+      ABSORB_FLASHES.push({life:1,isWord:n.isWord,isMemory:n.isMemory});
       DATA_NODES.splice(i,1);
       continue;
     }
-    const alpha=Math.min(1,n.progress*5)*Math.max(0,(dist-12)/40);
-    ctx.font=`bold ${n.isWord?9:8}px monospace`;
-    const tw=ctx.measureText(n.label).width;
-    const pw=tw+8,ph=12;
-    const px=lx-pw/2,py=ly-ph/2;
-    // word nodes get a slightly brighter border
-    const borderAlpha=n.isWord?Math.min(alpha*1.3,1):alpha*0.9;
-    ctx.fillStyle=`rgba(17,17,20,${alpha*0.85})`;
-    ctx.strokeStyle=`rgba(${r},${g},${b},${borderAlpha})`;
-    ctx.lineWidth=n.isWord?1.2:0.8;
-    ctx.beginPath();ctx.roundRect(px,py,pw,ph,3);
-    ctx.fill();ctx.stroke();
-    ctx.fillStyle=`rgba(${r},${g},${b},${alpha})`;
-    ctx.fillText(n.label,lx-tw/2,ly+3.5);
-    ctx.beginPath();ctx.arc(lx,ly-ph/2-2,1.5,0,Math.PI*2);
-    ctx.fillStyle=`rgba(${r},${g},${b},${alpha*0.8})`;
-    ctx.fill();
+
+    if(n.isMemory){
+      // Gold/white memory node — visually distinct from regular data
+      const alpha=Math.min(1,n.progress*5)*Math.max(0,(dist-12)/40);
+      ctx.font='bold 9px monospace';
+      const tw=ctx.measureText(n.label).width;
+      const pw=tw+10,ph=13;
+      const px=lx-pw/2,py=ly-ph/2;
+      // outer glow ring
+      ctx.strokeStyle=`rgba(251,191,36,${alpha*0.3})`;
+      ctx.lineWidth=3.5;
+      ctx.beginPath();ctx.roundRect(px-2,py-1,pw+4,ph+2,3);
+      ctx.stroke();
+      // inner fill + crisp border
+      ctx.fillStyle=`rgba(25,20,10,${alpha*0.95})`;
+      ctx.strokeStyle=`rgba(251,191,36,${alpha})`;
+      ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.roundRect(px,py,pw,ph,2);
+      ctx.fill();ctx.stroke();
+      ctx.fillStyle=`rgba(254,243,199,${alpha})`;
+      ctx.fillText(n.label,lx-tw/2,ly+3.5);
+      // leading dot
+      ctx.beginPath();ctx.arc(lx,ly-ph/2-2.5,2,0,Math.PI*2);
+      ctx.fillStyle=`rgba(251,191,36,${alpha})`;
+      ctx.fill();
+    } else {
+      const alpha=Math.min(1,n.progress*5)*Math.max(0,(dist-12)/40);
+      ctx.font=`bold ${n.isWord?9:8}px monospace`;
+      const tw=ctx.measureText(n.label).width;
+      const pw=tw+8,ph=12;
+      const px=lx-pw/2,py=ly-ph/2;
+      const borderAlpha=n.isWord?Math.min(alpha*1.3,1):alpha*0.9;
+      ctx.fillStyle=`rgba(17,17,20,${alpha*0.85})`;
+      ctx.strokeStyle=`rgba(${r},${g},${b},${borderAlpha})`;
+      ctx.lineWidth=n.isWord?1.2:0.8;
+      ctx.beginPath();ctx.roundRect(px,py,pw,ph,3);
+      ctx.fill();ctx.stroke();
+      ctx.fillStyle=`rgba(${r},${g},${b},${alpha})`;
+      ctx.fillText(n.label,lx-tw/2,ly+3.5);
+      ctx.beginPath();ctx.arc(lx,ly-ph/2-2,1.5,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${r},${g},${b},${alpha*0.8})`;
+      ctx.fill();
+    }
   }
 
   // ── ABSORB FLASHES
@@ -536,12 +582,33 @@ function drawUniverse(ts){
     const f=ABSORB_FLASHES[i];
     f.life-=0.04;
     if(f.life<=0){ABSORB_FLASHES.splice(i,1);continue;}
-    const rad=(f.isWord?8:6)+(1-f.life)*18;
-    const grd=ctx.createRadialGradient(cx,cy,0,cx,cy,rad);
-    grd.addColorStop(0,`rgba(${r},${g},${b},${f.life*(f.isWord?0.9:0.6)})`);
-    grd.addColorStop(1,`rgba(${r},${g},${b},0)`);
-    ctx.beginPath();ctx.arc(cx,cy,rad,0,Math.PI*2);
-    ctx.fillStyle=grd;ctx.fill();
+
+    if(f.isMemory){
+      // Gold pulse with "MINNE+" text — high-tech memory storage
+      const rad=10+(1-f.life)*28;
+      const grd=ctx.createRadialGradient(cx,cy,0,cx,cy,rad);
+      grd.addColorStop(0,`rgba(251,191,36,${f.life*0.9})`);
+      grd.addColorStop(0.5,`rgba(254,243,199,${f.life*0.4})`);
+      grd.addColorStop(1,'rgba(251,191,36,0)');
+      ctx.beginPath();ctx.arc(cx,cy,rad,0,Math.PI*2);
+      ctx.fillStyle=grd;ctx.fill();
+      // "MINNE+" label fades in then out
+      if(f.life>0.55){
+        const t=(f.life-0.55)/0.45;
+        ctx.globalAlpha=t;
+        ctx.fillStyle='rgba(251,191,36,1)';
+        ctx.font='bold 10px monospace';
+        ctx.fillText('◈ MINNE+',cx-32,cy-22);
+        ctx.globalAlpha=1;
+      }
+    } else {
+      const rad=(f.isWord?8:6)+(1-f.life)*18;
+      const grd=ctx.createRadialGradient(cx,cy,0,cx,cy,rad);
+      grd.addColorStop(0,`rgba(${r},${g},${b},${f.life*(f.isWord?0.9:0.6)})`);
+      grd.addColorStop(1,`rgba(${r},${g},${b},0)`);
+      ctx.beginPath();ctx.arc(cx,cy,rad,0,Math.PI*2);
+      ctx.fillStyle=grd;ctx.fill();
+    }
   }
 
   requestAnimationFrame(drawUniverse);
@@ -839,12 +906,11 @@ async function sendMsg(text,mode){
   document.getElementById('chat-in').value='';
   addMsg('user',text);
 
-  // ── Stickman: wave on send, inject words as data nodes
   forcePose('wave',700);
   nodeSpeedMult=5;
   const words=text.split(/\s+/).filter(w=>w.length>2);
   injectWordNodes(words);
-  setTimeout(()=>forcePose('think',9999999),750); // switch to think while waiting
+  setTimeout(()=>forcePose('think',9999999),750);
 
   const el=addMsg('ai','');
   try{
@@ -863,13 +929,17 @@ async function sendMsg(text,mode){
         if(!line.startsWith('data:'))continue;
         const raw=line.slice(5).trim();
         if(raw==='[DONE]')break;
-        try{const j=JSON.parse(raw);if(j.t==='text')el.textContent+=j.v;}catch(_){}
+        try{
+          const j=JSON.parse(raw);
+          if(j.t==='text') el.textContent+=j.v;
+          // Memory event: MONIR learned something new
+          if(j.t==='memory'&&j.facts&&j.facts.length) injectMemoryNodes(j.facts);
+        }catch(_){}
       }
       el.scrollIntoView({behavior:'smooth'});
     }
   }catch(e){el.textContent='Tilkoblingsfeil.';}
 
-  // ── Response done: victory pose then back to normal
   forcePose('pose',1400);
   setTimeout(()=>{clearForcedPose();nodeSpeedMult=1;},1500);
 }
@@ -877,7 +947,6 @@ async function sendMsg(text,mode){
 document.addEventListener('DOMContentLoaded',()=>{
   const inp=document.getElementById('chat-in');
 
-  // Typing → think pose + faster nodes
   inp.addEventListener('input',()=>{
     if(inp.value.trim()){
       forcePose('think',2500);
@@ -925,7 +994,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     setTimeout(()=>{clearForcedPose();nodeSpeedMult=1;},1300);
   };
 
-  // Voice
   const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(SpeechRecognition){
     const sr=new SpeechRecognition();
@@ -940,7 +1008,6 @@ document.addEventListener('DOMContentLoaded',()=>{
       const t=e.results[0][0].transcript;
       document.getElementById('chat-in').value=t;
       btn.classList.remove('listening');
-      // inject spoken words
       injectWordNodes(t.split(/\s+/).filter(w=>w.length>2));
       nodeSpeedMult=3;
       setTimeout(()=>nodeSpeedMult=1,3000);
